@@ -64,7 +64,7 @@
           <div class="flex items-center gap-4">
             <h3 class="font-medium">Configuración de descarga</h3>
             <div class="flex items-center gap-2">
-              <label class="text-sm font-medium">Carpeta:</label>
+              <label class="text-sm font-medium">Carpeta Imágenes:</label>
               <select id="destFolderSelect" class="border border-gray-300 rounded px-3 py-2 text-sm">
                 <option value="images">/images</option>
                 <option value="media">/media</option>
@@ -72,11 +72,37 @@
               </select>
               <input id="customFolderInput" type="text" placeholder="Nombre carpeta" class="border border-gray-300 rounded px-3 py-2 text-sm w-32 hidden">
             </div>
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium">Carpeta Vídeos:</label>
+              <select id="videoFolderSelect" class="border border-gray-300 rounded px-3 py-2 text-sm">
+                <option value="media">/media</option>
+                <option value="videos">/videos</option>
+                <option value="movies">/movies</option>
+                <option value="custom">Personalizado</option>
+              </select>
+            </div>
           </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-4 mt-3">
+<div class="flex items-center gap-2">
+              <label class="text-sm font-medium">ScreenScraper:</label>
+              <input id="ssUser" type="text" placeholder="Usuario" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
+              <input id="ssPass" type="password" placeholder="Password" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
+              <input id="devId" type="text" placeholder="DevID" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" value="jelos" title="Developer ID">
+              <input id="devPass" type="password" placeholder="DevPass" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" value="jelos" title="Developer Password">
+              <label class="flex items-center gap-1 text-sm">
+                <input type="checkbox" id="saveCredentials" class="w-4 h-4"> Recordar
+              </label>
+              <button id="testLoginBtn" class="text-sm bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Probar</button>
+            </div>
           <div class="flex items-center gap-2">
-            <button id="selectAllBtn" class="text-sm text-indigo-600 hover:text-indigo-800">Seleccionar todos</button>
-            <span class="text-gray-400">|</span>
-            <button id="deselectAllBtn" class="text-sm text-indigo-600 hover:text-indigo-800">Deseleccionar todos</button>
+            <label class="text-sm font-medium">Descargar:</label>
+            <label class="flex items-center gap-1 text-sm">
+              <input type="checkbox" id="downloadImages" checked> Imágenes
+            </label>
+            <label class="flex items-center gap-1 text-sm">
+              <input type="checkbox" id="downloadVideos"> Vídeos
+            </label>
           </div>
         </div>
       </div>
@@ -164,6 +190,16 @@
 
     function getBasename(filename) {
       return filename.replace(/\.[^.]+$/, '');
+    }
+
+    function cleanRomName(filename) {
+      let name = getBasename(filename);
+      name = name.replace(/\s*\([^)]*\)\s*/g, ' ');
+      name = name.replace(/\s*\[.*\]\s*/g, ' ');
+      name = name.replace(/,\s*.*$/g, '');
+      name = name.replace(/\s+/g, ' ');
+      name = name.trim();
+      return name;
     }
 
     async function scanDirectory(handle, path = '') {
@@ -299,6 +335,107 @@
       }
     }
 
+    const SCREENSCRAPER_API = 'https://api.screenscraper.fr/api2';
+    const SOFT_NAME = 'ArkOSCover';
+    
+    const SYSTEM_IDS = {
+      'gb': 4, 'gbc': 5, 'gba': 6, 'nes': 7, 'snes': 8, 'n64': 9,
+      'nds': 10, 'psx': 12, 'psp': 13, 'genesis': 15, 'sms': 16,
+      'pce': 17, 'ngp': 18, 'wii': 20, '3ds': 21
+    };
+
+async function loginScreenScraper(user, pass, devid, devpass) {
+      const params = new URLSearchParams({
+        output: 'json',
+        ssid: user,
+        sspass: pass
+      });
+      params.append('devid', devid);
+      params.append('devpassword', devpass);
+      params.append('softname', SOFT_NAME);
+      try {
+        const response = await fetch(SCREENSCRAPER_API + '/ssuserInfos.php?' + params);
+        const data = await response.json();
+        return data.response;
+      } catch (e) {
+        log('Error login: ' + e.message);
+        return null;
+      }
+    }
+
+    async function searchGame(user, pass, systemeid, romName, fileSize, devid, devpass) {
+      const params = new URLSearchParams({
+        ssid: user,
+        sspass: pass,
+        systemeid: systemeid,
+        romnom: romName,
+        output: 'json'
+      });
+      params.append('devid', devid);
+      params.append('devpassword', devpass);
+      params.append('softname', SOFT_NAME);
+      
+      try {
+        const response = await fetch(SCREENSCRAPER_API + '/jeuRecherche.php?' + params);
+        const data = await response.json();
+        return data.response;
+      } catch (e) {
+        log('Error searching: ' + e.message);
+        return null;
+      }
+    }
+
+    async function getMediaUrl(user, pass, systemeid, jeuid, mediaType, region, devid, devpass) {
+      const mediaRegion = region || 'wor';
+      const params = new URLSearchParams({
+        ssid: user,
+        sspass: pass,
+        systemeid: systemeid,
+        jeuid: jeuid,
+        media: mediaType + '(' + mediaRegion + ')'
+      });
+      params.append('devid', devid);
+      params.append('devpassword', devpass);
+      params.append('softname', SOFT_NAME);
+      return SCREENSCRAPER_API + '/mediaJeu.php?' + params;
+    }
+
+    async function searchGame(user, pass, systemeid, romName, fileSize, devid, devpass) {
+      const params = new URLSearchParams({
+        ssid: user,
+        sspass: pass,
+        systemeid: systemeid,
+        romnom: romName,
+        output: 'json'
+      });
+      params.append('devid', devid);
+      params.append('devpassword', devpass);
+      params.append('softname', SOFT_NAME);
+      
+      try {
+        const response = await fetch(SCREENSCRAPER_API + '/jeuRecherche.php?' + params);
+        const data = await response.json();
+        return data.response;
+      } catch (e) {
+        log('Error searching: ' + e.message);
+        return null;
+      }
+    }
+
+    async function getMediaUrl(user, pass, systemeid, jeuid, mediaType, region, devid, devpass) {
+      const params = new URLSearchParams({
+        action: 'mediaJeu',
+        ssid: user,
+        sspass: pass,
+        media: mediaType,
+        id: gameId,
+        devid: '',
+        devpassword: '',
+        softname: SOFT_NAME
+      });
+      return SCREENSCRAPER_API + '/mediaJeu.php?' + params;
+    }
+
     function getImageUrlPlaceholder(gameName, system) {
       const seed = encodeURIComponent(gameName);
       return `https://placehold.co/320x224/4f46e5/ffffff?text=${seed.slice(0, 20)}`;
@@ -332,9 +469,113 @@
         await writable.close();
         return true;
       } catch (e) {
-        log(`Error guardando imagen: ${e.message}`);
+        log('Error guardando imagen: ' + e.message);
         return false;
       }
+    }
+
+    function getRegionFromFilename(filename) {
+      const name = filename.toLowerCase();
+      if (name.includes('(world)') || name.includes('(wor)')) return 'wor';
+      if (name.includes('(europe)') || name.includes('(eu)')) return 'eu';
+      if (name.includes('(usa)') || name.includes('(us)')) return 'us';
+      if (name.includes('(japan)') || name.includes('(jp)')) return 'jp';
+      if (name.includes('(france)') || name.includes('(fr)')) return 'fr';
+      if (name.includes('(spain)') || name.includes('(es)')) return 'es';
+      if (name.includes('(germany)') || name.includes('(de)')) return 'de';
+      if (name.includes('(italy)') || name.includes('(it)')) return 'it';
+      if (name.includes('(netherlands)') || name.includes('(nl)')) return 'nl';
+      if (name.includes('(sweden)') || name.includes('(se)')) return 'se';
+      if (name.includes('(denmark)') || name.includes('(dk)')) return 'dk';
+      if (name.includes('(norway)') || name.includes('(no)')) return 'no';
+      if (name.includes('(finland)') || name.includes('(fi)')) return 'fi';
+      if (name.includes('(australia)') || name.includes('(au)')) return 'au';
+      if (name.includes('(canada)') || name.includes('(ca)')) return 'ca';
+      if (name.includes('(brazil)') || name.includes('(br)')) return 'br';
+      if (name.includes('(china)') || name.includes('(cn)')) return 'cn';
+      if (name.includes('(korea)') || name.includes('(kr)')) return 'kr';
+      if (name.includes('(world)')) return 'wor';
+      return 'wor';
+    }
+
+    async function testLogin(user, pass, devid, devpass) {
+      log('Probando conexión...');
+      try {
+        const params = new URLSearchParams({
+          output: 'json',
+          ssid: user,
+          sspass: pass
+        });
+        params.append('devid', devid);
+        params.append('devpassword', devpass);
+        const url = SCREENSCRAPER_API + '/ssuserInfos.php?' + params;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.response && data.response.ssuser) {
+          const userData = data.response.ssuser;
+          log('Login OK! Usuario: ' + userData.id);
+          log('Nivel: ' + userData.niveau + ' - Threads: ' + userData.maxthreads);
+          
+          if (document.getElementById('saveCredentials').checked) {
+            localStorage.setItem('ssUser', user);
+            localStorage.setItem('ssPass', pass);
+          }
+          return true;
+        } else if (data.error) {
+          log('Error: ' + data.error);
+          return false;
+        }
+        return false;
+      } catch (e) {
+        log('Error: ' + e.message);
+        return false;
+      }
+    }
+
+    async function scrapeGame(user, pass, systemeid, romName, region, devid, devpass) {
+      const params = new URLSearchParams({
+        output: 'json',
+        ssid: user,
+        sspass: pass,
+        systemeid: systemeid,
+        romnom: romName,
+        romtype: 'rom'
+      });
+      params.append('devid', devid);
+      params.append('devpassword', devpass);
+      params.append('softname', SOFT_NAME);
+      
+      try {
+        const url = SCREENSCRAPER_API + '/jeuInfos.php?' + params;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.response && data.response.jeu) {
+          const jeu = data.response.jeu;
+          const results = { jeu: jeu };
+          return results;
+        }
+        return null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function downloadMedia(user, pass, systemeid, jeuid, mediaType, region, devid, devpass) {
+      const mediaRegion = region || 'wor';
+      const params = new URLSearchParams({
+        ssid: user,
+        sspass: pass,
+        systemeid: systemeid,
+        jeuid: jeuid,
+        media: mediaType + '(' + mediaRegion + ')'
+      });
+      params.append('devid', devid);
+      params.append('devpassword', devpass);
+      params.append('softname', SOFT_NAME);
+      
+      return SCREENSCRAPER_API + '/mediaJeu.php?' + params;
     }
 
 async function simulateScraping() {
@@ -351,74 +592,130 @@ async function simulateScraping() {
       document.getElementById('progressGlobal').classList.add('flex');
 
       document.getElementById('logSection').classList.remove('hidden');
-      log('Iniciando simulación de scraping...');
+      log('Iniciando scraping desde ScreenScraper...');
 
       const destFolderSelect = document.getElementById('destFolderSelect');
+      const videoFolderSelect = document.getElementById('videoFolderSelect');
       const customFolderInput = document.getElementById('customFolderInput');
+      const ssUser = document.getElementById('ssUser').value.trim();
+      const ssPass = document.getElementById('ssPass').value;
+      const downloadImages = document.getElementById('downloadImages').checked;
+      const downloadVideos = document.getElementById('downloadVideos').checked;
       let destFolder = destFolderSelect.value;
+      let videoFolder = videoFolderSelect.value;
       if (destFolder === 'custom') {
         destFolder = customFolderInput.value.trim() || 'images';
       }
 
-      log(`Carpeta de destino: /${destFolder}`);
+      if (!ssUser || !ssPass) {
+        log('ERROR: Ingresa usuario y password de ScreenScraper');
+        isScraping = false;
+        scrapingBtn.disabled = false;
+        stopBtn.classList.add('hidden');
+        document.getElementById('progressGlobal').classList.add('hidden');
+        scrapingBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Descargar Covers';
+        return;
+      }
+
+      log('Usuario: ' + ssUser);
+      log('Imagenes: /' + destFolder + ' - Videos: /' + videoFolder);
 
       let processed = 0;
       let updated = 0;
-      let totalToProcess = Object.values(scannedData).reduce((acc, s) => acc + s.games.filter(g => !g.hasCover).length, 0);
+      let totalToProcess = 0;
+      for (const key of selectedSystems) {
+        const data = scannedData[key];
+        if (data) {
+          totalToProcess += data.games.filter(g => !g.hasCover).length;
+        }
+      }
 
-for (const [systemKey, systemData] of Object.entries(scannedData)) {
+      for (const systemKey of selectedSystems) {
         if (shouldStop) {
           log('Proceso detenido por el usuario');
           break;
         }
         
-        if (!selectedSystems.has(systemKey)) {
+        const systemData = scannedData[systemKey];
+        if (!systemData) continue;
+
+        const systemeid = SYSTEM_IDS[systemKey] || 0;
+        if (!systemeid) {
+          log('Sistema no soportado: ' + systemKey);
           continue;
         }
-        
+
         const gamesWithoutCover = systemData.games.filter(g => !g.hasCover);
         let systemProcessed = 0;
         
         for (const game of gamesWithoutCover) {
           if (shouldStop) {
-            log('⚠️ Proceso detenido por el usuario');
+            log('Proceso detenido por el usuario');
             break;
           }
           
-          const gameBase = getBasename(game.name);
-          const imageName = `${gameBase}-image.png`;
-          const imagePath = `/${destFolder}/${imageName}`;
-          
-          log(`Procesando: ${game.name} (${systemKey})`);
-          progressText.textContent = `${processed + 1}/${totalToProcess}`;
+          const searchName = cleanRomName(game.name);
+          const region = getRegionFromFilename(game.name);
+          log('Buscando: ' + searchName + ' (' + systemKey + ') region:' + region);
+          progressText.textContent = (processed + 1) + '/' + totalToProcess;
 
-          const url = getImageUrlPlaceholder(gameBase, systemKey);
-          const blob = await downloadImage(url);
-          
-          if (blob) {
-            const saved = await saveImage(systemData, imageName, blob, destFolder);
-            if (saved) {
-              await updateGamelistXml(systemData, game.name, imagePath);
-              game.hasCover = true;
-              game.imageName = imagePath;
-              updated++;
-              log(`✓ Cover guardado: ${imagePath}`);
+          try {
+            const jeuData = await scrapeGame(ssUser, ssPass, systemeid, game.name, region);
+            
+            if (jeuData && jeuData.jeu && jeuData.jeu.id) {
+              const jeuid = jeuData.jeu.id;
+              let downloaded = false;
+              
+              if (downloadImages) {
+                const imageUrl = await downloadMedia(ssUser, ssPass, systemeid, jeuid, 'box-2D', region);
+                const blob = await downloadImage(imageUrl);
+                if (blob && blob.size > 0) {
+                  const imageName = searchName.replace(/[^a-zA-Z0-9]/g, '') + '-image.png';
+                  const saved = await saveImage(systemData, imageName, blob, destFolder);
+                  if (saved) {
+                    const imagePath = '/' + destFolder + '/' + imageName;
+                    await updateGamelistXml(systemData, game.name, imagePath);
+                    game.hasCover = true;
+                    game.imageName = imagePath;
+                    downloaded = true;
+                    log('Imagen: ' + imageName);
+                  }
+                }
+              }
+              
+              if (downloadVideos && !shouldStop) {
+                const videoUrl = await downloadMedia(ssUser, ssPass, systemeid, jeuid, 'video', region);
+                const blob = await downloadImage(videoUrl);
+                if (blob && blob.size > 0) {
+                  const videoName = searchName.replace(/[^a-zA-Z0-9]/g, '') + '.mp4';
+                  await saveImage(systemData, videoName, blob, videoFolder);
+                  log('Video: ' + videoName);
+                }
+              }
+              
+              if (downloaded) {
+                updated++;
+              }
+            } else {
+              log('Juego no encontrado');
             }
+          } catch (e) {
+            log('Error: ' + e.message);
           }
 
           systemProcessed++;
           processed++;
           renderSystemsProgress(systemKey, systemProcessed, gamesWithoutCover.length);
-          await new Promise(r => setTimeout(r, 500));
+          await new Promise(r => setTimeout(r, 1000));
         }
       }
 
-      log(`\n✓ Scraping completado! Covers añadidos: ${updated}`);
+      log('Scraping completado! Covers: ' + updated);
       
       isScraping = false;
       scrapingBtn.disabled = false;
       stopBtn.classList.add('hidden');
-      scrapingBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Simular Scraping';
+      scrapingBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Descargar Covers';
 
       renderSystems();
     }
@@ -558,6 +855,17 @@ for (const [systemKey, systemData] of Object.entries(scannedData)) {
     document.getElementById('stopBtn').addEventListener('click', stopScraping);
     document.getElementById('selectAllBtn').addEventListener('click', selectAllSystems);
     document.getElementById('deselectAllBtn').addEventListener('click', deselectAllSystems);
+    document.getElementById('testLoginBtn').addEventListener('click', function() {
+      const user = document.getElementById('ssUser').value.trim();
+      const pass = document.getElementById('ssPass').value;
+      const devid = document.getElementById('devId').value.trim();
+      const devpass = document.getElementById('devPass').value;
+      if (user && pass) {
+        testLogin(user, pass, devid, devpass);
+      } else {
+        log('Ingresa usuario y password');
+      }
+    });
     
     document.addEventListener('change', function(e) {
       if (e.target.classList.contains('system-checkbox')) {
