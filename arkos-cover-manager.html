@@ -52,7 +52,7 @@
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
           </svg>
-          Seleccionar Carpeta de MicroSD
+          Select MicroSD Folder
         </button>
         <p id="folderPath" class="text-sm text-gray-500 hidden"></p>
       </div>
@@ -62,23 +62,23 @@
       <div class="card mb-4">
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div class="flex items-center gap-4">
-            <h3 class="font-medium">Configuración de descarga</h3>
+            <h3 class="font-medium">Download Settings</h3>
             <div class="flex items-center gap-2">
-              <label class="text-sm font-medium">Carpeta Imágenes:</label>
+              <label class="text-sm font-medium">Images Folder:</label>
               <select id="destFolderSelect" class="border border-gray-300 rounded px-3 py-2 text-sm">
                 <option value="images">/images</option>
                 <option value="media">/media</option>
-                <option value="custom">Personalizado</option>
+                <option value="custom">Custom</option>
               </select>
               <input id="customFolderInput" type="text" placeholder="Nombre carpeta" class="border border-gray-300 rounded px-3 py-2 text-sm w-32 hidden">
             </div>
             <div class="flex items-center gap-2">
-              <label class="text-sm font-medium">Carpeta Vídeos:</label>
+              <label class="text-sm font-medium">Videos Folder:</label>
               <select id="videoFolderSelect" class="border border-gray-300 rounded px-3 py-2 text-sm">
                 <option value="media">/media</option>
                 <option value="videos">/videos</option>
                 <option value="movies">/movies</option>
-                <option value="custom">Personalizado</option>
+                <option value="custom">Custom</option>
               </select>
             </div>
           </div>
@@ -88,15 +88,15 @@
               <label class="text-sm font-medium">ScreenScraper:</label>
               <input id="ssUser" type="text" placeholder="Usuario" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
               <input id="ssPass" type="password" placeholder="Password" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
-              <input id="devId" type="text" placeholder="DevID" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" value="jelos" title="Developer ID">
-              <input id="devPass" type="password" placeholder="DevPass" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" value="jelos" title="Developer Password">
+              <input id="devId" type="text" placeholder="DevID" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" title="Developer ID">
+              <input id="devPass" type="password" placeholder="DevPass" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" title="Developer Password">
               <label class="flex items-center gap-1 text-sm">
-                <input type="checkbox" id="saveCredentials" class="w-4 h-4"> Recordar
+                <input type="checkbox" id="saveCredentials" class="w-4 h-4"> Remember
               </label>
-              <button id="testLoginBtn" class="text-sm bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Probar</button>
+              <button id="testLoginBtn" class="text-sm bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Test</button>
             </div>
           <div class="flex items-center gap-2">
-            <label class="text-sm font-medium">Descargar:</label>
+            <label class="text-sm font-medium">Download:</label>
             <label class="flex items-center gap-1 text-sm">
               <input type="checkbox" id="downloadImages" checked> Imágenes
             </label>
@@ -110,15 +110,15 @@
       <div class="grid grid-cols-3 gap-4 mb-6">
         <div class="card text-center">
           <div class="text-2xl font-bold text-indigo-600" id="totalSystems">0</div>
-          <div class="text-sm text-gray-600">Sistemas</div>
+          <div class="text-sm text-gray-600">Systems</div>
         </div>
         <div class="card text-center">
           <div class="text-2xl font-bold text-indigo-600" id="totalRoms">0</div>
-          <div class="text-sm text-gray-600">ROMs Totales</div>
+          <div class="text-sm text-gray-600">Total ROMs</div>
         </div>
         <div class="card text-center">
           <div class="text-2xl font-bold text-yellow-600" id="totalMissing">0</div>
-          <div class="text-sm text-gray-600">Sin Cover</div>
+          <div class="text-sm text-gray-600">No Covers</div>
         </div>
       </div>
 
@@ -469,7 +469,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
         await writable.close();
         return true;
       } catch (e) {
-        log('Error guardando imagen: ' + e.message);
+        log('Error saving image: ' + e.message);
         return false;
       }
     }
@@ -608,12 +608,12 @@ async function simulateScraping() {
       }
 
       if (!ssUser || !ssPass) {
-        log('ERROR: Ingresa usuario y password de ScreenScraper');
+        log('ERROR: Enter ScreenScraper user and password');
         isScraping = false;
         scrapingBtn.disabled = false;
         stopBtn.classList.add('hidden');
         document.getElementById('progressGlobal').classList.add('hidden');
-        scrapingBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Descargar Covers';
+        scrapingBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Download Covers';
         return;
       }
 
@@ -715,14 +715,14 @@ async function simulateScraping() {
       isScraping = false;
       scrapingBtn.disabled = false;
       stopBtn.classList.add('hidden');
-      scrapingBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Descargar Covers';
+      scrapingBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Download Covers';
 
       renderSystems();
     }
 
     function stopScraping() {
       shouldStop = true;
-      log('Deteniendo proceso...');
+      log('Stopping process...');
     }
 
     function renderSystemsProgress(systemKey, current, total) {
@@ -734,7 +734,7 @@ async function simulateScraping() {
       if (progressBar && progressText) {
         const percentage = Math.round((current / total) * 100);
         progressBar.style.width = `${percentage}%`;
-        progressText.textContent = `${current}/${total} descargado`;
+        progressText.textContent = current + '/' + total + ' downloaded';
       }
     }
 
@@ -783,22 +783,22 @@ async function simulateScraping() {
               <input type="checkbox" class="system-checkbox w-5 h-5 text-indigo-600" data-system="${key}" ${isSelected ? 'checked' : ''}>
               <h3 class="font-semibold text-lg uppercase">${data.name || key}</h3>
               <span class="status-badge ${missing === 0 ? 'status-complete' : 'status-pending'}">
-                ${missing === 0 ? '✓ Completo' : `${missing} sin cover`}
+                ${missing === 0 ? 'Complete' : missing + ' missing'}
               </span>
             </div>
             <div class="progress-bar mb-2">
               <div class="progress-fill" style="width: ${percentage}%"></div>
             </div>
             <div class="text-sm text-gray-600 mb-2 flex justify-between">
-              <span>${total} ROMs · ${missing} faltantes · ${percentage}% cobertura</span>
-              <span class="system-progress-text text-indigo-600 font-medium">0/${missing} descargado</span>
+              <span>${total} ROMs - ${missing} missing - ${percentage}%</span>
+              <span class="system-progress-text text-indigo-600 font-medium">0/${missing} downloaded</span>
             </div>
             <div class="max-h-48 overflow-y-auto border-t border-gray-200 pt-2">
               ${data.games.map(g => `
                 <div class="game-item">
                   <span class="text-sm truncate flex-1 mr-2">${g.name}</span>
                   <span class="status-badge ${g.hasCover ? 'status-complete' : 'status-missing'}">
-                    ${g.hasCover ? '✓' : 'Pendiente'}
+                    ${g.hasCover ? 'OK' : 'Pending'}
                   </span>
                 </div>
               `).join('')}
@@ -831,7 +831,7 @@ async function simulateScraping() {
 
         for (const [key, data] of Object.entries(systems)) {
           data.games = await checkCovers(data);
-          log(`  ${key}: ${data.roms.length} ROMs, ${data.images.length} imágenes`);
+          log(key + ': ' + data.roms.length + ' ROMs, ' + data.images.length + ' images');
         }
 
         scannedData = systems;
