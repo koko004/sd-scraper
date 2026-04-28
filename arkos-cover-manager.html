@@ -60,16 +60,23 @@
 
     <div id="statsSection" class="hidden">
       <div class="card mb-4">
-        <h3 class="font-medium mb-3">Configuración de descarga</h3>
-        <div class="flex flex-wrap items-center gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <h3 class="font-medium">Configuración de descarga</h3>
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium">Carpeta:</label>
+              <select id="destFolderSelect" class="border border-gray-300 rounded px-3 py-2 text-sm">
+                <option value="images">/images</option>
+                <option value="media">/media</option>
+                <option value="custom">Personalizado</option>
+              </select>
+              <input id="customFolderInput" type="text" placeholder="Nombre carpeta" class="border border-gray-300 rounded px-3 py-2 text-sm w-32 hidden">
+            </div>
+          </div>
           <div class="flex items-center gap-2">
-            <label class="text-sm font-medium">Carpeta de destino:</label>
-            <select id="destFolderSelect" class="border border-gray-300 rounded px-3 py-2 text-sm">
-              <option value="images">/images</option>
-              <option value="media">/media</option>
-              <option value="custom">Personalizado</option>
-            </select>
-            <input id="customFolderInput" type="text" placeholder="Nombre carpeta" class="border border-gray-300 rounded px-3 py-2 text-sm w-32 hidden">
+            <button id="selectAllBtn" class="text-sm text-indigo-600 hover:text-indigo-800">Seleccionar todos</button>
+            <span class="text-gray-400">|</span>
+            <button id="deselectAllBtn" class="text-sm text-indigo-600 hover:text-indigo-800">Deseleccionar todos</button>
           </div>
         </div>
       </div>
@@ -129,6 +136,7 @@
 
     let directoryHandle = null;
     let scannedData = {};
+    let selectedSystems = new Set();
     let isScraping = false;
     let shouldStop = false;
 
@@ -358,10 +366,14 @@ async function simulateScraping() {
       let updated = 0;
       let totalToProcess = Object.values(scannedData).reduce((acc, s) => acc + s.games.filter(g => !g.hasCover).length, 0);
 
-      for (const [systemKey, systemData] of Object.entries(scannedData)) {
+for (const [systemKey, systemData] of Object.entries(scannedData)) {
         if (shouldStop) {
-          log('⚠️ Proceso detenido por el usuario');
+          log('Proceso detenido por el usuario');
           break;
+        }
+        
+        if (!selectedSystems.has(systemKey)) {
+          continue;
         }
         
         const gamesWithoutCover = systemData.games.filter(g => !g.hasCover);
@@ -429,6 +441,25 @@ async function simulateScraping() {
       }
     }
 
+    function toggleSystem(key) {
+      if (selectedSystems.has(key)) {
+        selectedSystems.delete(key);
+      } else {
+        selectedSystems.add(key);
+      }
+      renderSystems();
+    }
+
+    function selectAllSystems() {
+      selectedSystems = new Set(Object.keys(scannedData));
+      renderSystems();
+    }
+
+    function deselectAllSystems() {
+      selectedSystems.clear();
+      renderSystems();
+    }
+
     function renderSystems() {
       const container = document.getElementById('systemsList');
       
@@ -443,14 +474,16 @@ async function simulateScraping() {
       container.innerHTML = Object.entries(scannedData).map(([key, data]) => {
         const missing = data.games.filter(g => !g.hasCover).length;
         const total = data.games.length;
+        const isSelected = selectedSystems.has(key);
         totalRoms += total;
-        totalMissing += missing;
+        totalMissing += isSelected ? missing : 0;
 
         const percentage = total > 0 ? Math.round(((total - missing) / total) * 100) : 0;
 
         return `
-          <div class="system-card" id="system-${key}">
-            <div class="flex justify-between items-center mb-2">
+          <div class="system-card ${isSelected ? 'border-indigo-500' : 'border-gray-200'}" id="system-${key}">
+            <div class="flex items-center gap-3 mb-2">
+              <input type="checkbox" class="system-checkbox w-5 h-5 text-indigo-600" data-system="${key}" ${isSelected ? 'checked' : ''}>
               <h3 class="font-semibold text-lg uppercase">${data.name || key}</h3>
               <span class="status-badge ${missing === 0 ? 'status-complete' : 'status-pending'}">
                 ${missing === 0 ? '✓ Completo' : `${missing} sin cover`}
@@ -505,6 +538,7 @@ async function simulateScraping() {
         }
 
         scannedData = systems;
+        selectedSystems = new Set(Object.keys(systems));
         document.getElementById('statsSection').classList.remove('hidden');
         document.getElementById('scrapingBtn').disabled = false;
 
@@ -522,6 +556,20 @@ async function simulateScraping() {
     document.getElementById('selectFolderBtn').addEventListener('click', handleSelectFolder);
     document.getElementById('scrapingBtn').addEventListener('click', simulateScraping);
     document.getElementById('stopBtn').addEventListener('click', stopScraping);
+    document.getElementById('selectAllBtn').addEventListener('click', selectAllSystems);
+    document.getElementById('deselectAllBtn').addEventListener('click', deselectAllSystems);
+    
+    document.addEventListener('change', function(e) {
+      if (e.target.classList.contains('system-checkbox')) {
+        const key = e.target.dataset.system;
+        if (e.target.checked) {
+          selectedSystems.add(key);
+        } else {
+          selectedSystems.delete(key);
+        }
+        renderSystems();
+      }
+    });
     
     document.getElementById('destFolderSelect').addEventListener('change', function() {
       const customInput = document.getElementById('customFolderInput');
