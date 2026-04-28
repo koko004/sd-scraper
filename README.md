@@ -1,4 +1,4 @@
-# SD Cover Manager - R36S
+# SD Cover Manager
 
 Web tool for managing ROM covers of retro console with using web browser and ScreenScraper API.
 
