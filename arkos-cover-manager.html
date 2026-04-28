@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArkOS Cover Manager - R36S</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { --primary: #6366f1; --primary-dark: #4f46e5; }
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    .card { @apply bg-white rounded-lg shadow-md p-4; }
+    .btn { @apply px-4 py-2 rounded-lg font-medium transition-all; }
+    .btn-primary { @apply bg-indigo-600 text-white hover:bg-indigo-700; }
+    .btn-secondary { @apply bg-gray-200 text-gray-800 hover:bg-gray-300; }
+    .status-badge { @apply px-2 py-1 rounded text-xs font-medium; }
+    .status-complete { @apply bg-green-100 text-green-800; }
+    .status-pending { @apply bg-yellow-100 text-yellow-800; }
+    .status-missing { @apply bg-red-100 text-red-800; }
+    .progress-bar { @apply h-2 bg-gray-200 rounded-full overflow-hidden; }
+    .progress-fill { @apply h-full bg-indigo-500 transition-all; }
+    .system-card { @apply border border-gray-200 rounded-lg p-3 mb-2; }
+    .game-item { @apply flex items-center justify-between py-2 border-b border-gray-100; }
+    .game-item:last-child { @apply border-b-0; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .scanning { animation: pulse 1s infinite; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="max-w-4xl mx-auto p-6">
+    <header class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">🎮 ArkOS Cover Manager</h1>
+      <p class="text-gray-600">Gestor de carátulas para R36S</p>
+    </header>
+
+    <div id="warningSection" class="hidden">
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <div>
+            <h3 class="font-medium text-yellow-800">⚠️ Navegador no compatible</h3>
+            <p id="warningText" class="text-sm text-yellow-700 mt-1"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="folderSection" class="card mb-6">
+      <div class="flex flex-col items-center gap-4">
+        <button id="selectFolderBtn" class="btn btn-primary flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+          </svg>
+          Seleccionar Carpeta de MicroSD
+        </button>
+        <p id="folderPath" class="text-sm text-gray-500 hidden"></p>
+      </div>
+    </div>
+
+    <div id="statsSection" class="hidden">
+      <div class="card mb-4">
+        <h3 class="font-medium mb-3">Configuración de descarga</h3>
+        <div class="flex flex-wrap items-center gap-4">
+          <div class="flex items-center gap-2">
+            <label class="text-sm font-medium">Carpeta de destino:</label>
+            <select id="destFolderSelect" class="border border-gray-300 rounded px-3 py-2 text-sm">
+              <option value="images">/images</option>
+              <option value="media">/media</option>
+              <option value="custom">Personalizado</option>
+            </select>
+            <input id="customFolderInput" type="text" placeholder="Nombre carpeta" class="border border-gray-300 rounded px-3 py-2 text-sm w-32 hidden">
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="card text-center">
+          <div class="text-2xl font-bold text-indigo-600" id="totalSystems">0</div>
+          <div class="text-sm text-gray-600">Sistemas</div>
+        </div>
+        <div class="card text-center">
+          <div class="text-2xl font-bold text-indigo-600" id="totalRoms">0</div>
+          <div class="text-sm text-gray-600">ROMs Totales</div>
+        </div>
+        <div class="card text-center">
+          <div class="text-2xl font-bold text-yellow-600" id="totalMissing">0</div>
+          <div class="text-sm text-gray-600">Sin Cover</div>
+        </div>
+      </div>
+
+      <div id="systemsList" class="space-y-4"></div>
+
+      <div class="mt-6 flex justify-center gap-4">
+        <div id="progressGlobal" class="hidden flex items-center gap-2 bg-indigo-100 px-4 py-2 rounded-lg">
+          <svg class="w-5 h-5 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span id="progressText" class="text-sm font-medium text-indigo-800">0/0</span>
+        </div>
+        <button id="scrapingBtn" class="btn btn-primary flex items-center gap-2" disabled>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          Simular Scraping
+        </button>
+        <button id="stopBtn" class="btn bg-red-600 text-white hover:bg-red-700 flex items-center gap-2 hidden">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          Detener
+        </button>
+      </div>
+    </div>
+
+    <div id="logSection" class="mt-6 hidden">
+      <div class="card">
+        <h3 class="font-medium mb-2">Registro de Actividad</h3>
+        <div id="logContent" class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm h-48 overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ROM_EXTENSIONS = ['.nes', '.snes', '.sfc', '.gb', '.gbc', '.gba', '.n64', '.z64', '.nds', '.3ds', '.cia', '.xci', '.xwb', '.gcm', '.iso', '.wbfs', '.wad', '.a26', '.lnx', '.jag', '.j64', '.md', '.gen', '.sms', '.gg', '.s32x', '.32x', '.pce', '.ngp', '.ngc', '.crypt', '.fb', '.nsp', '.kv', '.m3u', '.zip', '.7z'];
+    const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif'];
+    const SYSTEMS = ['gb', 'gbc', 'gba', 'nes', 'snes', 'n64', 'nds', '3ds', 'wii', 'psx', 'psp', 'genesis', 'sms', 'pce', 'ngp'];
+
+    let directoryHandle = null;
+    let scannedData = {};
+    let isScraping = false;
+    let shouldStop = false;
+
+    const isChrome = /Chrome/.test(navigator.userAgent) && /Google/.test(navigator.vendor);
+    const isEdge = /Edg/.test(navigator.userAgent);
+    if (!window.showDirectoryPicker) {
+      document.getElementById('warningSection').classList.remove('hidden');
+      document.getElementById('warningText').textContent = 'API File System Access no disponible. Usa Chrome o Edge.';
+    } else if (!isChrome && !isEdge) {
+      document.getElementById('warningSection').classList.remove('hidden');
+      document.getElementById('warningText').textContent = 'File System Access API solo funciona en Chrome o Edge.';
+    }
+
+    function log(msg) {
+      const logEl = document.getElementById('logContent');
+      const time = new Date().toLocaleTimeString();
+      logEl.innerHTML += `<div>[${time}] ${msg}</div>`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function getExtension(filename) {
+      const ext = filename.toLowerCase().match(/\.[^.]+$/)?.[0] || '';
+      return ext;
+    }
+
+    function getBasename(filename) {
+      return filename.replace(/\.[^.]+$/, '');
+    }
+
+    async function scanDirectory(handle, path = '') {
+      const results = { roms: [], images: [], folders: [] };
+      
+      for await (const entry of handle.values()) {
+        if (entry.kind === 'file') {
+          const ext = getExtension(entry.name).toLowerCase();
+          if (ROM_EXTENSIONS.includes(ext)) {
+            results.roms.push({ name: entry.name, path: `${path}/${entry.name}` });
+          } else if (IMAGE_EXTENSIONS.includes(ext)) {
+            results.images.push({ name: entry.name, path: `${path}/${entry.name}` });
+          }
+        } else if (entry.kind === 'directory') {
+          results.folders.push({ name: entry.name, handle: entry, path: `${path}/${entry.name}` });
+        }
+      }
+      
+      return results;
+    }
+
+    function detectSystem(folderPath) {
+      const folder = folderPath.toLowerCase();
+      for (const sys of SYSTEMS) {
+        if (folder.includes(sys)) return sys;
+      }
+      return 'other';
+    }
+
+    async function findSystemFolders(rootHandle) {
+      const systems = {};
+      
+      const scan = async (handle, path) => {
+        const results = await scanDirectory(handle, path);
+        
+        if (results.roms.length > 0) {
+          const system = detectSystem(path);
+          if (!systems[system]) {
+            systems[system] = { 
+              name: path.split('/').pop(), 
+              system,
+              roms: [],
+              images: [],
+              imageFolder: null,
+              folderHandle: handle
+            };
+          }
+          systems[system].roms.push(...results.roms);
+          systems[system].images.push(...results.images);
+        }
+
+        for (const folder of results.folders) {
+          if (!folder.name.startsWith('.') && folder.name.toLowerCase() !== 'media') {
+            await scan(folder.handle, folder.path);
+          }
+        }
+      };
+
+      await scan(rootHandle, '');
+      return systems;
+    }
+
+    function findImageFolder(systemData, allEntries) {
+      if (allEntries.images.length > 0) {
+        return allEntries.images;
+      }
+      return systemData.images;
+    }
+
+    async function checkCovers(systemData) {
+      const romNames = systemData.roms.map(r => getBasename(r.name).toLowerCase());
+      const imageNames = systemData.images.map(i => getBasename(i.name).toLowerCase());
+      
+      return systemData.roms.map(rom => {
+        const baseName = getBasename(rom.name).toLowerCase();
+        const hasImage = imageNames.some(img => 
+          img.startsWith(baseName) || baseName.startsWith(img)
+        );
+        
+        return {
+          ...rom,
+          hasCover: hasImage,
+          imageName: hasImage ? systemData.images.find(i => 
+            getBasename(i.name).toLowerCase().startsWith(baseName) ||
+            baseName.startsWith(getBasename(i.name).toLowerCase())
+          )?.name : null
+        };
+      });
+    }
+
+    async function readGamelistXml(systemData) {
+      try {
+        const fileHandle = await systemData.folderHandle.getFileHandle('gamelist.xml');
+        const file = await fileHandle.getFile();
+        return await file.text();
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function updateGamelistXml(systemData, gameFile, imageFile) {
+      try {
+        let xml = await readGamelistXml(systemData);
+        
+        if (!xml) {
+          xml = '<?xml version="1.0" encoding="UTF-8"?>\n<gameList>\n</gameList>';
+        }
+
+        const gameName = getBasename(gameFile);
+        const imageName = imageFile || `${gameName}-image.png`;
+
+        if (xml.includes(`<path>${gameFile}</path>`)) {
+          const imgRegex = new RegExp(`(<path>${gameName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\\\?[^<]*</path>)[\\s\\S]*?(<image>[^<]*)`, 'i');
+          xml = xml.replace(imgRegex, `$1<image>${imageName}</image>`);
+        } else {
+          const gameEntry = `  <game>
+    <path>${gameFile}</path>
+    <name>${gameName}</name>
+    <image>${imageName}</image>
+  </game>`;
+          xml = xml.replace('<gameList>', `<gameList>\n${gameEntry}`);
+        }
+
+        const fileHandle = await systemData.folderHandle.getFileHandle('gamelist.xml', { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(xml);
+        await writable.close();
+        
+        return true;
+      } catch (e) {
+        console.error('Error updating gamelist.xml:', e);
+        return false;
+      }
+    }
+
+    function getImageUrlPlaceholder(gameName, system) {
+      const seed = encodeURIComponent(gameName);
+      return `https://placehold.co/320x224/4f46e5/ffffff?text=${seed.slice(0, 20)}`;
+    }
+
+    async function downloadImage(url) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Download failed');
+        return await response.blob();
+      } catch (e) {
+        log(`Error descargando: ${e.message}`);
+        return null;
+      }
+    }
+
+    async function saveImage(systemData, imageName, blob, destFolder) {
+      try {
+        const folderHandle = systemData.folderHandle;
+        let imageFolderHandle;
+        
+        try {
+          imageFolderHandle = await folderHandle.getDirectoryHandle(destFolder);
+        } catch (e) {
+          imageFolderHandle = await folderHandle.getDirectoryHandle(destFolder, { create: true });
+        }
+        
+        const fileHandle = await imageFolderHandle.getFileHandle(imageName, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return true;
+      } catch (e) {
+        log(`Error guardando imagen: ${e.message}`);
+        return false;
+      }
+    }
+
+async function simulateScraping() {
+      const scrapingBtn = document.getElementById('scrapingBtn');
+      const stopBtn = document.getElementById('stopBtn');
+      const progressText = document.getElementById('progressText');
+      
+      isScraping = true;
+      shouldStop = false;
+      scrapingBtn.disabled = true;
+      stopBtn.classList.remove('hidden');
+      scrapingBtn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Procesando...';
+      document.getElementById('progressGlobal').classList.remove('hidden');
+      document.getElementById('progressGlobal').classList.add('flex');
+
+      document.getElementById('logSection').classList.remove('hidden');
+      log('Iniciando simulación de scraping...');
+
+      const destFolderSelect = document.getElementById('destFolderSelect');
+      const customFolderInput = document.getElementById('customFolderInput');
+      let destFolder = destFolderSelect.value;
+      if (destFolder === 'custom') {
+        destFolder = customFolderInput.value.trim() || 'images';
+      }
+
+      log(`Carpeta de destino: /${destFolder}`);
+
+      let processed = 0;
+      let updated = 0;
+      let totalToProcess = Object.values(scannedData).reduce((acc, s) => acc + s.games.filter(g => !g.hasCover).length, 0);
+
+      for (const [systemKey, systemData] of Object.entries(scannedData)) {
+        if (shouldStop) {
+          log('⚠️ Proceso detenido por el usuario');
+          break;
+        }
+        
+        const gamesWithoutCover = systemData.games.filter(g => !g.hasCover);
+        let systemProcessed = 0;
+        
+        for (const game of gamesWithoutCover) {
+          if (shouldStop) {
+            log('⚠️ Proceso detenido por el usuario');
+            break;
+          }
+          
+          const gameBase = getBasename(game.name);
+          const imageName = `${gameBase}-image.png`;
+          const imagePath = `/${destFolder}/${imageName}`;
+          
+          log(`Procesando: ${game.name} (${systemKey})`);
+          progressText.textContent = `${processed + 1}/${totalToProcess}`;
+
+          const url = getImageUrlPlaceholder(gameBase, systemKey);
+          const blob = await downloadImage(url);
+          
+          if (blob) {
+            const saved = await saveImage(systemData, imageName, blob, destFolder);
+            if (saved) {
+              await updateGamelistXml(systemData, game.name, imagePath);
+              game.hasCover = true;
+              game.imageName = imagePath;
+              updated++;
+              log(`✓ Cover guardado: ${imagePath}`);
+            }
+          }
+
+          systemProcessed++;
+          processed++;
+          renderSystemsProgress(systemKey, systemProcessed, gamesWithoutCover.length);
+          await new Promise(r => setTimeout(r, 500));
+        }
+      }
+
+      log(`\n✓ Scraping completado! Covers añadidos: ${updated}`);
+      
+      isScraping = false;
+      scrapingBtn.disabled = false;
+      stopBtn.classList.add('hidden');
+      scrapingBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Simular Scraping';
+
+      renderSystems();
+    }
+
+    function stopScraping() {
+      shouldStop = true;
+      log('Deteniendo proceso...');
+    }
+
+    function renderSystemsProgress(systemKey, current, total) {
+      const systemCard = document.getElementById(`system-${systemKey}`);
+      if (!systemCard) return;
+      
+      const progressBar = systemCard.querySelector('.progress-fill');
+      const progressText = systemCard.querySelector('.system-progress-text');
+      if (progressBar && progressText) {
+        const percentage = Math.round((current / total) * 100);
+        progressBar.style.width = `${percentage}%`;
+        progressText.textContent = `${current}/${total} descargado`;
+      }
+    }
+
+    function renderSystems() {
+      const container = document.getElementById('systemsList');
+      
+      if (Object.keys(scannedData).length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-500">No se encontraron juegos</p>';
+        return;
+      }
+
+      let totalRoms = 0;
+      let totalMissing = 0;
+
+      container.innerHTML = Object.entries(scannedData).map(([key, data]) => {
+        const missing = data.games.filter(g => !g.hasCover).length;
+        const total = data.games.length;
+        totalRoms += total;
+        totalMissing += missing;
+
+        const percentage = total > 0 ? Math.round(((total - missing) / total) * 100) : 0;
+
+        return `
+          <div class="system-card" id="system-${key}">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-semibold text-lg uppercase">${data.name || key}</h3>
+              <span class="status-badge ${missing === 0 ? 'status-complete' : 'status-pending'}">
+                ${missing === 0 ? '✓ Completo' : `${missing} sin cover`}
+              </span>
+            </div>
+            <div class="progress-bar mb-2">
+              <div class="progress-fill" style="width: ${percentage}%"></div>
+            </div>
+            <div class="text-sm text-gray-600 mb-2 flex justify-between">
+              <span>${total} ROMs · ${missing} faltantes · ${percentage}% cobertura</span>
+              <span class="system-progress-text text-indigo-600 font-medium">0/${missing} descargado</span>
+            </div>
+            <div class="max-h-48 overflow-y-auto border-t border-gray-200 pt-2">
+              ${data.games.map(g => `
+                <div class="game-item">
+                  <span class="text-sm truncate flex-1 mr-2">${g.name}</span>
+                  <span class="status-badge ${g.hasCover ? 'status-complete' : 'status-missing'}">
+                    ${g.hasCover ? '✓' : 'Pendiente'}
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('totalSystems').textContent = Object.keys(scannedData).length;
+      document.getElementById('totalRoms').textContent = totalRoms;
+      document.getElementById('totalMissing').textContent = totalMissing;
+    }
+
+    async function handleSelectFolder() {
+      try {
+        directoryHandle = await window.showDirectoryPicker({
+          mode: 'readwrite',
+          suggestedName: 'ArkOS SD'
+        });
+
+        document.getElementById('folderPath').textContent = directoryHandle.name;
+        document.getElementById('folderPath').classList.remove('hidden');
+
+        log(`Carpeta seleccionada: ${directoryHandle.name}`);
+        log('Escaneando estructura...');
+
+        const systems = await findSystemFolders(directoryHandle);
+
+        log(`Encontrados ${Object.keys(systems).length} sistemas`);
+
+        for (const [key, data] of Object.entries(systems)) {
+          data.games = await checkCovers(data);
+          log(`  ${key}: ${data.roms.length} ROMs, ${data.images.length} imágenes`);
+        }
+
+        scannedData = systems;
+        document.getElementById('statsSection').classList.remove('hidden');
+        document.getElementById('scrapingBtn').disabled = false;
+
+        renderSystems();
+        log('Escaneo completado!');
+
+      } catch (e) {
+        if (e.name !== 'AbortError') {
+          log(`Error: ${e.message}`);
+          console.error(e);
+        }
+      }
+    }
+
+    document.getElementById('selectFolderBtn').addEventListener('click', handleSelectFolder);
+    document.getElementById('scrapingBtn').addEventListener('click', simulateScraping);
+    document.getElementById('stopBtn').addEventListener('click', stopScraping);
+    
+    document.getElementById('destFolderSelect').addEventListener('change', function() {
+      const customInput = document.getElementById('customFolderInput');
+      if (this.value === 'custom') {
+        customInput.classList.remove('hidden');
+      } else {
+        customInput.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
