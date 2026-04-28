@@ -1,12 +1,12 @@
-# ArkOS Cover Manager - R36S
+# SD Cover Manager - R36S
 
-Web tool for managing ROM covers on R36S retro console with ArkOS using ScreenScraper API.
+Web tool for managing ROM covers of retro console with using web browser and ScreenScraper API.
 
 ## Features
 
 - **Select MicroSD folder** using File System Access API
 - **Scan ROMs** from subfolders (gb, snes, nes, n64, etc.)
-- **Detect missing covers** by checking for images in standard ArkOS locations
+- **Detect missing covers** by checking for images in standard locations
 - **Download covers** from ScreenScraper.fr API
 - **Select/deselect systems** to download covers for specific consoles
 - **Choose destination folder** for images (images, media, or custom)
@@ -33,8 +33,8 @@ Web tool for managing ROM covers on R36S retro console with ArkOS using ScreenSc
 
 - **ssid**: Your ScreenScraper username
 - **sspass**: Your ScreenScraper password
-- **devid**: Developer ID (pre-filled: jelos)
-- **devpass**: Developer password (pre-filled: jelos)
+- **devid**: Developer ID
+- **devpass**: Developer password
 
 ## API Endpoints Used
 
