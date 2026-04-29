@@ -506,8 +506,8 @@ async function loginScreenScraper(user, pass, devid, devpass) {
           ssid: user,
           sspass: pass
         });
-        params.append('devid', devid);
-        params.append('devpassword', devpass);
+        if (devid) params.append('devid', devid);
+        if (devpass) params.append('devpassword', devpass);
         const url = SCREENSCRAPER_API + '/ssuserInfos.php?' + params;
         const response = await fetch(url);
         const data = await response.json();
@@ -660,14 +660,14 @@ async function simulateScraping() {
           progressText.textContent = (processed + 1) + '/' + totalToProcess;
 
           try {
-            const jeuData = await scrapeGame(ssUser, ssPass, systemeid, game.name, region);
+            const jeuData = await scrapeGame(ssUser, ssPass, systemeid, game.name, region, devid, devpass);
             
             if (jeuData && jeuData.jeu && jeuData.jeu.id) {
               const jeuid = jeuData.jeu.id;
               let downloaded = false;
               
               if (downloadImages) {
-                const imageUrl = await downloadMedia(ssUser, ssPass, systemeid, jeuid, 'box-2D', region);
+                const imageUrl = await downloadMedia(ssUser, ssPass, systemeid, jeuid, 'box-2D', region, devid, devpass);
                 const blob = await downloadImage(imageUrl);
                 if (blob && blob.size > 0) {
                   const imageName = searchName.replace(/[^a-zA-Z0-9]/g, '') + '-image.png';
@@ -684,7 +684,7 @@ async function simulateScraping() {
               }
               
               if (downloadVideos && !shouldStop) {
-                const videoUrl = await downloadMedia(ssUser, ssPass, systemeid, jeuid, 'video', region);
+                const videoUrl = await downloadMedia(ssUser, ssPass, systemeid, jeuid, 'video', region, devid, devpass);
                 const blob = await downloadImage(videoUrl);
                 if (blob && blob.size > 0) {
                   const videoName = searchName.replace(/[^a-zA-Z0-9]/g, '') + '.mp4';
@@ -856,14 +856,14 @@ async function simulateScraping() {
     document.getElementById('selectAllBtn').addEventListener('click', selectAllSystems);
     document.getElementById('deselectAllBtn').addEventListener('click', deselectAllSystems);
     document.getElementById('testLoginBtn').addEventListener('click', function() {
-      const user = document.getElementById('ssUser').value.trim();
-      const pass = document.getElementById('ssPass').value;
-      const devid = document.getElementById('devId').value.trim();
-      const devpass = document.getElementById('devPass').value;
+      const user = document.getElementById('ssUser')?.value.trim() || '';
+      const pass = document.getElementById('ssPass')?.value || '';
+      const devid = document.getElementById('devId')?.value.trim() || '';
+      const devpass = document.getElementById('devPass')?.value || '';
       if (user && pass) {
         testLogin(user, pass, devid, devpass);
       } else {
-        log('Ingresa usuario y password');
+        log('Enter user and password');
       }
     });
     
