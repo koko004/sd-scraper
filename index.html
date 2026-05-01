@@ -392,22 +392,35 @@ async function loginScreenScraper(user, pass, devid, devpass) {
     }
 
 async function downloadImage(mediaUrl) {
-      try {
-        const response = await fetch(mediaUrl);
-        return await response.blob();
-      } catch (e) {
-        log('CORS error, trying proxy...');
-        const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(mediaUrl);
-        try {
-          const response = await fetch(proxyUrl);
-          if (response.ok) {
-            return await response.blob();
-          }
-        } catch (e2) {
-          log('Proxy also failed - AllOrigins service might be saturated');
-        }
+      // Always use proxy to avoid CORS issues
+      log('Downloading via proxy: ' + mediaUrl);
+      
+      if (!mediaUrl || mediaUrl.trim() === '') {
+        log('Error: Empty media URL');
+        return null;
       }
-      return null;
+      
+      const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(mediaUrl);
+      log('Proxy URL: ' + proxyUrl);
+      
+      try {
+        const response = await fetch(proxyUrl);
+        if (!response.ok) {
+          throw new Error(`Proxy failed with status: ${response.status}`);
+        }
+        
+        const blob = await response.blob();
+        if (blob.size === 0) {
+          throw new Error('Empty blob received');
+        }
+        
+        log('Downloaded blob size: ' + blob.size + ' bytes');
+        return blob;
+      } catch (e) {
+        log('Proxy download failed: ' + e.message);
+        console.error('Proxy download error:', e);
+        return null;
+      }
     }
 
     async function saveImage(systemData, imageName, blob, destFolder) {
@@ -415,22 +428,27 @@ async function downloadImage(mediaUrl) {
         const folderHandle = systemData.folderHandle;
         let imageFolderHandle;
         
+        // Try to get existing folder, create if it doesn't exist
         try {
           imageFolderHandle = await folderHandle.getDirectoryHandle(destFolder);
         } catch (e) {
           imageFolderHandle = await folderHandle.getDirectoryHandle(destFolder, { create: true });
+          log('Created folder: ' + destFolder);
         }
         
+        // Create or get file handle
         const fileHandle = await imageFolderHandle.getFileHandle(imageName, { create: true });
-        const writable = await fileHandle.createWritable();
         
-        return new Promise((resolve, reject) => {
-          writable.write(blob).then(() => {
-            writable.close().then(() => resolve(true)).catch(reject);
-          }).catch(reject);
-        });
+        // Create writable stream and write blob
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        
+        log('Saved image: ' + imageName);
+        return true;
       } catch (e) {
         log('Error saving image: ' + e.message);
+        console.error('Save image error:', e);
         return false;
       }
     }
@@ -526,6 +544,8 @@ async function downloadImage(mediaUrl) {
 
     function extractMediaUrl(medias, mediaType, region) {
       const targetRegion = region || 'wor';
+      log('Searching for media: ' + mediaType + ' region: ' + targetRegion);
+      
       const candidates = medias.filter(m =>
         m.type === mediaType && (
           m.region === targetRegion ||
@@ -534,13 +554,20 @@ async function downloadImage(mediaUrl) {
           m.region === ''
         )
       );
+      
+      log('Found ' + candidates.length + ' candidates for ' + mediaType);
+      
       if (candidates.length === 0) return null;
+      
       candidates.sort((a, b) => {
         if (a.region === targetRegion && b.region !== targetRegion) return -1;
         if (a.region === 'wor' && b.region !== 'wor' && b.region !== targetRegion) return -1;
         return 0;
       });
-      return candidates[0].url || null;
+      
+      const selectedUrl = candidates[0].url || null;
+      log('Selected URL: ' + selectedUrl);
+      return selectedUrl;
     }
 
 async function simulateScraping() {
@@ -585,6 +612,7 @@ async function simulateScraping() {
       }
 
       log('Usuario: ' + ssUser);
+      log('Contraseña: ' + (ssPass ? '[***]' : 'VACÍO'));
       log('Imagenes: /' + destFolder + ' - Videos: /' + videoFolder);
 
       let processed = 0;
@@ -627,6 +655,7 @@ async function simulateScraping() {
           progressText.textContent = (processed + 1) + '/' + totalToProcess;
 
           try {
+            log('Scraping game: ' + game.name + ' with region: ' + region);
             const jeuData = await scrapeGame(ssUser, ssPass, systemeid, game.name, region, devid, devpass);
 
             if (jeuData && jeuData.jeu && jeuData.jeu.id) {
