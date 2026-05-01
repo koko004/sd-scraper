@@ -459,7 +459,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
         if (devid) params.append('devid', devid);
         if (devpass) params.append('devpassword', devpass);
         const url = SCREENSCRAPER_API + '/ssuserInfos.php?' + params;
-        const proxyUrl = window.location.origin.replace(/:\d+$/, ":5555") + "/proxy/media?url=" + encodeURIComponent(mediaUrl); const response = await fetch(proxyUrl);
+        const response = await fetch(url);
         const data = await response.json();
         
         if (data.response && data.response.ssuser) {
@@ -498,7 +498,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
 
       try {
         const url = SCREENSCRAPER_API + '/jeuInfos.php?' + params;
-        const proxyUrl = window.location.origin.replace(/:\d+$/, ":5555") + "/proxy/media?url=" + encodeURIComponent(mediaUrl); const response = await fetch(proxyUrl);
+        const response = await fetch(url);
         const data = await response.json();
 
         if (data.response && data.response.jeu) {
