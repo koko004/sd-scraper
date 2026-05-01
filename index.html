@@ -336,7 +336,7 @@
     }
 
     const SCREENSCRAPER_API = 'https://api.screenscraper.fr/api2';
-    const SOFT_NAME = 'ArkOSCover';
+    const SOFT_NAME = 'SDCoverManager';
     
     const SYSTEM_IDS = {
       'gb': 4, 'gbc': 5, 'gba': 6, 'nes': 7, 'snes': 8, 'n64': 9,
@@ -348,7 +348,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
       const params = new URLSearchParams({
         output: 'json',
         ssid: user,
-        sspass: pass
+        sspassword: pass
       });
       params.append('devid', devid);
       params.append('devpassword', devpass);
@@ -366,7 +366,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
     async function searchGame(user, pass, systemeid, romName, fileSize, devid, devpass) {
       const params = new URLSearchParams({
         ssid: user,
-        sspass: pass,
+        sspassword: pass,
         systemeid: systemeid,
         romnom: romName,
         output: 'json'
@@ -389,7 +389,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
       const mediaRegion = region || 'wor';
       const params = new URLSearchParams({
         ssid: user,
-        sspass: pass,
+        sspassword: pass,
         systemeid: systemeid,
         jeuid: jeuid,
         media: mediaType + '(' + mediaRegion + ')'
@@ -403,7 +403,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
     async function searchGame(user, pass, systemeid, romName, fileSize, devid, devpass) {
       const params = new URLSearchParams({
         ssid: user,
-        sspass: pass,
+        sspassword: pass,
         systemeid: systemeid,
         romnom: romName,
         output: 'json'
@@ -426,7 +426,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
       const params = new URLSearchParams({
         action: 'mediaJeu',
         ssid: user,
-        sspass: pass,
+        sspassword: pass,
         media: mediaType,
         id: gameId,
         devid: '',
@@ -504,7 +504,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
         const params = new URLSearchParams({
           output: 'json',
           ssid: user,
-          sspass: pass
+          sspassword: pass
         });
         if (devid) params.append('devid', devid);
         if (devpass) params.append('devpassword', devpass);
@@ -537,7 +537,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
       const params = new URLSearchParams({
         output: 'json',
         ssid: user,
-        sspass: pass,
+        sspassword: pass,
         systemeid: systemeid,
         romnom: romName,
         romtype: 'rom'
@@ -566,7 +566,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
       const mediaRegion = region || 'wor';
       const params = new URLSearchParams({
         ssid: user,
-        sspass: pass,
+        sspassword: pass,
         systemeid: systemeid,
         jeuid: jeuid,
         media: mediaType + '(' + mediaRegion + ')'
