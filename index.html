@@ -391,15 +391,25 @@ async function loginScreenScraper(user, pass, devid, devpass) {
       return `https://placehold.co/320x224/4f46e5/ffffff?text=${seed.slice(0, 20)}`;
     }
 
-    async function downloadImage(mediaUrl) {
+async function downloadImage(mediaUrl) {
       try {
-        const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(mediaUrl); const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error('Download failed');
+        // Try direct first since it works
+        const response = await fetch(mediaUrl);
+        if (!response.ok) throw new Error('Direct failed');
         return await response.blob();
       } catch (e) {
-        log(`Error descargando: ${e.message}`);
-        return null;
+        // Fallback to proxy
+        const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(mediaUrl);
+        try {
+          const response = await fetch(proxyUrl);
+          if (!response.ok) throw new Error('Proxy failed');
+          return await response.blob();
+        } catch (e2) {
+          log(`Error descargando: ${e2.message}`);
+          return null;
+        }
       }
+    }
     }
 
     async function saveImage(systemData, imageName, blob, destFolder) {
