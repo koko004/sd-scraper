@@ -385,56 +385,6 @@ async function loginScreenScraper(user, pass, devid, devpass) {
       }
     }
 
-    async function getMediaUrl(user, pass, systemeid, jeuid, mediaType, region, devid, devpass) {
-      const mediaRegion = region || 'wor';
-      const params = new URLSearchParams({
-        ssid: user,
-        sspassword: pass,
-        systemeid: systemeid,
-        jeuid: jeuid,
-        media: mediaType + '(' + mediaRegion + ')'
-      });
-      params.append('devid', devid);
-      params.append('devpassword', devpass);
-      params.append('softname', SOFT_NAME);
-      return SCREENSCRAPER_API + '/mediaJeu.php?' + params;
-    }
-
-    async function searchGame(user, pass, systemeid, romName, fileSize, devid, devpass) {
-      const params = new URLSearchParams({
-        ssid: user,
-        sspassword: pass,
-        systemeid: systemeid,
-        romnom: romName,
-        output: 'json'
-      });
-      params.append('devid', devid);
-      params.append('devpassword', devpass);
-      params.append('softname', SOFT_NAME);
-      
-      try {
-        const response = await fetch(SCREENSCRAPER_API + '/jeuRecherche.php?' + params);
-        const data = await response.json();
-        return data.response;
-      } catch (e) {
-        log('Error searching: ' + e.message);
-        return null;
-      }
-    }
-
-    async function getMediaUrl(user, pass, systemeid, jeuid, mediaType, region, devid, devpass) {
-      const params = new URLSearchParams({
-        action: 'mediaJeu',
-        ssid: user,
-        sspassword: pass,
-        media: mediaType,
-        id: gameId,
-        devid: '',
-        devpassword: '',
-        softname: SOFT_NAME
-      });
-      return SCREENSCRAPER_API + '/mediaJeu.php?' + params;
-    }
 
     function getImageUrlPlaceholder(gameName, system) {
       const seed = encodeURIComponent(gameName);
@@ -545,15 +495,16 @@ async function loginScreenScraper(user, pass, devid, devpass) {
       params.append('devid', devid);
       params.append('devpassword', devpass);
       params.append('softname', SOFT_NAME);
-      
+
       try {
         const url = SCREENSCRAPER_API + '/jeuInfos.php?' + params;
         const response = await fetch(url);
         const data = await response.json();
-        
+
         if (data.response && data.response.jeu) {
           const jeu = data.response.jeu;
-          const results = { jeu: jeu };
+          const medias = data.response.jeu.medias || [];
+          const results = { jeu: { id: jeu.id, nom: jeu.nom }, medias: medias };
           return results;
         }
         return null;
@@ -562,20 +513,23 @@ async function loginScreenScraper(user, pass, devid, devpass) {
       }
     }
 
-    async function downloadMedia(user, pass, systemeid, jeuid, mediaType, region, devid, devpass) {
-      const mediaRegion = region || 'wor';
-      const params = new URLSearchParams({
-        ssid: user,
-        sspassword: pass,
-        systemeid: systemeid,
-        jeuid: jeuid,
-        media: mediaType + '(' + mediaRegion + ')'
+    function extractMediaUrl(medias, mediaType, region) {
+      const targetRegion = region || 'wor';
+      const candidates = medias.filter(m =>
+        m.type === mediaType && (
+          m.region === targetRegion ||
+          m.region === 'wor' ||
+          m.region === null ||
+          m.region === ''
+        )
+      );
+      if (candidates.length === 0) return null;
+      candidates.sort((a, b) => {
+        if (a.region === targetRegion && b.region !== targetRegion) return -1;
+        if (a.region === 'wor' && b.region !== 'wor' && b.region !== targetRegion) return -1;
+        return 0;
       });
-      params.append('devid', devid);
-      params.append('devpassword', devpass);
-      params.append('softname', SOFT_NAME);
-      
-      return SCREENSCRAPER_API + '/mediaJeu.php?' + params;
+      return candidates[0].url || null;
     }
 
 async function simulateScraping() {
@@ -663,38 +617,47 @@ async function simulateScraping() {
 
           try {
             const jeuData = await scrapeGame(ssUser, ssPass, systemeid, game.name, region, devid, devpass);
-            
+
             if (jeuData && jeuData.jeu && jeuData.jeu.id) {
               const jeuid = jeuData.jeu.id;
+              const medias = jeuData.medias || [];
               let downloaded = false;
-              
+
               if (downloadImages) {
-                const imageUrl = await downloadMedia(ssUser, ssPass, systemeid, jeuid, 'box-2D', region, devid, devpass);
-                const blob = await downloadImage(imageUrl);
-                if (blob && blob.size > 0) {
-                  const imageName = searchName.replace(/[^a-zA-Z0-9]/g, '') + '-image.png';
-                  const saved = await saveImage(systemData, imageName, blob, destFolder);
-                  if (saved) {
-                    const imagePath = '/' + destFolder + '/' + imageName;
-                    await updateGamelistXml(systemData, game.name, imagePath);
-                    game.hasCover = true;
-                    game.imageName = imagePath;
-                    downloaded = true;
-                    log('Imagen: ' + imageName);
+                const imageUrl = extractMediaUrl(medias, 'box-2D', region) ||
+                                extractMediaUrl(medias, 'box-2D', 'wor');
+                if (imageUrl) {
+                  const blob = await downloadImage(imageUrl);
+                  if (blob && blob.size > 0) {
+                    const imageName = searchName.replace(/[^a-zA-Z0-9]/g, '') + '-image.png';
+                    const saved = await saveImage(systemData, imageName, blob, destFolder);
+                    if (saved) {
+                      const imagePath = '/' + destFolder + '/' + imageName;
+                      await updateGamelistXml(systemData, game.name, imagePath);
+                      game.hasCover = true;
+                      game.imageName = imagePath;
+                      downloaded = true;
+                      log('Imagen: ' + imageName);
+                    }
+                  }
+                } else {
+                  log('Sin imagen para: ' + searchName);
+                }
+              }
+
+              if (downloadVideos && !shouldStop) {
+                const videoUrl = extractMediaUrl(medias, 'video', region) ||
+                                extractMediaUrl(medias, 'video', 'wor');
+                if (videoUrl) {
+                  const blob = await downloadImage(videoUrl);
+                  if (blob && blob.size > 0) {
+                    const videoName = searchName.replace(/[^a-zA-Z0-9]/g, '') + '.mp4';
+                    await saveImage(systemData, videoName, blob, videoFolder);
+                    log('Video: ' + videoName);
                   }
                 }
               }
-              
-              if (downloadVideos && !shouldStop) {
-                const videoUrl = await downloadMedia(ssUser, ssPass, systemeid, jeuid, 'video', region, devid, devpass);
-                const blob = await downloadImage(videoUrl);
-                if (blob && blob.size > 0) {
-                  const videoName = searchName.replace(/[^a-zA-Z0-9]/g, '') + '.mp4';
-                  await saveImage(systemData, videoName, blob, videoFolder);
-                  log('Video: ' + videoName);
-                }
-              }
-              
+
               if (downloaded) {
                 updated++;
               }
