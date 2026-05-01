@@ -391,9 +391,9 @@ async function loginScreenScraper(user, pass, devid, devpass) {
       return `https://placehold.co/320x224/4f46e5/ffffff?text=${seed.slice(0, 20)}`;
     }
 
-    async function downloadImage(url) {
+    async function downloadImage(mediaUrl) {
       try {
-        const response = await fetch(url);
+        const proxyUrl = window.location.origin.replace(/:\d+$/, ":5555") + "/proxy/media?url=" + encodeURIComponent(mediaUrl); const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error('Download failed');
         return await response.blob();
       } catch (e) {
@@ -459,7 +459,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
         if (devid) params.append('devid', devid);
         if (devpass) params.append('devpassword', devpass);
         const url = SCREENSCRAPER_API + '/ssuserInfos.php?' + params;
-        const response = await fetch(url);
+        const proxyUrl = window.location.origin.replace(/:\d+$/, ":5555") + "/proxy/media?url=" + encodeURIComponent(mediaUrl); const response = await fetch(proxyUrl);
         const data = await response.json();
         
         if (data.response && data.response.ssuser) {
@@ -498,7 +498,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
 
       try {
         const url = SCREENSCRAPER_API + '/jeuInfos.php?' + params;
-        const response = await fetch(url);
+        const proxyUrl = window.location.origin.replace(/:\d+$/, ":5555") + "/proxy/media?url=" + encodeURIComponent(mediaUrl); const response = await fetch(proxyUrl);
         const data = await response.json();
 
         if (data.response && data.response.jeu) {
