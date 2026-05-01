@@ -392,29 +392,46 @@ async function loginScreenScraper(user, pass, devid, devpass) {
     }
 
 async function downloadImage(mediaUrl) {
-      // Always use proxy to avoid CORS issues
-      log('Downloading via proxy: ' + mediaUrl);
-      
+      // Check for empty URL
       if (!mediaUrl || mediaUrl.trim() === '') {
         log('Error: Empty media URL');
         return null;
       }
       
-      const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(mediaUrl);
-      log('Proxy URL: ' + proxyUrl);
+      log('Attempting to download: ' + mediaUrl);
       
+      // Try direct download first (CDN URLs might work)
       try {
-        const response = await fetch(proxyUrl);
-        if (!response.ok) {
-          throw new Error(`Proxy failed with status: ${response.status}`);
+        const directResponse = await fetch(mediaUrl);
+        if (directResponse.ok) {
+          const blob = await directResponse.blob();
+          if (blob.size > 0) {
+            log('Direct download successful: ' + blob.size + ' bytes');
+            return blob;
+          }
+        }
+      } catch (e) {
+        log('Direct download failed: ' + e.message);
+      }
+      
+      // Fallback to proxy with full URL encoding
+      log('Fallback to proxy with encoded URL');
+      try {
+        const encodedUrl = encodeURIComponent(mediaUrl);
+        const proxyUrl = "https://api.allorigins.win/raw?url=" + encodedUrl;
+        log('Proxy URL: ' + proxyUrl);
+        
+        const proxyResponse = await fetch(proxyUrl);
+        if (!proxyResponse.ok) {
+          throw new Error(`Proxy failed with status: ${proxyResponse.status}`);
         }
         
-        const blob = await response.blob();
+        const blob = await proxyResponse.blob();
         if (blob.size === 0) {
-          throw new Error('Empty blob received');
+          throw new Error('Empty blob received from proxy');
         }
         
-        log('Downloaded blob size: ' + blob.size + ' bytes');
+        log('Proxy download successful: ' + blob.size + ' bytes');
         return blob;
       } catch (e) {
         log('Proxy download failed: ' + e.message);
@@ -513,31 +530,29 @@ async function downloadImage(mediaUrl) {
     }
 
     async function scrapeGame(user, pass, systemeid, romName, region, devid, devpass) {
-      const params = new URLSearchParams({
-        output: 'json',
-        ssid: user,
-        sspass: pass,
-        systemeid: systemeid,
-        romnom: romName,
-        romtype: 'rom'
-      });
-      params.append('devid', devid);
-      params.append('devpassword', devpass);
-      params.append('softname', SOFT_NAME);
-
+      // Build URL according to ScreenScraper official documentation
+      const url = `${SCREENSCRAPER_API}/jeuInfos.php?output=json&devid=${encodeURIComponent(devid)}&devpassword=${encodeURIComponent(devpass)}&softname=${encodeURIComponent(SOFT_NAME)}&ssid=${encodeURIComponent(user)}&sspass=${encodeURIComponent(pass)}&systemeid=${systemeid}&romnom=${encodeURIComponent(romName)}`;
+      
+      log('Requesting game info from: ' + url);
+      
       try {
-        const url = SCREENSCRAPER_API + '/jeuInfos.php?' + params;
         const response = await fetch(url);
         const data = await response.json();
-
+        
         if (data.response && data.response.jeu) {
           const jeu = data.response.jeu;
           const medias = data.response.jeu.medias || [];
           const results = { jeu: { id: jeu.id, nom: jeu.nom }, medias: medias };
+          log('Game found: ' + jeu.nom + ' (ID: ' + jeu.id + ')');
+          log('Media files found: ' + medias.length);
           return results;
+        } else if (data.error) {
+          log('ScreenScraper API error: ' + data.error);
+          return null;
         }
         return null;
       } catch (e) {
+        log('Error requesting game info: ' + e.message);
         return null;
       }
     }
@@ -546,28 +561,31 @@ async function downloadImage(mediaUrl) {
       const targetRegion = region || 'wor';
       log('Searching for media: ' + mediaType + ' region: ' + targetRegion);
       
-      const candidates = medias.filter(m =>
-        m.type === mediaType && (
-          m.region === targetRegion ||
-          m.region === 'wor' ||
-          m.region === null ||
-          m.region === ''
-        )
-      );
+      // Prefer eu/us regions over others
+      const preferredRegions = targetRegion === 'eu' || targetRegion === 'us' 
+        ? [targetRegion, 'wor', 'us', 'eu', null, ''] 
+        : ['wor', targetRegion, 'eu', 'us', null, ''];
       
-      log('Found ' + candidates.length + ' candidates for ' + mediaType);
+      let selectedMedia = null;
       
-      if (candidates.length === 0) return null;
+      for (const prefRegion of preferredRegions) {
+        const candidates = medias.filter(m =>
+          m.type === mediaType && m.region === prefRegion
+        );
+        
+        if (candidates.length > 0) {
+          selectedMedia = candidates[0];
+          log('Selected media: type=' + selectedMedia.type + ', region=' + selectedMedia.region + ', url=' + selectedMedia.url);
+          break;
+        }
+      }
       
-      candidates.sort((a, b) => {
-        if (a.region === targetRegion && b.region !== targetRegion) return -1;
-        if (a.region === 'wor' && b.region !== 'wor' && b.region !== targetRegion) return -1;
-        return 0;
-      });
+      if (!selectedMedia) {
+        log('No media found for type: ' + mediaType);
+        return null;
+      }
       
-      const selectedUrl = candidates[0].url || null;
-      log('Selected URL: ' + selectedUrl);
-      return selectedUrl;
+      return selectedMedia.url;
     }
 
 async function simulateScraping() {
@@ -589,6 +607,7 @@ async function simulateScraping() {
       const destFolderSelect = document.getElementById('destFolderSelect');
       const videoFolderSelect = document.getElementById('videoFolderSelect');
       const customFolderInput = document.getElementById('customFolderInput');
+      // Get credentials from form with validation
       const ssUser = document.getElementById('ssUser').value.trim();
       const ssPass = document.getElementById('ssPass').value;
       const devid = document.getElementById('devId').value.trim();
@@ -601,6 +620,7 @@ async function simulateScraping() {
         destFolder = customFolderInput.value.trim() || 'images';
       }
 
+      // Validate credentials
       if (!ssUser || !ssPass) {
         log('ERROR: Enter ScreenScraper user and password');
         isScraping = false;
@@ -611,9 +631,12 @@ async function simulateScraping() {
         return;
       }
 
+      // Log credentials securely
       log('Usuario: ' + ssUser);
       log('Contraseña: ' + (ssPass ? '[***]' : 'VACÍO'));
       log('Imagenes: /' + destFolder + ' - Videos: /' + videoFolder);
+      log('Devid: ' + devid);
+      log('Devpass: ' + (devpass ? '[***]' : 'VACÍO'));
 
       let processed = 0;
       let updated = 0;
