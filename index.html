@@ -399,7 +399,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
       return `https://placehold.co/320x224/4f46e5/ffffff?text=${seed.slice(0, 20)}`;
     }
 
-async function downloadImage(cdnUrl) {
+async function downloadImage(cdnUrl, ssid, sspass) {
       const MAX_RETRIES = 3;
       const RETRY_DELAY = 2000; // 2 seconds
 
@@ -591,6 +591,12 @@ async function downloadImage(cdnUrl) {
           return candidates[0]; // returns media object
         }
       }
+      // Fallback: any box-2D media regardless of region
+      const anyBox2D = medias.filter(m => m.type === 'box-2D');
+      if (anyBox2D.length > 0) {
+        log('Found box-2D with no specific region match');
+        return anyBox2D[0];
+      }
       log('No box-2D media found');
       return null;
     }
@@ -707,7 +713,7 @@ async function simulateScraping() {
                       log('Warning: CDN URL does not start with expected prefix: ' + cdnUrl);
                     }
                     
-                    const blob = await downloadImage(cdnUrl);
+                    const blob = await downloadImage(cdnUrl, ssUser, ssPass);
                     if (blob && blob.size > 0) {
                       const imageName = searchName.replace(/[^a-zA-Z0-9]/g, '') + '-image.png';
                       const saved = await saveImage(systemData, imageName, blob, destFolder);
