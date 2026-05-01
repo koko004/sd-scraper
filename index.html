@@ -84,7 +84,7 @@
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-4 mt-3">
-<div class="flex items-center gap-2">
+<form class="flex items-center gap-2">
               <label class="text-sm font-medium">ScreenScraper:</label>
               <input id="ssUser" type="text" placeholder="Usuario" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
               <input id="ssPass" type="password" placeholder="Password" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
@@ -93,8 +93,8 @@
               <label class="flex items-center gap-1 text-sm">
                 <input type="checkbox" id="saveCredentials" class="w-4 h-4"> Remember
               </label>
-              <button id="testLoginBtn" class="text-sm bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Test</button>
-            </div>
+              <button type="button" id="testLoginBtn" class="text-sm bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Test</button>
+            </form>
           <div class="flex items-center gap-2">
             <label class="text-sm font-medium">Download:</label>
             <label class="flex items-center gap-1 text-sm">
@@ -348,7 +348,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
       const params = new URLSearchParams({
         output: 'json',
         ssid: user,
-        sspassword: pass
+        sspass: pass
       });
       params.append('devid', devid);
       params.append('devpassword', devpass);
@@ -366,7 +366,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
     async function searchGame(user, pass, systemeid, romName, fileSize, devid, devpass) {
       const params = new URLSearchParams({
         ssid: user,
-        sspassword: pass,
+        sspass: pass,
         systemeid: systemeid,
         romnom: romName,
         output: 'json'
@@ -394,19 +394,20 @@ async function loginScreenScraper(user, pass, devid, devpass) {
 async function downloadImage(mediaUrl) {
       try {
         const response = await fetch(mediaUrl);
-        if (!response.ok) throw new Error('Direct failed');
         return await response.blob();
       } catch (e) {
-        const proxyUrl = "https://cors.eu.org/?" + encodeURIComponent(mediaUrl);
+        log('CORS error, trying proxy...');
+        const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(mediaUrl);
         try {
           const response = await fetch(proxyUrl);
-          if (!response.ok) throw new Error('Proxy failed');
-          return await response.blob();
+          if (response.ok) {
+            return await response.blob();
+          }
         } catch (e2) {
-          log(`Error descargando: ${e2.message}`);
-          return null;
+          log('Proxy also failed - AllOrigins service might be saturated');
         }
       }
+      return null;
     }
 
     async function saveImage(systemData, imageName, blob, destFolder) {
@@ -422,9 +423,12 @@ async function downloadImage(mediaUrl) {
         
         const fileHandle = await imageFolderHandle.getFileHandle(imageName, { create: true });
         const writable = await fileHandle.createWritable();
-        await writable.write(blob);
-        await writable.close();
-        return true;
+        
+        return new Promise((resolve, reject) => {
+          writable.write(blob).then(() => {
+            writable.close().then(() => resolve(true)).catch(reject);
+          }).catch(reject);
+        });
       } catch (e) {
         log('Error saving image: ' + e.message);
         return false;
@@ -461,7 +465,7 @@ async function downloadImage(mediaUrl) {
         const params = new URLSearchParams({
           output: 'json',
           ssid: user,
-          sspassword: pass
+          sspass: pass
         });
         if (devid) params.append('devid', devid);
         if (devpass) params.append('devpassword', devpass);
@@ -494,7 +498,7 @@ async function downloadImage(mediaUrl) {
       const params = new URLSearchParams({
         output: 'json',
         ssid: user,
-        sspassword: pass,
+        sspass: pass,
         systemeid: systemeid,
         romnom: romName,
         romtype: 'rom'
