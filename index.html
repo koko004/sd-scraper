@@ -399,54 +399,52 @@ async function loginScreenScraper(user, pass, devid, devpass) {
       return `https://placehold.co/320x224/4f46e5/ffffff?text=${seed.slice(0, 20)}`;
     }
 
-async function downloadImage(mediaUrl, ssid, sspass) {
-      // ssid and sspass are accepted for compliance
+async function downloadImage(cdnUrl) {
+      const MAX_RETRIES = 3;
+      const RETRY_DELAY = 2000; // 2 seconds
+
       // Check for empty URL
-      if (!mediaUrl || mediaUrl.trim() === '') {
-        log('Error: Empty media URL');
+      if (!cdnUrl || cdnUrl.trim() === '') {
+        log('Error: Empty CDN URL');
         return null;
       }
-      
-      log('Attempting to download: ' + mediaUrl);
-      
-      // Try direct download first (CDN URLs might work)
-      try {
-        const directResponse = await fetch(mediaUrl);
-        if (directResponse.ok) {
-          const blob = await directResponse.blob();
-          if (blob.size > 0) {
-            log('Direct download successful: ' + blob.size + ' bytes');
-            return blob;
+
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(cdnUrl)}`;
+          log(`Downloading via proxy (attempt ${attempt}): ${proxyUrl}`);
+
+          const response = await fetch(proxyUrl);
+
+          if (response.ok) {
+            const blob = await response.blob();
+            if (blob.size > 0) {
+              log(`Download successful: ${blob.size} bytes`);
+              return blob;
+            } else {
+              throw new Error('Empty blob received');
+            }
+          } else if (response.status === 408 || response.status === 522 || response.status === 504) {
+            log(`Proxy error ${response.status}, retrying in ${RETRY_DELAY}ms...`);
+            if (attempt < MAX_RETRIES) {
+              await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+              continue;
+            } else {
+              throw new Error(`Proxy failed with status ${response.status} after ${MAX_RETRIES} retries`);
+            }
+          } else {
+            throw new Error(`Proxy failed with status ${response.status}`);
           }
+        } catch (e) {
+          log(`Download error (attempt ${attempt}): ${e.message}`);
+          if (attempt === MAX_RETRIES) {
+            log('Max retries reached, giving up.');
+            return null;
+          }
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
         }
-      } catch (e) {
-        log('Direct download failed: ' + e.message);
       }
-      
-      // Fallback to proxy with full URL encoding
-      log('Fallback to proxy with encoded URL');
-      try {
-        const encodedUrl = encodeURIComponent(mediaUrl);
-        const proxyUrl = "https://api.allorigins.win/raw?url=" + encodedUrl;
-        log('Proxy URL: ' + proxyUrl);
-        
-        const proxyResponse = await fetch(proxyUrl);
-        if (!proxyResponse.ok) {
-          throw new Error(`Proxy failed with status: ${proxyResponse.status}`);
-        }
-        
-        const blob = await proxyResponse.blob();
-        if (blob.size === 0) {
-          throw new Error('Empty blob received from proxy');
-        }
-        
-        log('Proxy download successful: ' + blob.size + ' bytes');
-        return blob;
-      } catch (e) {
-        log('Proxy download failed: ' + e.message);
-        console.error('Proxy download error:', e);
-        return null;
-      }
+      return null;
     }
 
     async function saveImage(systemData, imageName, blob, destFolder) {
@@ -597,23 +595,7 @@ async function downloadImage(mediaUrl, ssid, sspass) {
       return null;
     }
 
-    function buildMediaUrl(devid, devpass, ssid, sspass, systemeid, jeuid, media) {
-      // media example: "box-2D(eu)"
-      const base = `${SCREENSCRAPER_API}/mediaJeu.php`;
-      const params = new URLSearchParams({
-        devid: devid,
-        devpassword: devpass,
-        softname: SOFT_NAME,
-        ssid: ssid,
-        sspass: sspass,
-        systemeid: systemeid,
-        jeuid: jeuid
-      });
-      // Append media parameter without encoding (API expects parentheses)
-      let url = `${base}?${params.toString()}&media=${media}`;
-      log('Built media URL: ' + url);
-      return url;
-    }
+
 
 async function simulateScraping() {
       const scrapingBtn = document.getElementById('scrapingBtn');
@@ -714,16 +696,18 @@ async function simulateScraping() {
               let downloaded = false;
 
               if (downloadImages) {
-                // Find best box-2D media object
-                const box2D = findBox2D(medias, region);
-                if (box2D) {
-                  // Construct media parameter with region if exists
-                  let mediaParam = 'box-2D';
-                  if (box2D.region) mediaParam += '(' + box2D.region + ')';
-                  // Build URL using mediaJeu.php
-                  const imageUrl = buildMediaUrl(devid, devpass, ssUser, ssPass, systemeid, jeuid, mediaParam);
-                  if (imageUrl) {
-                    const blob = await downloadImage(imageUrl, ssUser, ssPass);
+                  // Find best box-2D media object from ScreenScraper response
+                  const box2D = findBox2D(medias, region);
+                  if (box2D && box2D.url) {
+                    const cdnUrl = box2D.url;
+                    log('Using CDN URL for image: ' + cdnUrl);
+                    
+                    // Verify CDN URL prefix (should start with https://cdn.screenscraper.fr/)
+                    if (!cdnUrl.startsWith('https://cdn.screenscraper.fr/')) {
+                      log('Warning: CDN URL does not start with expected prefix: ' + cdnUrl);
+                    }
+                    
+                    const blob = await downloadImage(cdnUrl);
                     if (blob && blob.size > 0) {
                       const imageName = searchName.replace(/[^a-zA-Z0-9]/g, '') + '-image.png';
                       const saved = await saveImage(systemData, imageName, blob, destFolder);
@@ -735,12 +719,13 @@ async function simulateScraping() {
                         downloaded = true;
                         log('Imagen: ' + imageName);
                       }
+                    } else {
+                      log('Failed to download image or empty blob for ' + searchName);
                     }
+                  } else {
+                    log('No valid box-2D media found for ' + searchName);
                   }
-                } else {
-                  log('Sin imagen para: ' + searchName);
                 }
-              }
 
               // Video download disabled - requires similar adaptation
               // if (downloadVideos && !shouldStop) { ... }
