@@ -849,13 +849,21 @@ async function simulateScraping() {
         }
       }
     }
-
-    document.getElementById('selectFolderBtn').addEventListener('click', handleSelectFolder);
-    document.getElementById('scrapingBtn').addEventListener('click', simulateScraping);
-    document.getElementById('stopBtn').addEventListener('click', stopScraping);
-    document.getElementById('selectAllBtn').addEventListener('click', selectAllSystems);
-    document.getElementById('deselectAllBtn').addEventListener('click', deselectAllSystems);
-    document.getElementById('testLoginBtn').addEventListener('click', function() {
+    
+    const selectFolderBtn = document.getElementById('selectFolderBtn');
+    const scrapingBtn = document.getElementById('scrapingBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const deselectAllBtn = document.getElementById('deselectAllBtn');
+    const testLoginBtn = document.getElementById('testLoginBtn');
+    const destFolderSelect = document.getElementById('destFolderSelect');
+    
+    if (selectFolderBtn) selectFolderBtn.addEventListener('click', handleSelectFolder);
+    if (scrapingBtn) scrapingBtn.addEventListener('click', simulateScraping);
+    if (stopBtn) stopBtn.addEventListener('click', stopScraping);
+    if (selectAllBtn) selectAllBtn.addEventListener('click', selectAllSystems);
+    if (deselectAllBtn) deselectAllBtn.addEventListener('click', deselectAllSystems);
+    if (testLoginBtn) testLoginBtn.addEventListener('click', function() {
       const user = document.getElementById('ssUser')?.value.trim() || '';
       const pass = document.getElementById('ssPass')?.value || '';
       const devid = document.getElementById('devId')?.value.trim() || '';
@@ -879,7 +887,7 @@ async function simulateScraping() {
       }
     });
     
-    document.getElementById('destFolderSelect').addEventListener('change', function() {
+    if (destFolderSelect) destFolderSelect.addEventListener('change', function() {
       const customInput = document.getElementById('customFolderInput');
       if (this.value === 'custom') {
         customInput.classList.remove('hidden');
