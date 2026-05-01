@@ -393,7 +393,7 @@ async function loginScreenScraper(user, pass, devid, devpass) {
 
     async function downloadImage(mediaUrl) {
       try {
-        const proxyUrl = "https://corsproxy.elevate.parts/proxy?" + encodeURIComponent(mediaUrl); const response = await fetch(proxyUrl);
+        const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(mediaUrl); const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error('Download failed');
         return await response.blob();
       } catch (e) {
