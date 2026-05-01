@@ -399,7 +399,7 @@ async function downloadImage(mediaUrl) {
         return await response.blob();
       } catch (e) {
         // Fallback to proxy
-        const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(mediaUrl);
+        const proxyUrl = "https://api.codetabs.com/v1/proxy?" + encodeURIComponent(mediaUrl);
         try {
           const response = await fetch(proxyUrl);
           if (!response.ok) throw new Error('Proxy failed');
