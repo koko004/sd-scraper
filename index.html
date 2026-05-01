@@ -393,13 +393,11 @@ async function loginScreenScraper(user, pass, devid, devpass) {
 
 async function downloadImage(mediaUrl) {
       try {
-        // Try direct first since it works
         const response = await fetch(mediaUrl);
         if (!response.ok) throw new Error('Direct failed');
         return await response.blob();
       } catch (e) {
-        // Fallback to proxy
-        const proxyUrl = "https://api.codetabs.com/v1/proxy?" + encodeURIComponent(mediaUrl);
+        const proxyUrl = "https://cors.eu.org/?" + encodeURIComponent(mediaUrl);
         try {
           const response = await fetch(proxyUrl);
           if (!response.ok) throw new Error('Proxy failed');
