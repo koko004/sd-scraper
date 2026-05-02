@@ -337,6 +337,8 @@
 
     const SCREENSCRAPER_API = 'https://api.screenscraper.fr/api2';
     const SOFT_NAME = 'SDCoverManager';
+    // Personal proxy with SSL compatibility and proper security
+    const MY_PROXY = 'https://www.sd-scrapper.gamer.gd/proxy.php?url=';
     
     const SYSTEM_IDS = {
       'nes': 3, 'snes': 4, 'gb': 5, 'gbc': 6, 'gba': 7, 
@@ -417,9 +419,9 @@ async function downloadImage(cdnUrl, ssid, sspass) {
 
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
-          // Use AllOrigins proxy with full URL encoding
-          const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(cdnUrl)}`;
-          log(`Downloading via proxy (attempt ${attempt}/${MAX_RETRIES}): ${cdnUrl}`);
+          // Use personal proxy with full URL encoding
+          const proxyUrl = `${MY_PROXY}${encodeURIComponent(cdnUrl)}`;
+          log(`Downloading via personal proxy (attempt ${attempt}/${MAX_RETRIES}): ${cdnUrl}`);
 
           const response = await fetch(proxyUrl);
 
@@ -449,6 +451,7 @@ async function downloadImage(cdnUrl, ssid, sspass) {
           log(`Download error (attempt ${attempt}/${MAX_RETRIES}): ${e.message}`);
           if (attempt === MAX_RETRIES) {
             log('Max retries reached, giving up on this image.');
+            log('If connection issues persist, try opening https://www.sd-scrapper.gamer.gd/proxy.php in a new tab to validate InfinityFree session.');
             return null;
           }
           // Wait before retrying (avoid API saturation)
