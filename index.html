@@ -72,6 +72,16 @@
             </select>
             <input id="customFolderInput" type="text" placeholder="Nombre carpeta" class="border border-gray-300 rounded px-3 py-2 text-sm w-32 hidden">
           </div>
+          <div class="flex items-center gap-2">
+            <label class="text-sm font-medium">Carpeta Videos:</label>
+            <select id="videoFolderSelect" class="border border-gray-300 rounded px-3 py-2 text-sm">
+              <option value="videos">/videos</option>
+              <option value="media">/media</option>
+              <option value="movies">/movies</option>
+              <option value="custom">Personalizada</option>
+            </select>
+            <input id="videoCustomFolderInput" type="text" placeholder="Nombre carpeta" class="border border-gray-300 rounded px-3 py-2 text-sm w-32 hidden">
+          </div>
         </div>
         
         <!-- ScreenScraper Credentials -->
@@ -724,6 +734,25 @@
       return null;
     }
 
+    function findSpecificMedia(medias, preferredRegion, mediaType) {
+      var regionPriority = preferredRegion ? [preferredRegion, 'eu', 'us', 'jp', 'fr', 'wor', null] : ['eu', 'us', 'jp', 'fr', 'wor', null];
+      
+      for (var i = 0; i < regionPriority.length; i++) {
+        var region = regionPriority[i];
+        var candidates = medias.filter(function(m) {
+          var typeMatch = m.type === mediaType;
+          var regionMatch = !region || m.region === region;
+          return typeMatch && regionMatch;
+        });
+        
+        if (candidates.length > 0) {
+          return candidates[0];
+        }
+      }
+      
+      return null;
+    }
+
     function findVideo(medias, preferredRegion) {
       var regionPriority = preferredRegion ? [preferredRegion, 'eu', 'us', 'wor', null] : ['eu', 'us', 'wor', null];
       
@@ -762,6 +791,8 @@
 
       var destFolderSelect = document.getElementById('destFolderSelect');
       var customFolderInput = document.getElementById('customFolderInput');
+      var videoFolderSelect = document.getElementById('videoFolderSelect');
+      var videoCustomFolderInput = document.getElementById('videoCustomFolderInput');
       
       // Get media configuration
       var imageType = document.getElementById('imageType').value;
@@ -780,6 +811,10 @@
       if (destFolder === 'custom') {
         destFolder = customFolderInput.value.trim() || 'images';
       }
+      var videoFolder = videoFolderSelect.value;
+      if (videoFolder === 'custom') {
+        videoFolder = videoCustomFolderInput.value.trim() || 'videos';
+      }
       
       // Get download mode
       var downloadMode = document.querySelector('input[name="downloadMode"]:checked').value;
@@ -796,8 +831,9 @@
       }
 
       log('Usuario: ' + ssUser);
-      log('Carpeta: /' + destFolder);
-      log('Imagen: ' + imageType + ' | Region: ' + preferredRegion);
+      log('Carpeta imagenes: /' + destFolder);
+      log('Carpeta videos: /' + videoFolder);
+      log('Media: img=' + imageType + ' box=' + boxType + ' logo=' + logoType + ' region=' + preferredRegion);
       log('Modo: ' + (downloadMode === 'direct' ? 'Directo' : 'Scripts'));
 
       var processed = 0;
@@ -848,48 +884,65 @@
             if (jeuData && jeuData.jeu && jeuData.jeu.id) {
               var medias = jeuData.medias || [];
               var downloaded = false;
-
-              // Find main image based on user preferences
-              var selectedMedia = findMedia(medias, preferredRegion, imageType, boxType, logoType);
-              if (selectedMedia && selectedMedia.url) {
-                var cdnUrl = selectedMedia.url;
+              var mediaTypes = [];
+              
+              // Add all selected media types
+              if (imageType && imageType !== 'none') mediaTypes.push(imageType);
+              if (boxType && boxType !== 'none') mediaTypes.push(boxType);
+              if (logoType && logoType !== 'none') mediaTypes.push(logoType);
+              
+              // Download each media type
+              for (var m = 0; m < mediaTypes.length; m++) {
+                var mediaType = mediaTypes[m];
+                var selectedMedia = findSpecificMedia(medias, preferredRegion, mediaType);
                 
-                if (downloadMode === 'direct') {
-                  // Direct download mode
-                  var blob = await downloadImage(cdnUrl);
-                  if (blob && blob.size > 0) {
-                    var imageName = getBasename(game.name) + '.png';
-                    var saved = await saveImage(systemData, imageName, blob, destFolder);
-                    if (saved) {
-                      var imagePath = '/' + destFolder + '/' + imageName;
-                      await updateGamelistXml(systemData, game.path, imagePath);
-                      game.hasCover = true;
-                      game.imageName = imagePath;
-                      downloaded = true;
-                      log('COVER: ' + imageName);
+                if (selectedMedia && selectedMedia.url) {
+                  var cdnUrl = selectedMedia.url;
+                  
+                  if (downloadMode === 'direct') {
+                    var blob = await downloadImage(cdnUrl);
+                    if (blob && blob.size > 0) {
+                      var ext = (mediaType === 'video') ? '.mp4' : '.png';
+                      var mediaName = getBasename(game.name) + '_' + mediaType + ext;
+                      var folder = (mediaType === 'video') ? videoFolder : destFolder;
+                      
+                      if (mediaType === 'video') {
+                        await saveVideo(systemData, mediaName, blob, folder);
+                        log('VIDEO ' + mediaType + ': ' + mediaName);
+                      } else {
+                        var saved = await saveImage(systemData, mediaName, blob, folder);
+                        if (saved) {
+                          // First non-video media becomes the main cover
+                          if (!game.hasCover) {
+                            var imagePath = '/' + folder + '/' + mediaName;
+                            await updateGamelistXml(systemData, game.path, imagePath);
+                            game.hasCover = true;
+                            game.imageName = imagePath;
+                          }
+                          downloaded = true;
+                          log('COVER ' + mediaType + ': ' + mediaName);
+                        }
+                      }
+                    } else {
+                      log('FALLO ' + mediaType + ': ' + searchName);
                     }
                   } else {
-                    log('FALLO imagen: ' + searchName);
-                    failedDownloads.push(searchName);
+                    // Script generation mode
+                    var folder = (mediaType === 'video') ? videoFolder : destFolder;
+                    addDownloadUrl(systemKey, searchName + '_' + mediaType, cdnUrl, folder);
+                    downloaded = true;
                   }
-                } else {
-                  // Script generation mode
-                  addDownloadUrl(systemKey, searchName, cdnUrl, destFolder);
-                  downloaded = true;
                 }
-              } else {
-                log('Sin media para: ' + searchName);
-                failedDownloads.push(searchName);
               }
 
-              // Handle video download
-              if (downloadVideos && downloaded && !shouldStop) {
+              // Handle video download (legacy support)
+              if (downloadVideos && !shouldStop) {
                 var videoMedia = findVideo(medias, preferredRegion);
                 if (videoMedia && videoMedia.url) {
                   var videoBlob = await downloadImage(videoMedia.url);
                   if (videoBlob && videoBlob.size > 0) {
                     var videoName = getBasename(game.name) + '.mp4';
-                    await saveVideo(systemData, videoName, videoBlob, 'media');
+                    await saveVideo(systemData, videoName, videoBlob, videoFolder);
                     log('VIDEO: ' + videoName);
                   }
                 }
@@ -919,6 +972,47 @@
       
       if (failedDownloads.length > 0) {
         log('FALLOS (' + failedDownloads.length + '): ' + failedDownloads.slice(0, 5).join(', ') + (failedDownloads.length > 5 ? '...' : ''));
+      }
+      
+      // Re-scan to detect newly downloaded files
+      log('Re-escaneando archivos...');
+      for (var systemKey in scannedData) {
+        var systemData = scannedData[systemKey];
+        if (systemData && systemData.folderHandle) {
+          // Re-check covers
+          var allImages = [];
+          try {
+            var results = await scanDirectory(systemData.folderHandle, '');
+            allImages = results.images;
+          } catch (e) {
+            console.log('Error re-scanning:', e);
+          }
+          
+          var imageNames = allImages.map(function(i) { return getBasename(i.name).toLowerCase(); });
+          
+          // Update each game's cover status
+          for (var g = 0; g < systemData.games.length; g++) {
+            var game = systemData.games[g];
+            var baseName = getBasename(game.name).toLowerCase();
+            var hasImage = imageNames.some(function(img) {
+              return img.startsWith(baseName) || baseName.startsWith(img);
+            });
+            
+            if (hasImage && !game.hasCover) {
+              var matchingImage = allImages.find(function(i) {
+                var imgBase = getBasename(i.name).toLowerCase();
+                return imgBase.startsWith(baseName) || baseName.startsWith(imgBase);
+              });
+              if (matchingImage) {
+                game.hasCover = true;
+                game.imageName = matchingImage.name;
+              }
+            }
+          }
+          
+          systemData.images = allImages;
+          log('Re-escaneado ' + systemKey + ': ' + allImages.length + ' imagenes');
+        }
       }
       
       isScraping = false;
@@ -1081,6 +1175,16 @@
     
     if (destFolderSelect) destFolderSelect.addEventListener('change', function() {
       var customInput = document.getElementById('customFolderInput');
+      if (this.value === 'custom') {
+        customInput.classList.remove('hidden');
+      } else {
+        customInput.classList.add('hidden');
+      }
+    });
+    
+    var videoFolderSelect = document.getElementById('videoFolderSelect');
+    if (videoFolderSelect) videoFolderSelect.addEventListener('change', function() {
+      var customInput = document.getElementById('videoCustomFolderInput');
       if (this.value === 'custom') {
         customInput.classList.remove('hidden');
       } else {
