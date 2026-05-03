@@ -285,39 +285,58 @@
     }
 
     async function scanDirectory(handle, path = '') {
-      const results = { roms: [], images: [], videos: [], folders: [] };
+      const results = { roms: [], images: [], videos: [], folders: [], gamelist: null };
+      const MEDIA_FOLDERS = ['media', 'image', 'images', 'imagen', 'imagenes', 'video', 'videos', 'box', 'covers', 'snap'];
       
       for await (const entry of handle.values()) {
         if (entry.kind === 'file') {
           const ext = getExtension(entry.name).toLowerCase();
+          const nameLower = entry.name.toLowerCase();
+          
           if (ROM_EXTENSIONS.includes(ext)) {
             results.roms.push({ name: entry.name, path: path + '/' + entry.name });
           } else if (IMAGE_EXTENSIONS.includes(ext)) {
             results.images.push({ name: entry.name, path: path + '/' + entry.name });
           } else if (VIDEO_EXTENSIONS.includes(ext)) {
             results.videos.push({ name: entry.name, path: path + '/' + entry.name });
+          } else if (nameLower === 'gamelist.xml') {
+            // Store gamelist.xml content
+            try {
+              const file = await entry.getFile();
+              results.gamelist = await file.text();
+              log('Encontrado gamelist.xml en: ' + path);
+            } catch (e) {
+              // Ignore
+            }
           }
         } else if (entry.kind === 'directory') {
-          // Skip hidden folders and system folders
           const folderName = entry.name.toLowerCase();
           if (folderName.startsWith('.') || folderName === 'tmp' || folderName === 'temp') {
             continue;
           }
           
-          // Scan ALL subfolders deeply to find images/videos
+          // Scan subfolders - prioritize media folders, but scan all
           try {
             const subResults = await scanDirectory(entry.handle, path + '/' + entry.name);
-            // Only add if subfolder has media files
+            
+            // Add media from subfolders
             if (subResults.images.length > 0 || subResults.videos.length > 0) {
               results.images.push(...subResults.images);
               results.videos.push(...subResults.videos);
-              log('Carpeta ' + entry.name + ': ' + subResults.images.length + ' img, ' + subResults.videos.length + ' vid');
+              // Only log media folders
+              if (MEDIA_FOLDERS.includes(folderName)) {
+                log('Carpeta ' + entry.name + ': ' + subResults.images.length + ' img, ' + subResults.videos.length + ' vid');
+              }
+            }
+            
+            // Merge gamelist if found
+            if (subResults.gamelist && !results.gamelist) {
+              results.gamelist = subResults.gamelist;
             }
           } catch (e) {
-            // Skip inaccessible folders
+            // Skip inaccessible
           }
           
-          // Only add folders with ROMs to the list
           results.folders.push({ name: entry.name, handle: entry, path: path + '/' + entry.name });
         }
       }
@@ -348,12 +367,16 @@
               roms: [],
               images: [],
               videos: [],
+              gamelist: results.gamelist,
               folderHandle: handle
             };
           }
           systems[system].roms.push(...results.roms);
           systems[system].images.push(...results.images);
           systems[system].videos.push(...results.videos);
+          if (results.gamelist && !systems[system].gamelist) {
+            systems[system].gamelist = results.gamelist;
+          }
         }
 
         for (const folder of results.folders) {
@@ -371,24 +394,24 @@
       // Get image names from direct file scan
       const imageNames = systemData.images.map(i => getBasename(i.name).toLowerCase());
       
-      // Also check gamelist.xml for image references
+      // Check gamelist.xml that was scanned along with the system
       let gamelistImages = [];
-      try {
-        const xml = await readGamelistXml(systemData);
-        if (xml) {
-          // Extract image paths from gamelist.xml
-          const imgMatches = xml.match(/<image>([^<]+)<\/image>/g) || [];
+      if (systemData.gamelist) {
+        try {
+          const imgMatches = systemData.gamelist.match(/<image>([^<]+)<\/image>/g) || [];
           gamelistImages = imgMatches.map(m => {
             const imgPath = m.replace(/<[^>]+>/g, '');
             return getBasename(imgPath).toLowerCase();
           });
+          log('gamelist.xml encontrado con ' + gamelistImages.length + ' imagenes');
+        } catch (e) {
+          // Ignore
         }
-      } catch (e) {
-        // Ignore gamelist errors
       }
       
       // Combine all known image names
       const allImageNames = [...new Set([...imageNames, ...gamelistImages])];
+      log('Total imagenes conocidas para ' + (systemData.name || 'sistema') + ': ' + allImageNames.length);
       
       return systemData.roms.map(rom => {
         const baseName = getBasename(rom.name).toLowerCase();
@@ -404,7 +427,6 @@
             return imgBase.startsWith(baseName) || baseName.startsWith(imgBase) || imgBase.includes(baseName);
           });
           
-          // If not found in files, try gamelist
           if (!matchedImage) {
             const gamelistMatch = gamelistImages.find(img => 
               img.startsWith(baseName) || baseName.startsWith(img) || img.includes(baseName)
