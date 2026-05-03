@@ -286,7 +286,6 @@
 
     async function scanDirectory(handle, path = '') {
       const results = { roms: [], images: [], videos: [], folders: [] };
-      const IMAGE_FOLDERS = ['images', 'media', 'box', 'covers', 'thumbs', 'box2d', 'box3d'];
       
       for await (const entry of handle.values()) {
         if (entry.kind === 'file') {
@@ -299,18 +298,26 @@
             results.videos.push({ name: entry.name, path: path + '/' + entry.name });
           }
         } else if (entry.kind === 'directory') {
+          // Skip hidden folders and system folders
           const folderName = entry.name.toLowerCase();
-          // Scan into image/video folders for matching files
-          if (IMAGE_FOLDERS.includes(folderName) || folderName.startsWith('img')) {
-            try {
-              const subResults = await scanDirectory(entry.handle, path + '/' + entry.name);
+          if (folderName.startsWith('.') || folderName === 'tmp' || folderName === 'temp') {
+            continue;
+          }
+          
+          // Scan ALL subfolders deeply to find images/videos
+          try {
+            const subResults = await scanDirectory(entry.handle, path + '/' + entry.name);
+            // Only add if subfolder has media files
+            if (subResults.images.length > 0 || subResults.videos.length > 0) {
               results.images.push(...subResults.images);
               results.videos.push(...subResults.videos);
-            } catch (e) {
-              // Skip inaccessible folders
+              log('Carpeta ' + entry.name + ': ' + subResults.images.length + ' img, ' + subResults.videos.length + ' vid');
             }
+          } catch (e) {
+            // Skip inaccessible folders
           }
-          // Add all folders for ROM scanning
+          
+          // Only add folders with ROMs to the list
           results.folders.push({ name: entry.name, handle: entry, path: path + '/' + entry.name });
         }
       }
@@ -1157,11 +1164,19 @@
         var systems = await findSystemFolders(directoryHandle);
 
         log('Encontrados ' + Object.keys(systems).length + ' sistemas');
+        
+        // Log detailed scan results
+        for (var key in systems) {
+          var data = systems[key];
+          log('Sistema ' + key + ' - ROMs: ' + data.roms.length + ', Imagenes encontradas: ' + data.images.length + ', Videos: ' + data.videos.length);
+          if (data.images.length > 0) {
+            log('  Primeras imagenes: ' + data.images.slice(0, 3).map(i => i.name).join(', '));
+          }
+        }
 
         for (var key in systems) {
           var data = systems[key];
           data.games = await checkCovers(data);
-          log(key + ': ' + data.roms.length + ' ROMs, ' + data.images.length + ' imagenes');
         }
 
         scannedData = systems;
