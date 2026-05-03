@@ -95,14 +95,87 @@
               </label>
               <button type="button" id="testLoginBtn" class="text-sm bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Test</button>
             </form>
-          <div class="flex items-center gap-2">
-            <label class="text-sm font-medium">Download:</label>
+          
+          <!-- Media Configuration Panel -->
+          <div class="flex flex-wrap items-start gap-4 mt-4">
+            <!-- Image Type Selection -->
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium">Tipo de Imagen:</label>
+              <select id="imageType" class="border border-gray-300 rounded px-3 py-2 text-sm">
+                <option value="box-2D">Caja 2D (por defecto)</option>
+                <option value="box-3D">Caja 3D</option>
+                <option value="capture">Captura</option>
+                <option value="capture-title">Captura con título</option>
+                <option value="mix-v1">Mix V1</option>
+                <option value="mix-v2">Mix V2</option>
+              </select>
+            </div>
+            
+            <!-- Box Type Selection -->
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium">Tipo de Caja:</label>
+              <select id="boxType" class="border border-gray-300 rounded px-3 py-2 text-sm">
+                <option value="none">Ninguno</option>
+                <option value="box-2D">Caja 2D</option>
+                <option value="box-3D">Caja 3D</option>
+              </select>
+            </div>
+            
+            <!-- Logo Type Selection -->
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium">Tipo de Logo:</label>
+              <select id="logoType" class="border border-gray-300 rounded px-3 py-2 text-sm">
+                <option value="none">Ninguno</option>
+                <option value="wheel">Rueda</option>
+                <option value="marquee">Marquesina</option>
+              </select>
+            </div>
+            
+            <!-- Region Selection -->
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium">Región Preferida:</label>
+              <select id="preferredRegion" class="border border-gray-300 rounded px-3 py-2 text-sm">
+                <option value="us">US</option>
+                <option value="eu">EU</option>
+                <option value="fr">FR</option>
+                <option value="jp">JP</option>
+                <option value="wor">Wor (por defecto)</option>
+              </select>
+            </div>
+            
+            <!-- Extra Options -->
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium">Extras:</label>
+              <div class="flex flex-col gap-1">
+                <label class="flex items-center gap-1 text-sm">
+                  <input type="checkbox" id="scanRatings" class="w-4 h-4"> Escanear calificaciones
+                </label>
+                <label class="flex items-center gap-1 text-sm">
+                  <input type="checkbox" id="scrapeVideos" class="w-4 h-4"> Escrapear videos
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Download Mode Selection -->
+          <div class="flex items-center gap-2 mt-4">
+            <label class="text-sm font-medium">Modo:</label>
             <label class="flex items-center gap-1 text-sm">
-              <input type="checkbox" id="downloadImages" checked> Imágenes
+              <input type="radio" name="downloadMode" value="direct" checked> Descarga Directa
             </label>
             <label class="flex items-center gap-1 text-sm">
-              <input type="checkbox" id="downloadVideos"> Vídeos
+              <input type="radio" name="downloadMode" value="script"> Generador de Scripts
             </label>
+          </div>
+          
+          <!-- Script Generation Controls -->
+          <div id="scriptControls" class="hidden">
+            <button id="downloadScriptsBtn" class="btn bg-green-600 text-white hover:bg-green-700">
+              Descargar Scripts
+            </button>
+            <div id="scriptInfo" class="text-sm text-gray-600 mt-2 hidden">
+              Se encontraron <span id="scriptCount">0</span> URLs para descargar
+            </div>
           </div>
         </div>
       </div>
@@ -338,7 +411,9 @@
     const SCREENSCRAPER_API = 'https://api.screenscraper.fr/api2';
     const SOFT_NAME = 'SDCoverManager';
     // Personal proxy with SSL compatibility and proper security
-    const MY_PROXY = 'https://www.sd-scrapper.gamer.gd/proxy.php?url=';
+    // Proxy configuration (configurable for VPS migration)
+    const PROXY_URL = './proxy.php?url='; // Relative path for VPS/Hosting
+    // const PROXY_URL = 'https://www.sd-scrapper.gamer.gd/proxy.php?url='; // Full URL for GitHub Pages
     
     const SYSTEM_IDS = {
       'nes': 3, 'snes': 4, 'gb': 5, 'gbc': 6, 'gba': 7, 
@@ -419,9 +494,9 @@ async function downloadImage(cdnUrl, ssid, sspass) {
 
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
-          // Use personal proxy with full URL encoding
-          const proxyUrl = `${MY_PROXY}${encodeURIComponent(cdnUrl)}`;
-          log(`Downloading via personal proxy (attempt ${attempt}/${MAX_RETRIES}): ${cdnUrl}`);
+          // Use proxy (relative for VPS, full for GitHub Pages)
+          const proxyUrl = `${PROXY_URL}${encodeURIComponent(cdnUrl)}`;
+          log(`Downloading via proxy (attempt ${attempt}/${MAX_RETRIES}): ${cdnUrl}`);
 
           const response = await fetch(proxyUrl);
 
@@ -459,6 +534,114 @@ async function downloadImage(cdnUrl, ssid, sspass) {
         }
       }
       return null;
+    }
+
+    // Script generation system
+    let downloadUrls = new Set();
+    let processedGames = 0;
+
+    function addDownloadUrl(gameName, imageUrl, destFolder) {
+      const downloadEntry = {
+        gameName: gameName,
+        url: imageUrl,
+        folder: destFolder || 'images'
+      };
+      downloadUrls.add(JSON.stringify(downloadEntry));
+      processedGames++;
+      log(`Added URL for ${gameName} (${processedGames} total)`);
+    }
+
+    function generateScripts() {
+      const urls = Array.from(downloadUrls).map(u => JSON.parse(u));
+      const scriptCount = urls.length;
+      
+      document.getElementById('scriptCount').textContent = scriptCount;
+      document.getElementById('scriptInfo').classList.remove('hidden');
+      
+      // Generate PowerShell script
+      const psScript = `# PowerShell script for downloading covers
+# Generated by SD Cover Manager
+# Total games: ${scriptCount}
+
+# Create directories
+$gameFolders = @()
+$urls = @()
+
+$urls = @(
+${urls.map((u, i) => `  [${i+1}] '${u.url}'`).join(',\n')}
+)
+
+$urls | ForEach-Object {
+    $url = $_
+    $folder = $url.split('/')[0]  # Extract folder from URL
+    $gameName = $url.gameName
+    $fileName = $gameName + '.png'
+    
+    # Create folder if it doesn't exist
+    if (-not (Test-Path -Path $folder)) {
+        New-Item -ItemType Directory -Path $folder | Out-Null
+        Write-Host "Created folder: $folder"
+    }
+    
+    # Download file
+    try {
+        $destination = Join-Path -Path $folder -ChildPath $fileName
+        Invoke-WebRequest -Uri $url.url -OutFile $destination -TimeoutSec 30
+        Write-Host "Downloaded: $fileName"
+    } catch {
+        Write-Host "Failed to download $fileName from $url.url"
+    }
+}
+
+Write-Host "Download complete! Processed $scriptCount files."`;
+
+      // Generate Linux script
+      const shScript = `#!/bin/bash
+# R36S script for downloading covers
+# Generated by SD Cover Manager
+# Total games: ${scriptCount}
+
+# Create directories
+${urls.map((u, i) => `mkdir -p "${u.folder}" 2>/dev/null || true`).join('\n')}
+
+# Download files
+${urls.map((u, i) => `
+# File ${i+1}: ${u.gameName}
+if curl -L -s --max-time 30 "${u.url}" -o "${u.folder}/${u.gameName}.png"; then
+    echo "Downloaded: ${u.gameName}.png"
+else
+    echo "Failed to download: ${u.gameName}"
+fi`).join('\n')}
+
+echo "Download complete! Processed $scriptCount files."`;
+
+      // Create download links
+      const psBlob = new Blob([psScript], { type: 'text/plain' });
+      const shBlob = new Blob([shScript], { type: 'text/plain' });
+      
+      const psUrl = URL.createObjectURL(psBlob);
+      const shUrl = URL.createObjectURL(shBlob);
+      
+      // Create temporary links for download
+      const psLink = document.createElement('a');
+      psLink.href = psUrl;
+      psLink.download = 'descargar_r36s.bat';
+      psLink.click();
+      
+      setTimeout(() => {
+        const shLink = document.createElement('a');
+        shLink.href = shUrl;
+        shLink.download = 'descargar_r36s.sh';
+        shLink.click();
+      }, 100);
+      
+      // Clean up
+      setTimeout(() => {
+        URL.revokeObjectURL(psUrl);
+        URL.revokeObjectURL(shUrl);
+      }, 1000);
+      
+      log(`Generated scripts for ${scriptCount} files`);
     }
 
     async function saveImage(systemData, imageName, blob, destFolder) {
@@ -595,23 +778,50 @@ async function downloadImage(cdnUrl, ssid, sspass) {
       }
     }
 
-    function findBox2D(medias, preferredRegion) {
-      // Priority: preferredRegion, 'eu', 'us', 'wor', null (no region)
+    function findMedia(medias, preferredRegion, imageType, boxType, logoType) {
+      // Define media types to search in priority order
+      const mediaTypes = [];
+      
+      // Add selected image type first
+      if (imageType && imageType !== 'box-2D') {
+        mediaTypes.push(imageType);
+      }
+      // Add selected box type if different from image type
+      if (boxType && boxType !== 'none' && boxType !== imageType) {
+        mediaTypes.push(boxType);
+      }
+      // Add logo type if selected
+      if (logoType && logoType !== 'none') {
+        mediaTypes.push(logoType);
+      }
+      // Default to box-2D if no specific types selected
+      if (!mediaTypes.includes('box-2D')) {
+        mediaTypes.push('box-2D');
+      }
+      
+      // Define region priority
       const regionPriority = preferredRegion ? [preferredRegion, 'eu', 'us', 'wor', null] : ['eu', 'us', 'wor', null];
-      for (const reg of regionPriority) {
-        const candidates = medias.filter(m => m.type === 'box-2D' && m.region === reg);
-        if (candidates.length > 0) {
-          log('Found box-2D with region: ' + (reg || 'none'));
-          return candidates[0]; // returns media object
+      
+      // Search for each media type in priority order
+      for (const mediaType of mediaTypes) {
+        log(`Searching for ${mediaType} media...`);
+        
+        for (const region of regionPriority) {
+          const candidates = medias.filter(m => {
+            const typeMatch = m.type === mediaType;
+            const regionMatch = !region || m.region === region;
+            return typeMatch && regionMatch;
+          });
+          
+          if (candidates.length > 0) {
+            const selected = candidates[0];
+            log(`Found ${mediaType} with region: ${selected.region || 'none'}`);
+            return selected;
+          }
         }
       }
-      // Fallback: any box-2D media regardless of region
-      const anyBox2D = medias.filter(m => m.type === 'box-2D');
-      if (anyBox2D.length > 0) {
-        log('Found box-2D with no specific region match');
-        return anyBox2D[0];
-      }
-      log('No box-2D media found');
+      
+      log(`No media found for types: ${mediaTypes.join(', ')}`);
       return null;
     }
 
@@ -636,18 +846,28 @@ async function simulateScraping() {
       const destFolderSelect = document.getElementById('destFolderSelect');
       const videoFolderSelect = document.getElementById('videoFolderSelect');
       const customFolderInput = document.getElementById('customFolderInput');
+      
+      // Get media configuration
+      const imageType = document.getElementById('imageType').value;
+      const boxType = document.getElementById('boxType').value;
+      const logoType = document.getElementById('logoType').value;
+      const preferredRegion = document.getElementById('preferredRegion').value;
+      const scanRatings = document.getElementById('scanRatings').checked;
+      const scrapeVideos = document.getElementById('scrapeVideos').checked;
+      
       // Get credentials from form with validation
       const ssUser = document.getElementById('ssUser').value.trim();
       const ssPass = document.getElementById('ssPass').value;
       const devid = document.getElementById('devId').value.trim();
       const devpass = document.getElementById('devPass').value;
-      const downloadImages = document.getElementById('downloadImages').checked;
-      const downloadVideos = document.getElementById('downloadVideos').checked;
       let destFolder = destFolderSelect.value;
       let videoFolder = videoFolderSelect.value;
       if (destFolder === 'custom') {
         destFolder = customFolderInput.value.trim() || 'images';
       }
+      
+      // Get download mode
+      const downloadMode = document.querySelector('input[name="downloadMode"]:checked').value;
 
       // Validate credentials
       if (!ssUser || !ssPass) {
@@ -715,26 +935,27 @@ async function simulateScraping() {
               const medias = jeuData.medias || [];
               let downloaded = false;
 
-              if (downloadImages) {
-                  // Find best box-2D media object from ScreenScraper response
-                  const box2D = findBox2D(medias, region);
-                  if (box2D && box2D.url) {
-                    const cdnUrl = box2D.url;
-                    log('Using CDN URL for image: ' + cdnUrl);
-                    
-                    // Verify CDN URL prefix (should start with https://cdn.screenscraper.fr/)
-                    if (!cdnUrl.startsWith('https://cdn.screenscraper.fr/')) {
-                      log('Warning: CDN URL does not start with expected prefix: ' + cdnUrl);
-                    }
-                    
-                      const blob = await downloadImage(cdnUrl, ssUser, ssPass);
-                      if (blob && blob.size > 0) {
-                        // Filename matches ROM name exactly with .png extension
-                        const imageName = getBasename(game.name) + '.png';
+              // Find media based on user preferences
+              const selectedMedia = findMedia(medias, preferredRegion, imageType, boxType, logoType);
+                if (selectedMedia && selectedMedia.url) {
+                  const cdnUrl = selectedMedia.url;
+                  log('Using CDN URL for image: ' + cdnUrl);
+                  
+                  // Verify CDN URL prefix (should start with https://cdn.screenscraper.fr/)
+                  if (!cdnUrl.startsWith('https://cdn.screenscraper.fr/')) {
+                    log('Warning: CDN URL does not start with expected prefix: ' + cdnUrl);
+                  }
+                  
+                  if (downloadMode === 'direct') {
+                    // Direct download mode
+                    const blob = await downloadImage(cdnUrl, ssUser, ssPass);
+                    if (blob && blob.size > 0) {
+                      // Filename matches ROM name exactly with .png extension
+                      const imageName = getBasename(game.name) + '.png';
                       const saved = await saveImage(systemData, imageName, blob, destFolder);
                       if (saved) {
                         const imagePath = '/' + destFolder + '/' + imageName;
-                        await updateGamelistXml(systemData, game.name, imagePath);
+                        await updateGamelistXml(systemData, game.path, imagePath);
                         game.hasCover = true;
                         game.imageName = imagePath;
                         downloaded = true;
@@ -744,8 +965,13 @@ async function simulateScraping() {
                       log('Failed to download image or empty blob for ' + searchName);
                     }
                   } else {
-                    log('No valid box-2D media found for ' + searchName);
+                    // Script generation mode
+                    addDownloadUrl(searchName, cdnUrl, destFolder);
+                    downloaded = true;
+                    log('Added URL for script generation: ' + searchName);
                   }
+                } else {
+                  log('No valid media found for ' + searchName + ' with selected preferences');
                 }
 
               // Video download disabled - requires similar adaptation
@@ -953,6 +1179,30 @@ async function simulateScraping() {
         customInput.classList.add('hidden');
       }
     });
+    
+    // Download mode change handler
+    document.addEventListener('change', function(e) {
+      if (e.target.name === 'downloadMode') {
+        const scriptControls = document.getElementById('scriptControls');
+        if (e.target.value === 'script') {
+          scriptControls.classList.remove('hidden');
+        } else {
+          scriptControls.classList.add('hidden');
+        }
+      }
+    });
+    
+    // Download scripts button handler
+    const downloadScriptsBtn = document.getElementById('downloadScriptsBtn');
+    if (downloadScriptsBtn) {
+      downloadScriptsBtn.addEventListener('click', function() {
+        if (downloadUrls.size > 0) {
+          generateScripts();
+        } else {
+          log('No URLs found for script generation');
+        }
+      });
+    }
   </script>
 </body>
 </html>
