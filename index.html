@@ -803,14 +803,17 @@
       var processed = 0;
       var updated = 0;
       var totalToProcess = 0;
-      for (var key in selectedSystems) {
+      var selectedSystemsArray = Array.from(selectedSystems);
+      for (var j = 0; j < selectedSystemsArray.length; j++) {
+        var key = selectedSystemsArray[j];
         var data = scannedData[key];
         if (data) {
           totalToProcess += data.games.filter(function(g) { return !g.hasCover; }).length;
         }
       }
 
-      for (var systemKey in selectedSystems) {
+      for (var i = 0; i < selectedSystemsArray.length; i++) {
+        var systemKey = selectedSystemsArray[i];
         if (shouldStop) {
           log('Proceso detenido por el usuario');
           break;
