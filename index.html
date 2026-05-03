@@ -284,6 +284,62 @@
       return name;
     }
 
+    function cleanRomNameForSearch(filename) {
+      let name = getBasename(filename);
+      // Remove parentheses and brackets
+      name = name.replace(/\s*\([^)]*\)\s*/g, ' ');
+      name = name.replace(/\s*\[.*\]\s*/g, ' ');
+      // Remove trailing comments after comma
+      name = name.replace(/,\s*.*$/g, '');
+      // Remove accents and special characters
+      name = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      // Remove extra spaces
+      name = name.replace(/\s+/g, ' ');
+      name = name.trim();
+      return name;
+    }
+
+    // CRC32 implementation for ROM hash
+    function crc32(data) {
+      let crc = 0xFFFFFFFF;
+      const table = [];
+      
+      for (let i = 0; i < 256; i++) {
+        let c = i;
+        for (let j = 0; j < 8; j++) {
+          c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+        }
+        table[i] = c;
+      }
+      
+      for (let i = 0; i < data.length; i++) {
+        crc = table[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
+      }
+      
+      return (crc ^ 0xFFFFFFFF) >>> 0;
+    }
+
+    async function calculateRomHash(romHandle, fileSize) {
+      const MAX_SIZE = 50 * 1024 * 1024; // 50MB limit
+      
+      if (fileSize > MAX_SIZE) {
+        log('Archivo muy grande para hash (' + (fileSize / 1024 / 1024).toFixed(1) + 'MB), usando nombre');
+        return null;
+      }
+      
+      try {
+        log('Calculando huella digital...');
+        const file = await romHandle.getFile();
+        const buffer = await file.slice(0, Math.min(fileSize, MAX_SIZE)).arrayBuffer();
+        const uint8 = new Uint8Array(buffer);
+        const hash = crc32(uint8);
+        return hash.toString(16).toUpperCase();
+      } catch (e) {
+        log('Error calculando hash: ' + e.message);
+        return null;
+      }
+    }
+
     async function scanDirectory(handle, path = '') {
       const results = { roms: [], images: [], videos: [], folders: [], gamelist: null };
       const MEDIA_FOLDERS = ['media', 'image', 'images', 'imagen', 'imagenes', 'video', 'videos', 'box', 'covers', 'snap'];
@@ -294,7 +350,13 @@
           const nameLower = entry.name.toLowerCase();
           
           if (ROM_EXTENSIONS.includes(ext)) {
-            results.roms.push({ name: entry.name, path: path + '/' + entry.name });
+            // Get file size for hash calculation
+            let fileSize = 0;
+            try {
+              const file = await entry.getFile();
+              fileSize = file.size;
+            } catch (e) {}
+            results.roms.push({ name: entry.name, path: path + '/' + entry.name, size: fileSize, handle: entry });
           } else if (IMAGE_EXTENSIONS.includes(ext)) {
             results.images.push({ name: entry.name, path: path + '/' + entry.name });
           } else if (VIDEO_EXTENSIONS.includes(ext)) {
@@ -539,7 +601,69 @@
       }
     }
 
-    async function scrapeGame(user, pass, systemeid, romName, region, devid, devpass) {
+    async function scrapeGame(user, pass, systemeid, romData, region, devid, devpass) {
+      const romName = romData.name;
+      const romHandle = romData.handle;
+      const fileSize = romData.size || 0;
+      
+      // Try first with hash
+      let hash = null;
+      if (romHandle && fileSize > 0) {
+        hash = await calculateRomHash(romHandle, fileSize);
+      }
+      
+      // First attempt: try with CRC32 hash
+      if (hash) {
+        const hashUrl = SCREENSCRAPER_API + '/jeuInfos.php?output=json&devid=' + encodeURIComponent(devid) + '&devpassword=' + encodeURIComponent(devpass) + '&softname=' + encodeURIComponent(SOFT_NAME) + '&ssid=' + encodeURIComponent(user) + '&sspassword=' + encodeURIComponent(pass) + '&systemeid=' + systemeid + '&crc=' + hash;
+        
+        log('Buscando por hash: ' + romName + ' (CRC: ' + hash + ')');
+        
+        try {
+          const response = await fetch(hashUrl);
+          if (response.ok) {
+            const text = await response.text();
+            if (!text.startsWith('Erreur') && text.includes('"jeu"')) {
+              const data = JSON.parse(text);
+              if (data.response && data.response.jeu) {
+                const jeu = data.response.jeu;
+                const medias = data.response.jeu.medias || [];
+                log('Encontrado por hash: ' + jeu.nom);
+                return { jeu: { id: jeu.id, nom: jeu.nom }, medias: medias };
+              }
+            }
+          }
+        } catch (e) {
+          // Continue to fallback
+        }
+      }
+      
+      // Fallback 1: try with cleaned name (no special chars)
+      const cleanName = cleanRomNameForSearch(romName);
+      if (cleanName !== romName) {
+        const cleanUrl = SCREENSCRAPER_API + '/jeuInfos.php?output=json&devid=' + encodeURIComponent(devid) + '&devpassword=' + encodeURIComponent(devpass) + '&softname=' + encodeURIComponent(SOFT_NAME) + '&ssid=' + encodeURIComponent(user) + '&sspassword=' + encodeURIComponent(pass) + '&systemeid=' + systemeid + '&romnom=' + encodeURIComponent(cleanName);
+        
+        log('Buscando (nombre limpio): ' + cleanName);
+        
+        try {
+          const response = await fetch(cleanUrl);
+          if (response.ok) {
+            const text = await response.text();
+            if (!text.startsWith('Erreur') && text.includes('"jeu"')) {
+              const data = JSON.parse(text);
+              if (data.response && data.response.jeu) {
+                const jeu = data.response.jeu;
+                const medias = data.response.jeu.medias || [];
+                log('Encontrado (nombre limpio): ' + jeu.nom);
+                return { jeu: { id: jeu.id, nom: jeu.nom }, medias: medias };
+              }
+            }
+          }
+        } catch (e) {
+          // Continue to last fallback
+        }
+      }
+      
+      // Fallback 2: original rom name
       const url = SCREENSCRAPER_API + '/jeuInfos.php?output=json&devid=' + encodeURIComponent(devid) + '&devpassword=' + encodeURIComponent(devpass) + '&softname=' + encodeURIComponent(SOFT_NAME) + '&ssid=' + encodeURIComponent(user) + '&sspassword=' + encodeURIComponent(pass) + '&systemeid=' + systemeid + '&romnom=' + encodeURIComponent(romName);
       
       log('Buscando: ' + romName);
@@ -956,7 +1080,7 @@
           progressText.textContent = (processed + 1) + '/' + totalToProcess;
 
           try {
-            var jeuData = await scrapeGame(ssUser, ssPass, systemeid, game.name, region, devid, devpass);
+            var jeuData = await scrapeGame(ssUser, ssPass, systemeid, game, region, devid, devpass);
 
             if (jeuData && jeuData.jeu && jeuData.jeu.id) {
               var medias = jeuData.medias || [];
