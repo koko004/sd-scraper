@@ -286,6 +286,7 @@
 
     async function scanDirectory(handle, path = '') {
       const results = { roms: [], images: [], videos: [], folders: [] };
+      const IMAGE_FOLDERS = ['images', 'media', 'box', 'covers', 'thumbs', 'box2d', 'box3d'];
       
       for await (const entry of handle.values()) {
         if (entry.kind === 'file') {
@@ -298,6 +299,18 @@
             results.videos.push({ name: entry.name, path: path + '/' + entry.name });
           }
         } else if (entry.kind === 'directory') {
+          const folderName = entry.name.toLowerCase();
+          // Scan into image/video folders for matching files
+          if (IMAGE_FOLDERS.includes(folderName) || folderName.startsWith('img')) {
+            try {
+              const subResults = await scanDirectory(entry.handle, path + '/' + entry.name);
+              results.images.push(...subResults.images);
+              results.videos.push(...subResults.videos);
+            } catch (e) {
+              // Skip inaccessible folders
+            }
+          }
+          // Add all folders for ROM scanning
           results.folders.push({ name: entry.name, handle: entry, path: path + '/' + entry.name });
         }
       }
@@ -348,22 +361,57 @@
     }
 
     async function checkCovers(systemData) {
-      const romNames = systemData.roms.map(r => getBasename(r.name).toLowerCase());
+      // Get image names from direct file scan
       const imageNames = systemData.images.map(i => getBasename(i.name).toLowerCase());
+      
+      // Also check gamelist.xml for image references
+      let gamelistImages = [];
+      try {
+        const xml = await readGamelistXml(systemData);
+        if (xml) {
+          // Extract image paths from gamelist.xml
+          const imgMatches = xml.match(/<image>([^<]+)<\/image>/g) || [];
+          gamelistImages = imgMatches.map(m => {
+            const imgPath = m.replace(/<[^>]+>/g, '');
+            return getBasename(imgPath).toLowerCase();
+          });
+        }
+      } catch (e) {
+        // Ignore gamelist errors
+      }
+      
+      // Combine all known image names
+      const allImageNames = [...new Set([...imageNames, ...gamelistImages])];
       
       return systemData.roms.map(rom => {
         const baseName = getBasename(rom.name).toLowerCase();
-        const hasImage = imageNames.some(img => 
-          img.startsWith(baseName) || baseName.startsWith(img)
+        const hasImage = allImageNames.some(img => 
+          img.startsWith(baseName) || baseName.startsWith(img) || img.includes(baseName)
         );
+        
+        // Find matching image
+        let matchedImage = null;
+        if (hasImage) {
+          matchedImage = systemData.images.find(i => {
+            const imgBase = getBasename(i.name).toLowerCase();
+            return imgBase.startsWith(baseName) || baseName.startsWith(imgBase) || imgBase.includes(baseName);
+          });
+          
+          // If not found in files, try gamelist
+          if (!matchedImage) {
+            const gamelistMatch = gamelistImages.find(img => 
+              img.startsWith(baseName) || baseName.startsWith(img) || img.includes(baseName)
+            );
+            if (gamelistMatch) {
+              matchedImage = { name: gamelistMatch + '.png' };
+            }
+          }
+        }
         
         return {
           ...rom,
           hasCover: hasImage,
-          imageName: hasImage ? systemData.images.find(i => 
-            getBasename(i.name).toLowerCase().startsWith(baseName) ||
-            baseName.startsWith(getBasename(i.name).toLowerCase())
-          )?.name : null
+          imageName: matchedImage ? matchedImage.name : null
         };
       });
     }
