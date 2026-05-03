@@ -39,7 +39,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
           </svg>
           <div>
-            <h3 class="font-medium text-yellow-800">⚠️ Navegador no compatible</h3>
+            <h3 class="font-medium text-yellow-800">Navegador no compatible</h3>
             <p id="warningText" class="text-sm text-yellow-700 mt-1"></p>
           </div>
         </div>
@@ -60,7 +60,7 @@
 
     <div id="statsSection" class="hidden">
       <div class="card mb-4">
-        <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
           <div class="flex items-center gap-4">
             <h3 class="font-medium">Download Settings</h3>
             <div class="flex items-center gap-2">
@@ -72,111 +72,92 @@
               </select>
               <input id="customFolderInput" type="text" placeholder="Nombre carpeta" class="border border-gray-300 rounded px-3 py-2 text-sm w-32 hidden">
             </div>
-            <div class="flex items-center gap-2">
-              <label class="text-sm font-medium">Videos Folder:</label>
-              <select id="videoFolderSelect" class="border border-gray-300 rounded px-3 py-2 text-sm">
-                <option value="media">/media</option>
-                <option value="videos">/videos</option>
-                <option value="movies">/movies</option>
-                <option value="custom">Custom</option>
-              </select>
-            </div>
           </div>
         </div>
-        <div class="flex flex-wrap items-center gap-4 mt-3">
-<form class="flex items-center gap-2">
-              <label class="text-sm font-medium">ScreenScraper:</label>
-              <input id="ssUser" type="text" placeholder="Usuario" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
-              <input id="ssPass" type="password" placeholder="Password" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
-              <input id="devId" type="text" placeholder="DevID" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" title="Developer ID">
-              <input id="devPass" type="password" placeholder="DevPass" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" title="Developer Password">
-              <label class="flex items-center gap-1 text-sm">
-                <input type="checkbox" id="saveCredentials" class="w-4 h-4"> Remember
-              </label>
-              <button type="button" id="testLoginBtn" class="text-sm bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Test</button>
-            </form>
-          
-          <!-- Media Configuration Panel -->
-          <div class="flex flex-wrap items-start gap-4 mt-4">
-            <!-- Image Type Selection -->
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium">Tipo de Imagen:</label>
-              <select id="imageType" class="border border-gray-300 rounded px-3 py-2 text-sm">
-                <option value="box-2D">Caja 2D (por defecto)</option>
-                <option value="box-3D">Caja 3D</option>
-                <option value="capture">Captura</option>
-                <option value="capture-title">Captura con título</option>
-                <option value="mix-v1">Mix V1</option>
-                <option value="mix-v2">Mix V2</option>
-              </select>
-            </div>
-            
-            <!-- Box Type Selection -->
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium">Tipo de Caja:</label>
-              <select id="boxType" class="border border-gray-300 rounded px-3 py-2 text-sm">
-                <option value="none">Ninguno</option>
-                <option value="box-2D">Caja 2D</option>
-                <option value="box-3D">Caja 3D</option>
-              </select>
-            </div>
-            
-            <!-- Logo Type Selection -->
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium">Tipo de Logo:</label>
-              <select id="logoType" class="border border-gray-300 rounded px-3 py-2 text-sm">
-                <option value="none">Ninguno</option>
-                <option value="wheel">Rueda</option>
-                <option value="marquee">Marquesina</option>
-              </select>
-            </div>
-            
-            <!-- Region Selection -->
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium">Región Preferida:</label>
-              <select id="preferredRegion" class="border border-gray-300 rounded px-3 py-2 text-sm">
-                <option value="us">US</option>
-                <option value="eu">EU</option>
-                <option value="fr">FR</option>
-                <option value="jp">JP</option>
-                <option value="wor">Wor (por defecto)</option>
-              </select>
-            </div>
-            
-            <!-- Extra Options -->
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium">Extras:</label>
-              <div class="flex flex-col gap-1">
-                <label class="flex items-center gap-1 text-sm">
-                  <input type="checkbox" id="scanRatings" class="w-4 h-4"> Escanear calificaciones
-                </label>
-                <label class="flex items-center gap-1 text-sm">
-                  <input type="checkbox" id="scrapeVideos" class="w-4 h-4"> Escrapear videos
-                </label>
-              </div>
-            </div>
+        
+        <!-- ScreenScraper Credentials -->
+        <form class="flex flex-wrap items-center gap-2 mb-4">
+          <label class="text-sm font-medium">ScreenScraper:</label>
+          <input id="ssUser" type="text" placeholder="Usuario" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
+          <input id="ssPass" type="password" placeholder="Password" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
+          <input id="devId" type="text" placeholder="DevID" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" title="Developer ID">
+          <input id="devPass" type="password" placeholder="DevPass" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" title="Developer Password">
+          <label class="flex items-center gap-1 text-sm">
+            <input type="checkbox" id="saveCredentials" class="w-4 h-4"> Remember
+          </label>
+          <button type="button" id="testLoginBtn" class="text-sm bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Test</button>
+        </form>
+
+        <!-- Media Configuration Panel - Grid Layout -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+          <!-- Image Type Selection -->
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium">Imagen Principal:</label>
+            <select id="imageType" class="border border-gray-300 rounded px-3 py-2 text-sm">
+              <option value="box-2D">Caja 2D</option>
+              <option value="box-3D">Caja 3D</option>
+              <option value="screenshot">Screenshot</option>
+              <option value="titlescreen">Titlescreen</option>
+              <option value="mixrbv1">Mix V1</option>
+              <option value="mixrbv2">Mix V2</option>
+            </select>
           </div>
           
-          <!-- Download Mode Selection -->
-          <div class="flex items-center gap-2 mt-4">
+          <!-- Logo Type Selection -->
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium">Logo:</label>
+            <select id="logoType" class="border border-gray-300 rounded px-3 py-2 text-sm">
+              <option value="none">Ninguno</option>
+              <option value="wheel">Rueda</option>
+              <option value="marquee">Marquesina</option>
+            </select>
+          </div>
+          
+          <!-- Region Selection -->
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium">Region:</label>
+            <select id="preferredRegion" class="border border-gray-300 rounded px-3 py-2 text-sm">
+              <option value="eu">EU (Europa)</option>
+              <option value="us">US (USA)</option>
+              <option value="jp">JP (Japan)</option>
+              <option value="fr">FR (France)</option>
+              <option value="wor">Wor (World)</option>
+            </select>
+          </div>
+          
+          <!-- Videos Checkbox -->
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium">Extras:</label>
+            <label class="flex items-center gap-2 text-sm">
+              <input type="checkbox" id="downloadVideos" class="w-4 h-4"> Descargar Videos
+            </label>
+          </div>
+          
+          <!-- Download Mode -->
+          <div class="flex flex-col gap-1">
             <label class="text-sm font-medium">Modo:</label>
-            <label class="flex items-center gap-1 text-sm">
-              <input type="radio" name="downloadMode" value="direct" checked> Descarga Directa
-            </label>
-            <label class="flex items-center gap-1 text-sm">
-              <input type="radio" name="downloadMode" value="script"> Generador de Scripts
-            </label>
-          </div>
-          
-          <!-- Script Generation Controls -->
-          <div id="scriptControls" class="hidden">
-            <button id="downloadScriptsBtn" class="btn bg-green-600 text-white hover:bg-green-700">
-              Descargar Scripts
-            </button>
-            <div id="scriptInfo" class="text-sm text-gray-600 mt-2 hidden">
-              Se encontraron <span id="scriptCount">0</span> URLs para descargar
+            <div class="flex gap-3">
+              <label class="flex items-center gap-1 text-sm">
+                <input type="radio" name="downloadMode" value="direct" checked> Directo
+              </label>
+              <label class="flex items-center gap-1 text-sm">
+                <input type="radio" name="downloadMode" value="script"> Scripts
+              </label>
             </div>
           </div>
+          
+          <!-- Script Generation Button -->
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium">Scripts:</label>
+            <button id="generateScriptsBtn" class="btn bg-green-600 text-white hover:bg-green-700 text-sm py-1">
+              Generar Scripts de Descarga
+            </button>
+          </div>
+        </div>
+        
+        <!-- Script Info -->
+        <div id="scriptInfo" class="text-sm text-gray-600 hidden">
+          URLs acumuladas: <span id="scriptCount">0</span>
         </div>
       </div>
 
@@ -231,6 +212,7 @@
   <script>
     const ROM_EXTENSIONS = ['.nes', '.snes', '.sfc', '.gb', '.gbc', '.gba', '.n64', '.z64', '.nds', '.3ds', '.cia', '.xci', '.xwb', '.gcm', '.iso', '.wbfs', '.wad', '.a26', '.lnx', '.jag', '.j64', '.md', '.gen', '.sms', '.gg', '.s32x', '.32x', '.pce', '.ngp', '.ngc', '.crypt', '.fb', '.nsp', '.kv', '.m3u', '.zip', '.7z'];
     const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif'];
+    const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.mkv', '.avi'];
     const SYSTEMS = ['gb', 'gbc', 'gba', 'nes', 'snes', 'n64', 'nds', '3ds', 'wii', 'psx', 'psp', 'genesis', 'sms', 'pce', 'ngp'];
 
     let directoryHandle = null;
@@ -238,6 +220,8 @@
     let selectedSystems = new Set();
     let isScraping = false;
     let shouldStop = false;
+    let downloadUrls = [];
+    let processedGames = 0;
 
     const isChrome = /Chrome/.test(navigator.userAgent) && /Google/.test(navigator.vendor);
     const isEdge = /Edg/.test(navigator.userAgent);
@@ -276,7 +260,7 @@
     }
 
     async function scanDirectory(handle, path = '') {
-      const results = { roms: [], images: [], folders: [] };
+      const results = { roms: [], images: [], videos: [], folders: [] };
       
       for await (const entry of handle.values()) {
         if (entry.kind === 'file') {
@@ -285,6 +269,8 @@
             results.roms.push({ name: entry.name, path: `${path}/${entry.name}` });
           } else if (IMAGE_EXTENSIONS.includes(ext)) {
             results.images.push({ name: entry.name, path: `${path}/${entry.name}` });
+          } else if (VIDEO_EXTENSIONS.includes(ext)) {
+            results.videos.push({ name: entry.name, path: `${path}/${entry.name}` });
           }
         } else if (entry.kind === 'directory') {
           results.folders.push({ name: entry.name, handle: entry, path: `${path}/${entry.name}` });
@@ -316,12 +302,13 @@
               system,
               roms: [],
               images: [],
-              imageFolder: null,
+              videos: [],
               folderHandle: handle
             };
           }
           systems[system].roms.push(...results.roms);
           systems[system].images.push(...results.images);
+          systems[system].videos.push(...results.videos);
         }
 
         for (const folder of results.folders) {
@@ -333,13 +320,6 @@
 
       await scan(rootHandle, '');
       return systems;
-    }
-
-    function findImageFolder(systemData, allEntries) {
-      if (allEntries.images.length > 0) {
-        return allEntries.images;
-      }
-      return systemData.images;
     }
 
     async function checkCovers(systemData) {
@@ -410,10 +390,7 @@
 
     const SCREENSCRAPER_API = 'https://api.screenscraper.fr/api2';
     const SOFT_NAME = 'SDCoverManager';
-    // Personal proxy with SSL compatibility and proper security
-    // Proxy configuration (configurable for VPS migration)
-    const PROXY_URL = './proxy.php?url='; // Relative path for VPS/Hosting
-    // const PROXY_URL = 'https://www.sd-scrapper.gamer.gd/proxy.php?url='; // Full URL for GitHub Pages
+    const PROXY_URL = 'https://www.sd-scrapper.gamer.gd/proxy.php?url=';
     
     const SYSTEM_IDS = {
       'nes': 3, 'snes': 4, 'gb': 5, 'gbc': 6, 'gba': 7, 
@@ -421,290 +398,13 @@
       'sms': 16, 'pce': 17, 'ngp': 18, 'wii': 19, '3ds': 20
     };
 
-async function loginScreenScraper(user, pass, devid, devpass) {
-      const params = new URLSearchParams({
-        output: 'json',
-        ssid: user,
-        sspass: pass
-      });
-      params.append('devid', devid);
-      params.append('devpassword', devpass);
-      params.append('softname', SOFT_NAME);
-      try {
-        const response = await fetch(SCREENSCRAPER_API + '/ssuserInfos.php?' + params);
-        if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
-        }
-        const text = await response.text();
-        if (text.startsWith('Erreur')) {
-          log('ScreenScraper login error: ' + text);
-          return null;
-        }
-        const data = JSON.parse(text);
-        return data.response;
-      } catch (e) {
-        log('Error login: ' + e.message);
-        return null;
-      }
-    }
-
-    async function searchGame(user, pass, systemeid, romName, fileSize, devid, devpass) {
-      const params = new URLSearchParams({
-        ssid: user,
-        sspass: pass,
-        systemeid: systemeid,
-        romnom: romName,
-        output: 'json'
-      });
-      params.append('devid', devid);
-      params.append('devpassword', devpass);
-      params.append('softname', SOFT_NAME);
-      
-      try {
-        const response = await fetch(SCREENSCRAPER_API + '/jeuRecherche.php?' + params);
-        const data = await response.json();
-        return data.response;
-      } catch (e) {
-        log('Error searching: ' + e.message);
-        return null;
-      }
-    }
-
-
-    function getImageUrlPlaceholder(gameName, system) {
-      const seed = encodeURIComponent(gameName);
-      return `https://placehold.co/320x224/4f46e5/ffffff?text=${seed.slice(0, 20)}`;
-    }
-
-async function downloadImage(cdnUrl, ssid, sspass) {
-      // ssid and sspass are accepted for compliance (credentials verification)
-      const MAX_RETRIES = 3;
-      const RETRY_DELAY = 2000; // 2 seconds (avoid ScreenScraper rate limits)
-
-      // Validate CDN URL
-      if (!cdnUrl || cdnUrl.trim() === '') {
-        log('Error: Empty CDN URL');
-        return null;
-      }
-
-      // Verify CDN URL format (should start with https://cdn.screenscraper.fr/)
-      if (!cdnUrl.startsWith('https://cdn.screenscraper.fr/')) {
-        log('Warning: CDN URL does not match expected format: ' + cdnUrl);
-      }
-
-      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        try {
-          // Use proxy (relative for VPS, full for GitHub Pages)
-          const proxyUrl = `${PROXY_URL}${encodeURIComponent(cdnUrl)}`;
-          log(`Downloading via proxy (attempt ${attempt}/${MAX_RETRIES}): ${cdnUrl}`);
-
-          const response = await fetch(proxyUrl);
-
-          // Handle specific errors with retry logic
-          if (response.ok) {
-            // Get binary data as Blob (static image file from CDN)
-            const blob = await response.blob();
-            if (blob.size > 0) {
-              log(`Download successful: ${blob.size} bytes`);
-              return blob;
-            } else {
-              throw new Error('Empty blob received from proxy');
-            }
-          } else if (response.status === 408 || response.status === 522 || response.status === 504) {
-            // Timeout or Cloudflare errors - retry with delay
-            log(`Proxy error ${response.status} (timeout/saturation), retrying in ${RETRY_DELAY}ms...`);
-            if (attempt < MAX_RETRIES) {
-              await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-              continue;
-            } else {
-              throw new Error(`Proxy failed with status ${response.status} after ${MAX_RETRIES} retries`);
-            }
-          } else {
-            throw new Error(`Proxy failed with status ${response.status}`);
-          }
-        } catch (e) {
-          log(`Download error (attempt ${attempt}/${MAX_RETRIES}): ${e.message}`);
-          if (attempt === MAX_RETRIES) {
-            log('Max retries reached, giving up on this image.');
-            log('If connection issues persist, try opening https://www.sd-scrapper.gamer.gd/proxy.php in a new tab to validate InfinityFree session.');
-            return null;
-          }
-          // Wait before retrying (avoid API saturation)
-          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-        }
-      }
-      return null;
-    }
-
-    // Script generation system
-    let downloadUrls = new Set();
-    let processedGames = 0;
-
-    function addDownloadUrl(gameName, imageUrl, destFolder) {
-      const downloadEntry = {
-        gameName: gameName,
-        url: imageUrl,
-        folder: destFolder || 'images'
-      };
-      downloadUrls.add(JSON.stringify(downloadEntry));
-      processedGames++;
-      log(`Added URL for ${gameName} (${processedGames} total)`);
-    }
-
-    function generateScripts() {
-      const urls = Array.from(downloadUrls).map(u => JSON.parse(u));
-      const scriptCount = urls.length;
-      
-      document.getElementById('scriptCount').textContent = scriptCount;
-      document.getElementById('scriptInfo').classList.remove('hidden');
-      
-      // Generate PowerShell script
-      const psScript = `# PowerShell script for downloading covers
-# Generated by SD Cover Manager
-# Total games: ${scriptCount}
-
-# Create directories
-$gameFolders = @()
-$urls = @()
-
-$urls = @(
-${urls.map((u, i) => `  [${i+1}] '${u.url}'`).join(',\n')}
-)
-
-$urls | ForEach-Object {
-    $url = $_
-    $folder = $url.split('/')[0]  # Extract folder from URL
-    $gameName = $url.gameName
-    $fileName = $gameName + '.png'
-    
-    # Create folder if it doesn't exist
-    if (-not (Test-Path -Path $folder)) {
-        New-Item -ItemType Directory -Path $folder | Out-Null
-        Write-Host "Created folder: $folder"
-    }
-    
-    # Download file
-    try {
-        $destination = Join-Path -Path $folder -ChildPath $fileName
-        Invoke-WebRequest -Uri $url.url -OutFile $destination -TimeoutSec 30
-        Write-Host "Downloaded: $fileName"
-    } catch {
-        Write-Host "Failed to download $fileName from $url.url"
-    }
-}
-
-Write-Host "Download complete! Processed $scriptCount files."`;
-
-      // Generate Linux script
-      const shScript = `#!/bin/bash
-# R36S script for downloading covers
-# Generated by SD Cover Manager
-# Total games: ${scriptCount}
-
-# Create directories
-${urls.map((u, i) => `mkdir -p "${u.folder}" 2>/dev/null || true`).join('\n')}
-
-# Download files
-${urls.map((u, i) => `
-# File ${i+1}: ${u.gameName}
-if curl -L -s --max-time 30 "${u.url}" -o "${u.folder}/${u.gameName}.png"; then
-    echo "Downloaded: ${u.gameName}.png"
-else
-    echo "Failed to download: ${u.gameName}"
-fi`).join('\n')}
-
-echo "Download complete! Processed $scriptCount files."`;
-
-      // Create download links
-      const psBlob = new Blob([psScript], { type: 'text/plain' });
-      const shBlob = new Blob([shScript], { type: 'text/plain' });
-      
-      const psUrl = URL.createObjectURL(psBlob);
-      const shUrl = URL.createObjectURL(shBlob);
-      
-      // Create temporary links for download
-      const psLink = document.createElement('a');
-      psLink.href = psUrl;
-      psLink.download = 'descargar_r36s.bat';
-      psLink.click();
-      
-      setTimeout(() => {
-        const shLink = document.createElement('a');
-        shLink.href = shUrl;
-        shLink.download = 'descargar_r36s.sh';
-        shLink.click();
-      }, 100);
-      
-      // Clean up
-      setTimeout(() => {
-        URL.revokeObjectURL(psUrl);
-        URL.revokeObjectURL(shUrl);
-      }, 1000);
-      
-      log(`Generated scripts for ${scriptCount} files`);
-    }
-
-    async function saveImage(systemData, imageName, blob, destFolder) {
-      try {
-        const folderHandle = systemData.folderHandle;
-        let imageFolderHandle;
-        
-        // Try to get existing folder, create if it doesn't exist
-        try {
-          imageFolderHandle = await folderHandle.getDirectoryHandle(destFolder);
-        } catch (e) {
-          imageFolderHandle = await folderHandle.getDirectoryHandle(destFolder, { create: true });
-          log('Created folder: ' + destFolder);
-        }
-        
-        // Create or get file handle
-        const fileHandle = await imageFolderHandle.getFileHandle(imageName, { create: true });
-        
-        // Create writable stream and write blob
-        const writable = await fileHandle.createWritable();
-        await writable.write(blob);
-        await writable.close();
-        
-        log('Saved image: ' + imageName);
-        return true;
-      } catch (e) {
-        log('Error saving image: ' + e.message);
-        console.error('Save image error:', e);
-        return false;
-      }
-    }
-
-    function getRegionFromFilename(filename) {
-      const name = filename.toLowerCase();
-      if (name.includes('(world)') || name.includes('(wor)')) return 'wor';
-      if (name.includes('(europe)') || name.includes('(eu)')) return 'eu';
-      if (name.includes('(usa)') || name.includes('(us)')) return 'us';
-      if (name.includes('(japan)') || name.includes('(jp)')) return 'jp';
-      if (name.includes('(france)') || name.includes('(fr)')) return 'fr';
-      if (name.includes('(spain)') || name.includes('(es)')) return 'es';
-      if (name.includes('(germany)') || name.includes('(de)')) return 'de';
-      if (name.includes('(italy)') || name.includes('(it)')) return 'it';
-      if (name.includes('(netherlands)') || name.includes('(nl)')) return 'nl';
-      if (name.includes('(sweden)') || name.includes('(se)')) return 'se';
-      if (name.includes('(denmark)') || name.includes('(dk)')) return 'dk';
-      if (name.includes('(norway)') || name.includes('(no)')) return 'no';
-      if (name.includes('(finland)') || name.includes('(fi)')) return 'fi';
-      if (name.includes('(australia)') || name.includes('(au)')) return 'au';
-      if (name.includes('(canada)') || name.includes('(ca)')) return 'ca';
-      if (name.includes('(brazil)') || name.includes('(br)')) return 'br';
-      if (name.includes('(china)') || name.includes('(cn)')) return 'cn';
-      if (name.includes('(korea)') || name.includes('(kr)')) return 'kr';
-      if (name.includes('(world)')) return 'wor';
-      return 'wor';
-    }
-
     async function testLogin(user, pass, devid, devpass) {
-      log('Probando conexión...');
+      log('Probando conexion...');
       try {
         const params = new URLSearchParams({
           output: 'json',
           ssid: user,
-          sspass: pass
+          sspassword: pass
         });
         if (devid) params.append('devid', devid);
         if (devpass) params.append('devpassword', devpass);
@@ -742,10 +442,9 @@ echo "Download complete! Processed $scriptCount files."`;
     }
 
     async function scrapeGame(user, pass, systemeid, romName, region, devid, devpass) {
-      // Build URL according to ScreenScraper official documentation
-      const url = `${SCREENSCRAPER_API}/jeuInfos.php?output=json&devid=${encodeURIComponent(devid)}&devpassword=${encodeURIComponent(devpass)}&softname=${encodeURIComponent(SOFT_NAME)}&ssid=${encodeURIComponent(user)}&sspass=${encodeURIComponent(pass)}&systemeid=${systemeid}&romnom=${encodeURIComponent(romName)}`;
+      const url = `${SCREENSCRAPER_API}/jeuInfos.php?output=json&devid=${encodeURIComponent(devid)}&devpassword=${encodeURIComponent(devpass)}&softname=${encodeURIComponent(SOFT_NAME)}&ssid=${encodeURIComponent(user)}&sspassword=${encodeURIComponent(pass)}&systemeid=${systemeid}&romnom=${encodeURIComponent(romName)}`;
       
-      log('Requesting game info from: ' + url);
+      log('Requesting game info: ' + romName);
       
       try {
         const response = await fetch(url);
@@ -753,7 +452,6 @@ echo "Download complete! Processed $scriptCount files."`;
           throw new Error(`HTTP error: ${response.status}`);
         }
         const text = await response.text();
-        // Check if response starts with 'Erreur' (API error)
         if (text.startsWith('Erreur')) {
           log('ScreenScraper API error: ' + text);
           return null;
@@ -778,33 +476,225 @@ echo "Download complete! Processed $scriptCount files."`;
       }
     }
 
-    function findMedia(medias, preferredRegion, imageType, boxType, logoType) {
-      // Define media types to search in priority order
+    async function downloadImage(cdnUrl) {
+      const MAX_RETRIES = 3;
+      const RETRY_DELAY = 2000;
+
+      if (!cdnUrl || cdnUrl.trim() === '') {
+        log('Error: Empty CDN URL');
+        return null;
+      }
+
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          const proxyUrl = PROXY_URL + encodeURIComponent(cdnUrl);
+          log(`Downloading (attempt ${attempt}/${MAX_RETRIES}): ${cdnUrl}`);
+
+          const response = await fetch(proxyUrl);
+
+          if (response.ok) {
+            const blob = await response.blob();
+            if (blob.size > 0) {
+              log(`Download successful: ${blob.size} bytes`);
+              return blob;
+            } else {
+              throw new Error('Empty blob received from proxy');
+            }
+          } else if (response.status === 408 || response.status === 522 || response.status === 504) {
+            log(`Proxy error ${response.status}, retrying in ${RETRY_DELAY}ms...`);
+            if (attempt < MAX_RETRIES) {
+              await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+              continue;
+            } else {
+              throw new Error(`Proxy failed with status ${response.status} after ${MAX_RETRIES} retries`);
+            }
+          } else {
+            throw new Error(`Proxy failed with status ${response.status}`);
+          }
+        } catch (e) {
+          log(`Download error (attempt ${attempt}/${MAX_RETRIES}): ${e.message}`);
+          if (attempt === MAX_RETRIES) {
+            log('Max retries reached, giving up on this image.');
+            return null;
+          }
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        }
+      }
+      return null;
+    }
+
+    function addDownloadUrl(systemKey, gameName, imageUrl, destFolder) {
+      downloadUrls.push({
+        system: systemKey,
+        gameName: gameName,
+        url: imageUrl,
+        folder: destFolder || 'images'
+      });
+      processedGames++;
+      log(`Added URL for ${gameName} (${processedGames} total)`);
+    }
+
+    function generateScripts() {
+      const urls = downloadUrls;
+      const scriptCount = urls.length;
+      
+      if (scriptCount === 0) {
+        log('No URLs to generate scripts');
+        return;
+      }
+      
+      document.getElementById('scriptCount').textContent = scriptCount;
+      document.getElementById('scriptInfo').classList.remove('hidden');
+      
+      // Generate PowerShell script for Windows
+      const psScript = `@echo off
+REM PowerShell script for downloading covers
+REM Generated by SD Cover Manager
+REM Total games: ${scriptCount}
+
+echo Starting download of ${scriptCount} files...
+
+${urls.map((u, i) => `
+echo [${i+1}/${scriptCount}] Downloading ${u.gameName}.png
+powershell -Command "Invoke-WebRequest -Uri '${u.url}' -OutFile '${u.system}/${u.folder}/${u.gameName}.png' -TimeoutSec 30"
+`).join('\n')}
+
+echo Download complete! Processed ${scriptCount} files.
+pause`.trim();
+
+      // Generate Linux script
+      const shScript = `#!/bin/bash
+# Linux script for downloading covers
+# Generated by SD Cover Manager
+# Total games: ${scriptCount}
+
+echo "Starting download of ${scriptCount} files..."
+
+${urls.map((u, i) => `
+echo "[${i+1}/${scriptCount}] Downloading ${u.gameName}.png"
+mkdir -p "${u.system}/${u.folder}"
+curl -L -s --max-time 30 "${u.url}" -o "${u.system}/${u.folder}/${u.gameName}.png" || echo "Failed: ${u.gameName}"
+`).join('\n')}
+
+echo "Download complete! Processed ${scriptCount} files.".trim();
+
+      // Download PowerShell script
+      const psBlob = new Blob([psScript], { type: 'text/plain' });
+      const psUrl = URL.createObjectURL(psBlob);
+      const psLink = document.createElement('a');
+      psLink.href = psUrl;
+      psLink.download = 'descargar_windows.bat';
+      psLink.click();
+      
+      // Download Linux script after short delay
+      setTimeout(() => {
+        const shBlob = new Blob([shScript], { type: 'text/plain' });
+        const shUrl = URL.createObjectURL(shBlob);
+        const shLink = document.createElement('a');
+        shLink.href = shUrl;
+        shLink.download = 'descargar_linux.sh';
+        shLink.click();
+        
+        // Clean up
+        setTimeout(() => {
+          URL.revokeObjectURL(psUrl);
+          URL.revokeObjectURL(shUrl);
+        }, 1000);
+      }, 100);
+      
+      log(`Generated scripts for ${scriptCount} files`);
+    }
+
+    async function ensureFolderExists(systemHandle, folderName) {
+      try {
+        return await systemHandle.getDirectoryHandle(folderName);
+      } catch (e) {
+        return await systemHandle.getDirectoryHandle(folderName, { create: true });
+      }
+    }
+
+    async function saveImage(systemData, imageName, blob, destFolder) {
+      try {
+        const folderHandle = systemData.folderHandle;
+        
+        // Ensure destination folder exists
+        const imageFolderHandle = await ensureFolderExists(folderHandle, destFolder);
+        
+        // Create or get file handle
+        const fileHandle = await imageFolderHandle.getFileHandle(imageName, { create: true });
+        
+        // Create writable stream and write blob
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        
+        log('Saved image: ' + imageName + ' in ' + destFolder);
+        return true;
+      } catch (e) {
+        log('Error saving image: ' + e.message);
+        console.error('Save image error:', e);
+        return false;
+      }
+    }
+
+    async function saveVideo(systemData, videoName, blob, destFolder) {
+      try {
+        const folderHandle = systemData.folderHandle;
+        
+        // Ensure destination folder exists
+        const videoFolderHandle = await ensureFolderExists(folderHandle, destFolder);
+        
+        // Create or get file handle
+        const fileHandle = await videoFolderHandle.getFileHandle(videoName, { create: true });
+        
+        // Create writable stream and write blob
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        
+        log('Saved video: ' + videoName + ' in ' + destFolder);
+        return true;
+      } catch (e) {
+        log('Error saving video: ' + e.message);
+        console.error('Save video error:', e);
+        return false;
+      }
+    }
+
+    function getRegionFromFilename(filename) {
+      const name = filename.toLowerCase();
+      if (name.includes('(world)') || name.includes('(wor)')) return 'wor';
+      if (name.includes('(europe)') || name.includes('(eu)')) return 'eu';
+      if (name.includes('(usa)') || name.includes('(us)')) return 'us';
+      if (name.includes('(japan)') || name.includes('(jp)')) return 'jp';
+      if (name.includes('(france)') || name.includes('(fr)')) return 'fr';
+      return 'wor';
+    }
+
+    function findMedia(medias, preferredRegion, imageType, logoType) {
       const mediaTypes = [];
       
-      // Add selected image type first
-      if (imageType && imageType !== 'box-2D') {
+      // Add selected image type
+      if (imageType && imageType !== 'none') {
         mediaTypes.push(imageType);
       }
-      // Add selected box type if different from image type
-      if (boxType && boxType !== 'none' && boxType !== imageType) {
-        mediaTypes.push(boxType);
-      }
+      
       // Add logo type if selected
       if (logoType && logoType !== 'none') {
         mediaTypes.push(logoType);
       }
-      // Default to box-2D if no specific types selected
-      if (!mediaTypes.includes('box-2D')) {
+      
+      // Default fallback types
+      if (mediaTypes.length === 0) {
         mediaTypes.push('box-2D');
       }
       
       // Define region priority
-      const regionPriority = preferredRegion ? [preferredRegion, 'eu', 'us', 'wor', null] : ['eu', 'us', 'wor', null];
+      const regionPriority = preferredRegion ? [preferredRegion, 'eu', 'us', 'jp', 'fr', 'wor', null] : ['eu', 'us', 'jp', 'fr', 'wor', null];
       
       // Search for each media type in priority order
       for (const mediaType of mediaTypes) {
-        log(`Searching for ${mediaType} media...`);
+        log(`Searching for ${mediaType}...`);
         
         for (const region of regionPriority) {
           const candidates = medias.filter(m => {
@@ -815,7 +705,7 @@ echo "Download complete! Processed $scriptCount files."`;
           
           if (candidates.length > 0) {
             const selected = candidates[0];
-            log(`Found ${mediaType} with region: ${selected.region || 'none'}`);
+            log(`Found ${mediaType} region: ${selected.region || 'none'}`);
             return selected;
           }
         }
@@ -825,9 +715,25 @@ echo "Download complete! Processed $scriptCount files."`;
       return null;
     }
 
+    function findVideo(medias, preferredRegion) {
+      const regionPriority = preferredRegion ? [preferredRegion, 'eu', 'us', 'wor', null] : ['eu', 'us', 'wor', null];
+      
+      for (const region of regionPriority) {
+        const candidates = medias.filter(m => {
+          const typeMatch = m.type === 'video';
+          const regionMatch = !region || m.region === region;
+          return typeMatch && regionMatch;
+        });
+        
+        if (candidates.length > 0) {
+          return candidates[0];
+        }
+      }
+      
+      return null;
+    }
 
-
-async function simulateScraping() {
+    async function simulateScraping() {
       const scrapingBtn = document.getElementById('scrapingBtn');
       const stopBtn = document.getElementById('stopBtn');
       const progressText = document.getElementById('progressText');
@@ -844,16 +750,13 @@ async function simulateScraping() {
       log('Iniciando scraping desde ScreenScraper...');
 
       const destFolderSelect = document.getElementById('destFolderSelect');
-      const videoFolderSelect = document.getElementById('videoFolderSelect');
       const customFolderInput = document.getElementById('customFolderInput');
       
       // Get media configuration
       const imageType = document.getElementById('imageType').value;
-      const boxType = document.getElementById('boxType').value;
       const logoType = document.getElementById('logoType').value;
       const preferredRegion = document.getElementById('preferredRegion').value;
-      const scanRatings = document.getElementById('scanRatings').checked;
-      const scrapeVideos = document.getElementById('scrapeVideos').checked;
+      const downloadVideos = document.getElementById('downloadVideos').checked;
       
       // Get credentials from form with validation
       const ssUser = document.getElementById('ssUser').value.trim();
@@ -861,7 +764,6 @@ async function simulateScraping() {
       const devid = document.getElementById('devId').value.trim();
       const devpass = document.getElementById('devPass').value;
       let destFolder = destFolderSelect.value;
-      let videoFolder = videoFolderSelect.value;
       if (destFolder === 'custom') {
         destFolder = customFolderInput.value.trim() || 'images';
       }
@@ -880,12 +782,10 @@ async function simulateScraping() {
         return;
       }
 
-      // Log credentials securely
       log('Usuario: ' + ssUser);
-      log('Contraseña: ' + (ssPass ? '[***]' : 'VACÍO'));
-      log('Imagenes: /' + destFolder + ' - Videos: /' + videoFolder);
+      log('Carpeta imagenes: /' + destFolder);
       log('Devid: ' + devid);
-      log('Devpass: ' + (devpass ? '[***]' : 'VACÍO'));
+      log('Modo: ' + downloadMode);
 
       let processed = 0;
       let updated = 0;
@@ -923,65 +823,67 @@ async function simulateScraping() {
           
           const searchName = cleanRomName(game.name);
           const region = getRegionFromFilename(game.name);
-          log('Buscando: ' + searchName + ' (' + systemKey + ') region:' + region);
+          log('Buscando: ' + searchName + ' (' + systemKey + ')');
           progressText.textContent = (processed + 1) + '/' + totalToProcess;
 
           try {
-            log('Scraping game: ' + game.name + ' with region: ' + region);
             const jeuData = await scrapeGame(ssUser, ssPass, systemeid, game.name, region, devid, devpass);
 
             if (jeuData && jeuData.jeu && jeuData.jeu.id) {
-              const jeuid = jeuData.jeu.id;
               const medias = jeuData.medias || [];
               let downloaded = false;
 
-              // Find media based on user preferences
-              const selectedMedia = findMedia(medias, preferredRegion, imageType, boxType, logoType);
-                if (selectedMedia && selectedMedia.url) {
-                  const cdnUrl = selectedMedia.url;
-                  log('Using CDN URL for image: ' + cdnUrl);
-                  
-                  // Verify CDN URL prefix (should start with https://cdn.screenscraper.fr/)
-                  if (!cdnUrl.startsWith('https://cdn.screenscraper.fr/')) {
-                    log('Warning: CDN URL does not start with expected prefix: ' + cdnUrl);
-                  }
-                  
-                  if (downloadMode === 'direct') {
-                    // Direct download mode
-                    const blob = await downloadImage(cdnUrl, ssUser, ssPass);
-                    if (blob && blob.size > 0) {
-                      // Filename matches ROM name exactly with .png extension
-                      const imageName = getBasename(game.name) + '.png';
-                      const saved = await saveImage(systemData, imageName, blob, destFolder);
-                      if (saved) {
-                        const imagePath = '/' + destFolder + '/' + imageName;
-                        await updateGamelistXml(systemData, game.path, imagePath);
-                        game.hasCover = true;
-                        game.imageName = imagePath;
-                        downloaded = true;
-                        log('Imagen: ' + imageName);
-                      }
-                    } else {
-                      log('Failed to download image or empty blob for ' + searchName);
+              // Find main image based on user preferences
+              const selectedMedia = findMedia(medias, preferredRegion, imageType, logoType);
+              if (selectedMedia && selectedMedia.url) {
+                const cdnUrl = selectedMedia.url;
+                log('Using URL: ' + cdnUrl);
+                
+                if (downloadMode === 'direct') {
+                  // Direct download mode
+                  const blob = await downloadImage(cdnUrl);
+                  if (blob && blob.size > 0) {
+                    const imageName = getBasename(game.name) + '.png';
+                    const saved = await saveImage(systemData, imageName, blob, destFolder);
+                    if (saved) {
+                      const imagePath = '/' + destFolder + '/' + imageName;
+                      await updateGamelistXml(systemData, game.path, imagePath);
+                      game.hasCover = true;
+                      game.imageName = imagePath;
+                      downloaded = true;
+                      log('Imagen guardada: ' + imageName);
                     }
                   } else {
-                    // Script generation mode
-                    addDownloadUrl(searchName, cdnUrl, destFolder);
-                    downloaded = true;
-                    log('Added URL for script generation: ' + searchName);
+                    log('Error al descargar imagen: ' + searchName);
                   }
                 } else {
-                  log('No valid media found for ' + searchName + ' with selected preferences');
+                  // Script generation mode
+                  addDownloadUrl(systemKey, searchName, cdnUrl, destFolder);
+                  downloaded = true;
+                  log('URL agregada para script: ' + searchName);
                 }
+              } else {
+                log('No media found for ' + searchName);
+              }
 
-              // Video download disabled - requires similar adaptation
-              // if (downloadVideos && !shouldStop) { ... }
+              // Handle video download
+              if (downloadVideos && !shouldStop && downloaded) {
+                const videoMedia = findVideo(medias, preferredRegion);
+                if (videoMedia && videoMedia.url) {
+                  const videoBlob = await downloadImage(videoMedia.url);
+                  if (videoBlob && videoBlob.size > 0) {
+                    const videoName = getBasename(game.name) + '.mp4';
+                    await saveVideo(systemData, videoName, videoBlob, 'media');
+                    log('Video guardado: ' + videoName);
+                  }
+                }
+              }
 
               if (downloaded) {
                 updated++;
               }
             } else {
-              log('Juego no encontrado');
+              log('Juego no encontrado: ' + searchName);
             }
           } catch (e) {
             log('Error: ' + e.message);
@@ -1014,11 +916,11 @@ async function simulateScraping() {
       if (!systemCard) return;
       
       const progressBar = systemCard.querySelector('.progress-fill');
-      const progressText = systemCard.querySelector('.system-progress-text');
-      if (progressBar && progressText) {
+      const progressTextEl = systemCard.querySelector('.system-progress-text');
+      if (progressBar && progressTextEl) {
         const percentage = Math.round((current / total) * 100);
         progressBar.style.width = `${percentage}%`;
-        progressText.textContent = current + '/' + total + ' downloaded';
+        progressTextEl.textContent = current + '/' + total + ' downloaded';
       }
     }
 
@@ -1137,16 +1039,13 @@ async function simulateScraping() {
     const selectFolderBtn = document.getElementById('selectFolderBtn');
     const scrapingBtn = document.getElementById('scrapingBtn');
     const stopBtn = document.getElementById('stopBtn');
-    const selectAllBtn = document.getElementById('selectAllBtn');
-    const deselectAllBtn = document.getElementById('deselectAllBtn');
     const testLoginBtn = document.getElementById('testLoginBtn');
     const destFolderSelect = document.getElementById('destFolderSelect');
+    const generateScriptsBtn = document.getElementById('generateScriptsBtn');
     
     if (selectFolderBtn) selectFolderBtn.addEventListener('click', handleSelectFolder);
     if (scrapingBtn) scrapingBtn.addEventListener('click', simulateScraping);
     if (stopBtn) stopBtn.addEventListener('click', stopScraping);
-    if (selectAllBtn) selectAllBtn.addEventListener('click', selectAllSystems);
-    if (deselectAllBtn) deselectAllBtn.addEventListener('click', deselectAllSystems);
     if (testLoginBtn) testLoginBtn.addEventListener('click', function() {
       const user = document.getElementById('ssUser')?.value.trim() || '';
       const pass = document.getElementById('ssPass')?.value || '';
@@ -1156,6 +1055,13 @@ async function simulateScraping() {
         testLogin(user, pass, devid, devpass);
       } else {
         log('Enter user and password');
+      }
+    });
+    if (generateScriptsBtn) generateScriptsBtn.addEventListener('click', function() {
+      if (downloadUrls.length > 0) {
+        generateScripts();
+      } else {
+        log('No URLs accumulated. Run scraping in "Scripts" mode first.');
       }
     });
     
@@ -1179,30 +1085,14 @@ async function simulateScraping() {
         customInput.classList.add('hidden');
       }
     });
-    
-    // Download mode change handler
-    document.addEventListener('change', function(e) {
-      if (e.target.name === 'downloadMode') {
-        const scriptControls = document.getElementById('scriptControls');
-        if (e.target.value === 'script') {
-          scriptControls.classList.remove('hidden');
-        } else {
-          scriptControls.classList.add('hidden');
-        }
-      }
+
+    // Load saved credentials
+    window.addEventListener('load', function() {
+      const savedUser = localStorage.getItem('ssUser');
+      const savedPass = localStorage.getItem('ssPass');
+      if (savedUser) document.getElementById('ssUser').value = savedUser;
+      if (savedPass) document.getElementById('ssPass').value = savedPass;
     });
-    
-    // Download scripts button handler
-    const downloadScriptsBtn = document.getElementById('downloadScriptsBtn');
-    if (downloadScriptsBtn) {
-      downloadScriptsBtn.addEventListener('click', function() {
-        if (downloadUrls.size > 0) {
-          generateScripts();
-        } else {
-          log('No URLs found for script generation');
-        }
-      });
-    }
   </script>
 </body>
 </html>
