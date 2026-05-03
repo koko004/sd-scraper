@@ -60,18 +60,17 @@
 
     <div id="statsSection" class="hidden">
       <div class="card mb-4">
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-          <div class="flex items-center gap-4">
-            <h3 class="font-medium">Download Settings</h3>
-            <div class="flex items-center gap-2">
-              <label class="text-sm font-medium">Images Folder:</label>
-              <select id="destFolderSelect" class="border border-gray-300 rounded px-3 py-2 text-sm">
-                <option value="images">/images</option>
-                <option value="media">/media</option>
-                <option value="custom">Custom</option>
-              </select>
-              <input id="customFolderInput" type="text" placeholder="Nombre carpeta" class="border border-gray-300 rounded px-3 py-2 text-sm w-32 hidden">
-            </div>
+        <!-- Folder Configuration -->
+        <div class="flex flex-wrap items-center gap-4 mb-4">
+          <h3 class="font-medium">Configuracion</h3>
+          <div class="flex items-center gap-2">
+            <label class="text-sm font-medium">Carpeta Imagenes:</label>
+            <select id="destFolderSelect" class="border border-gray-300 rounded px-3 py-2 text-sm">
+              <option value="images">/images</option>
+              <option value="media">/media</option>
+              <option value="custom">Personalizada</option>
+            </select>
+            <input id="customFolderInput" type="text" placeholder="Nombre carpeta" class="border border-gray-300 rounded px-3 py-2 text-sm w-32 hidden">
           </div>
         </div>
         
@@ -83,29 +82,41 @@
           <input id="devId" type="text" placeholder="DevID" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" title="Developer ID">
           <input id="devPass" type="password" placeholder="DevPass" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" title="Developer Password">
           <label class="flex items-center gap-1 text-sm">
-            <input type="checkbox" id="saveCredentials" class="w-4 h-4"> Remember
+            <input type="checkbox" id="saveCredentials" class="w-4 h-4"> Recordar
           </label>
           <button type="button" id="testLoginBtn" class="text-sm bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Test</button>
         </div>
 
         <!-- Media Configuration Panel - Grid Layout -->
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+          <div class="col-span-full text-sm font-semibold text-gray-700 mb-2">Opciones de Media</div>
+          
           <!-- Image Type Selection -->
           <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium">Imagen Principal:</label>
+            <label class="text-sm font-medium">Tipo de Imagen:</label>
             <select id="imageType" class="border border-gray-300 rounded px-3 py-2 text-sm">
-              <option value="box-2D">Caja 2D</option>
-              <option value="box-3D">Caja 3D</option>
               <option value="screenshot">Screenshot</option>
               <option value="titlescreen">Titlescreen</option>
               <option value="mixrbv1">Mix V1</option>
               <option value="mixrbv2">Mix V2</option>
+              <option value="box-2D">Caja 2D</option>
+              <option value="box-3D">Caja 3D</option>
+            </select>
+          </div>
+          
+          <!-- Box Type Selection -->
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium">Tipo de Caja:</label>
+            <select id="boxType" class="border border-gray-300 rounded px-3 py-2 text-sm">
+              <option value="none">Ninguno</option>
+              <option value="box-2D">Caja 2D</option>
+              <option value="box-3D">Caja 3D</option>
             </select>
           </div>
           
           <!-- Logo Type Selection -->
           <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium">Logo:</label>
+            <label class="text-sm font-medium">Tipo de Logo:</label>
             <select id="logoType" class="border border-gray-300 rounded px-3 py-2 text-sm">
               <option value="none">Ninguno</option>
               <option value="wheel">Rueda</option>
@@ -115,28 +126,32 @@
           
           <!-- Region Selection -->
           <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium">Region:</label>
+            <label class="text-sm font-medium">Region Preferida:</label>
             <select id="preferredRegion" class="border border-gray-300 rounded px-3 py-2 text-sm">
               <option value="eu">EU (Europa)</option>
               <option value="us">US (USA)</option>
               <option value="jp">JP (Japan)</option>
               <option value="fr">FR (France)</option>
-              <option value="wor">Wor (World)</option>
             </select>
           </div>
           
-          <!-- Videos Checkbox -->
+          <!-- Extras -->
           <div class="flex flex-col gap-1">
             <label class="text-sm font-medium">Extras:</label>
-            <label class="flex items-center gap-2 text-sm">
-              <input type="checkbox" id="downloadVideos" class="w-4 h-4"> Descargar Videos
-            </label>
+            <div class="flex flex-col gap-1">
+              <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" id="scanRatings" class="w-4 h-4"> Escanear calificaciones
+              </label>
+              <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" id="downloadVideos" class="w-4 h-4"> Descargar Videos (/media/)
+              </label>
+            </div>
           </div>
           
           <!-- Download Mode -->
           <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium">Modo:</label>
-            <div class="flex gap-3">
+            <label class="text-sm font-medium">Modo de Descarga:</label>
+            <div class="flex gap-3 mt-1">
               <label class="flex items-center gap-1 text-sm">
                 <input type="radio" name="downloadMode" value="direct" checked> Directo
               </label>
@@ -145,26 +160,26 @@
               </label>
             </div>
           </div>
-          
-          <!-- Script Generation Button -->
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium">Scripts:</label>
-            <button id="generateScriptsBtn" class="btn bg-green-600 text-white hover:bg-green-700 text-sm py-1">
-              Generar Scripts de Descarga
-            </button>
-          </div>
         </div>
         
-        <!-- Script Info -->
-        <div id="scriptInfo" class="text-sm text-gray-600 hidden">
-          URLs acumuladas: <span id="scriptCount">0</span>
+        <!-- Script Generator Button -->
+        <div class="flex items-center gap-4 mt-4">
+          <button id="generateScriptsBtn" class="btn bg-green-600 text-white hover:bg-green-700 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            Generar Scripts de Respaldo
+          </button>
+          <div id="scriptInfo" class="text-sm text-gray-600 hidden">
+            URLs acumuladas: <span id="scriptCount">0</span>
+          </div>
         </div>
       </div>
 
       <div class="grid grid-cols-3 gap-4 mb-6">
         <div class="card text-center">
           <div class="text-2xl font-bold text-indigo-600" id="totalSystems">0</div>
-          <div class="text-sm text-gray-600">Systems</div>
+          <div class="text-sm text-gray-600">Sistemas</div>
         </div>
         <div class="card text-center">
           <div class="text-2xl font-bold text-indigo-600" id="totalRoms">0</div>
@@ -172,7 +187,7 @@
         </div>
         <div class="card text-center">
           <div class="text-2xl font-bold text-yellow-600" id="totalMissing">0</div>
-          <div class="text-sm text-gray-600">No Covers</div>
+          <div class="text-sm text-gray-600">Sin Cover</div>
         </div>
       </div>
 
@@ -190,7 +205,7 @@
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
           </svg>
-          Start
+          Iniciar Scraping
         </button>
         <button id="stopBtn" class="btn bg-red-600 text-white hover:bg-red-700 flex items-center gap-2 hidden">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,7 +236,7 @@
     let isScraping = false;
     let shouldStop = false;
     let downloadUrls = [];
-    let processedGames = 0;
+    let failedDownloads = [];
 
     const isChrome = /Chrome/.test(navigator.userAgent) && /Google/.test(navigator.vendor);
     const isEdge = /Edg/.test(navigator.userAgent);
@@ -236,7 +251,7 @@
     function log(msg) {
       const logEl = document.getElementById('logContent');
       const time = new Date().toLocaleTimeString();
-      logEl.innerHTML += `<div>[${time}] ${msg}</div>`;
+      logEl.innerHTML += '<div>[' + time + '] ' + msg + '</div>';
       logEl.scrollTop = logEl.scrollHeight;
     }
 
@@ -266,14 +281,14 @@
         if (entry.kind === 'file') {
           const ext = getExtension(entry.name).toLowerCase();
           if (ROM_EXTENSIONS.includes(ext)) {
-            results.roms.push({ name: entry.name, path: `${path}/${entry.name}` });
+            results.roms.push({ name: entry.name, path: path + '/' + entry.name });
           } else if (IMAGE_EXTENSIONS.includes(ext)) {
-            results.images.push({ name: entry.name, path: `${path}/${entry.name}` });
+            results.images.push({ name: entry.name, path: path + '/' + entry.name });
           } else if (VIDEO_EXTENSIONS.includes(ext)) {
-            results.videos.push({ name: entry.name, path: `${path}/${entry.name}` });
+            results.videos.push({ name: entry.name, path: path + '/' + entry.name });
           }
         } else if (entry.kind === 'directory') {
-          results.folders.push({ name: entry.name, handle: entry, path: `${path}/${entry.name}` });
+          results.folders.push({ name: entry.name, handle: entry, path: path + '/' + entry.name });
         }
       }
       
@@ -362,18 +377,14 @@
         }
 
         const gameName = getBasename(gameFile);
-        const imageName = imageFile || `${gameName}-image.png`;
+        const imageName = imageFile || gameName + '-image.png';
 
-        if (xml.includes(`<path>${gameFile}</path>`)) {
-          const imgRegex = new RegExp(`(<path>${gameName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\\\?[^<]*</path>)[\\s\\S]*?(<image>[^<]*)`, 'i');
-          xml = xml.replace(imgRegex, `$1<image>${imageName}</image>`);
+        if (xml.includes('<path>' + gameFile + '</path>')) {
+          const imgRegex = new RegExp('(<path>' + gameName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\\\?[^<]*</path>)[\\s\\S]*?(<image>[^<]*)', 'i');
+          xml = xml.replace(imgRegex, '$1<image>' + imageName + '</image>');
         } else {
-          const gameEntry = `  <game>
-    <path>${gameFile}</path>
-    <name>${gameName}</name>
-    <image>${imageName}</image>
-  </game>`;
-          xml = xml.replace('<gameList>', `<gameList>\n${gameEntry}`);
+          const gameEntry = '  <game>\n    <path>' + gameFile + '</path>\n    <name>' + gameName + '</name>\n    <image>' + imageName + '</image>\n  </game>';
+          xml = xml.replace('<gameList>', '<gameList>\n' + gameEntry);
         }
 
         const fileHandle = await systemData.folderHandle.getFileHandle('gamelist.xml', { create: true });
@@ -390,7 +401,7 @@
 
     const SCREENSCRAPER_API = 'https://api.screenscraper.fr/api2';
     const SOFT_NAME = 'SDCoverManager';
-    const PROXY_URL = 'https://www.sd-scrapper.gamer.gd/proxy.php?url=';
+    const MY_PROXY = './proxy.php?url=';
     
     const SYSTEM_IDS = {
       'nes': 3, 'snes': 4, 'gb': 5, 'gbc': 6, 'gba': 7, 
@@ -411,7 +422,7 @@
         const url = SCREENSCRAPER_API + '/ssuserInfos.php?' + params;
         const response = await fetch(url);
         if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
+          throw new Error('HTTP error: ' + response.status);
         }
         const text = await response.text();
         if (text.startsWith('Erreur')) {
@@ -442,14 +453,14 @@
     }
 
     async function scrapeGame(user, pass, systemeid, romName, region, devid, devpass) {
-      const url = `${SCREENSCRAPER_API}/jeuInfos.php?output=json&devid=${encodeURIComponent(devid)}&devpassword=${encodeURIComponent(devpass)}&softname=${encodeURIComponent(SOFT_NAME)}&ssid=${encodeURIComponent(user)}&sspassword=${encodeURIComponent(pass)}&systemeid=${systemeid}&romnom=${encodeURIComponent(romName)}`;
+      const url = SCREENSCRAPER_API + '/jeuInfos.php?output=json&devid=' + encodeURIComponent(devid) + '&devpassword=' + encodeURIComponent(devpass) + '&softname=' + encodeURIComponent(SOFT_NAME) + '&ssid=' + encodeURIComponent(user) + '&sspassword=' + encodeURIComponent(pass) + '&systemeid=' + systemeid + '&romnom=' + encodeURIComponent(romName);
       
-      log('Requesting game info: ' + romName);
+      log('Buscando: ' + romName);
       
       try {
         const response = await fetch(url);
         if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
+          throw new Error('HTTP error: ' + response.status);
         }
         const text = await response.text();
         if (text.startsWith('Erreur')) {
@@ -462,8 +473,7 @@
           const jeu = data.response.jeu;
           const medias = data.response.jeu.medias || [];
           const results = { jeu: { id: jeu.id, nom: jeu.nom }, medias: medias };
-          log('Game found: ' + jeu.nom + ' (ID: ' + jeu.id + ')');
-          log('Media files found: ' + medias.length);
+          log('Encontrado: ' + jeu.nom + ' (' + medias.length + ' media)');
           return results;
         } else if (data.error) {
           log('ScreenScraper API error: ' + data.error);
@@ -481,40 +491,40 @@
       const RETRY_DELAY = 2000;
 
       if (!cdnUrl || cdnUrl.trim() === '') {
-        log('Error: Empty CDN URL');
+        log('Error: URL CDN vacia');
         return null;
       }
 
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
-          const proxyUrl = PROXY_URL + encodeURIComponent(cdnUrl);
-          log(`Downloading (attempt ${attempt}/${MAX_RETRIES}): ${cdnUrl}`);
+          const proxyUrl = MY_PROXY + encodeURIComponent(cdnUrl);
+          log('Descargando (intento ' + attempt + '/' + MAX_RETRIES + '): ' + cdnUrl.substring(0, 50) + '...');
 
           const response = await fetch(proxyUrl);
 
           if (response.ok) {
             const blob = await response.blob();
             if (blob.size > 0) {
-              log(`Download successful: ${blob.size} bytes`);
+              log('Descarga exitosa: ' + blob.size + ' bytes');
               return blob;
             } else {
-              throw new Error('Empty blob received from proxy');
+              throw new Error('Blob vacio recibido del proxy');
             }
           } else if (response.status === 408 || response.status === 522 || response.status === 504) {
-            log(`Proxy error ${response.status}, retrying in ${RETRY_DELAY}ms...`);
+            log('Error proxy ' + response.status + ', reintentando en ' + RETRY_DELAY + 'ms...');
             if (attempt < MAX_RETRIES) {
               await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
               continue;
             } else {
-              throw new Error(`Proxy failed with status ${response.status} after ${MAX_RETRIES} retries`);
+              throw new Error('Proxy falló con estado ' + response.status + ' despues de ' + MAX_RETRIES + ' intentos');
             }
           } else {
-            throw new Error(`Proxy failed with status ${response.status}`);
+            throw new Error('Proxy falló con estado ' + response.status);
           }
         } catch (e) {
-          log(`Download error (attempt ${attempt}/${MAX_RETRIES}): ${e.message}`);
+          log('Error descarga (intento ' + attempt + '/' + MAX_RETRIES + '): ' + e.message);
           if (attempt === MAX_RETRIES) {
-            log('Max retries reached, giving up on this image.');
+            log('Maximo de intentos alcanzado, saltando esta imagen.');
             return null;
           }
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
@@ -530,8 +540,7 @@
         url: imageUrl,
         folder: destFolder || 'images'
       });
-      processedGames++;
-      log(`Added URL for ${gameName} (${processedGames} total)`);
+      log('URL agregada para script: ' + gameName);
     }
 
     function generateScripts() {
@@ -539,67 +548,64 @@
       const scriptCount = urls.length;
       
       if (scriptCount === 0) {
-        log('No URLs to generate scripts');
+        log('No hay URLs para generar scripts');
         return;
       }
       
       document.getElementById('scriptCount').textContent = scriptCount;
       document.getElementById('scriptInfo').classList.remove('hidden');
       
-      // Generate PowerShell script for Windows
+      // Generate PowerShell script for Windows (descargar_r36s.bat)
       let psContent = '@echo off\n';
-      psContent += 'REM PowerShell script for downloading covers\n';
-      psContent += 'REM Generated by SD Cover Manager\n';
-      psContent += 'REM Total games: ' + scriptCount + '\n\n';
-      psContent += 'echo Starting download of ' + scriptCount + ' files...\n\n';
+      psContent += 'REM Script de descarga para SD Cover Manager\n';
+      psContent += 'REM Total archivos: ' + scriptCount + '\n\n';
+      psContent += 'echo Iniciando descarga de ' + scriptCount + ' archivos...\n\n';
       
-      urls.forEach((u, i) => {
-        psContent += 'echo [' + (i+1) + '/' + scriptCount + '] Downloading ' + u.gameName + '.png\n';
+      urls.forEach(function(u, i) {
+        psContent += 'echo [' + (i+1) + '/' + scriptCount + '] Descargando ' + u.gameName + '.png\n';
         psContent += 'powershell -Command "Invoke-WebRequest -Uri ' + "'" + u.url + "'" + ' -OutFile ' + "'" + u.system + '/' + u.folder + '/' + u.gameName + '.png' + "'" + ' -TimeoutSec 30"\n';
       });
       
-      psContent += '\necho Download complete! Processed ' + scriptCount + ' files.\npause';
+      psContent += '\necho Descarga completada! ' + scriptCount + ' archivos procesados.\npause';
 
-      // Generate Linux script
+      // Generate Linux script (descargar_r36s.sh)
       let shContent = '#!/bin/bash\n';
-      shContent += '# Linux script for downloading covers\n';
-      shContent += '# Generated by SD Cover Manager\n';
-      shContent += '# Total games: ' + scriptCount + '\n\n';
-      shContent += 'echo "Starting download of ' + scriptCount + ' files..."\n\n';
+      shContent += '# Script de descarga para SD Cover Manager\n';
+      shContent += '# Total archivos: ' + scriptCount + '\n\n';
+      shContent += 'echo "Iniciando descarga de ' + scriptCount + ' archivos..."\n\n';
       
-      urls.forEach((u, i) => {
-        shContent += 'echo "[' + (i+1) + '/' + scriptCount + '] Downloading ' + u.gameName + '.png"\n';
+      urls.forEach(function(u, i) {
+        shContent += 'echo "[' + (i+1) + '/' + scriptCount + '] Descargando ' + u.gameName + '.png"\n';
         shContent += 'mkdir -p "' + u.system + '/' + u.folder + '"\n';
-        shContent += 'curl -L -s --max-time 30 "' + u.url + '" -o "' + u.system + '/' + u.folder + '/' + u.gameName + '.png" || echo "Failed: ' + u.gameName + '"\n';
+        shContent += 'curl -L -s --max-time 30 "' + u.url + '" -o "' + u.system + '/' + u.folder + '/' + u.gameName + '.png" || echo "Fallido: ' + u.gameName + '"\n';
       });
       
-      shContent += '\necho "Download complete! Processed ' + scriptCount + ' files."';
+      shContent += '\necho "Descarga completada! ' + scriptCount + ' archivos procesados."';
 
       // Download PowerShell script
       const psBlob = new Blob([psContent], { type: 'text/plain' });
       const psUrl = URL.createObjectURL(psBlob);
       const psLink = document.createElement('a');
       psLink.href = psUrl;
-      psLink.download = 'descargar_windows.bat';
+      psLink.download = 'descargar_r36s.bat';
       psLink.click();
       
       // Download Linux script after short delay
-      setTimeout(() => {
+      setTimeout(function() {
         const shBlob = new Blob([shContent], { type: 'text/plain' });
         const shUrl = URL.createObjectURL(shBlob);
         const shLink = document.createElement('a');
         shLink.href = shUrl;
-        shLink.download = 'descargar_linux.sh';
+        shLink.download = 'descargar_r36s.sh';
         shLink.click();
         
-        // Clean up
-        setTimeout(() => {
+        setTimeout(function() {
           URL.revokeObjectURL(psUrl);
           URL.revokeObjectURL(shUrl);
         }, 1000);
       }, 100);
       
-      log(`Generated scripts for ${scriptCount} files`);
+      log('Generados scripts para ' + scriptCount + ' archivos');
     }
 
     async function ensureFolderExists(systemHandle, folderName) {
@@ -625,10 +631,10 @@
         await writable.write(blob);
         await writable.close();
         
-        log('Saved image: ' + imageName + ' in ' + destFolder);
+        log('Imagen guardada: ' + imageName + ' en ' + destFolder);
         return true;
       } catch (e) {
-        log('Error saving image: ' + e.message);
+        log('Error guardando imagen: ' + e.message);
         console.error('Save image error:', e);
         return false;
       }
@@ -649,10 +655,10 @@
         await writable.write(blob);
         await writable.close();
         
-        log('Saved video: ' + videoName + ' in ' + destFolder);
+        log('Video guardado: ' + videoName + ' en ' + destFolder);
         return true;
       } catch (e) {
-        log('Error saving video: ' + e.message);
+        log('Error guardando video: ' + e.message);
         console.error('Save video error:', e);
         return false;
       }
@@ -668,12 +674,17 @@
       return 'wor';
     }
 
-    function findMedia(medias, preferredRegion, imageType, logoType) {
+    function findMedia(medias, preferredRegion, imageType, boxType, logoType) {
       const mediaTypes = [];
       
-      // Add selected image type
+      // Add selected image type first
       if (imageType && imageType !== 'none') {
         mediaTypes.push(imageType);
+      }
+      
+      // Add box type if different from image
+      if (boxType && boxType !== 'none' && boxType !== imageType) {
+        mediaTypes.push(boxType);
       }
       
       // Add logo type if selected
@@ -681,44 +692,46 @@
         mediaTypes.push(logoType);
       }
       
-      // Default fallback types
+      // Default fallback
       if (mediaTypes.length === 0) {
-        mediaTypes.push('box-2D');
+        mediaTypes.push('screenshot', 'box-2D');
       }
       
       // Define region priority
       const regionPriority = preferredRegion ? [preferredRegion, 'eu', 'us', 'jp', 'fr', 'wor', null] : ['eu', 'us', 'jp', 'fr', 'wor', null];
       
       // Search for each media type in priority order
-      for (const mediaType of mediaTypes) {
-        log(`Searching for ${mediaType}...`);
+      for (var i = 0; i < mediaTypes.length; i++) {
+        var mediaType = mediaTypes[i];
         
-        for (const region of regionPriority) {
-          const candidates = medias.filter(m => {
-            const typeMatch = m.type === mediaType;
-            const regionMatch = !region || m.region === region;
+        for (var j = 0; j < regionPriority.length; j++) {
+          var region = regionPriority[j];
+          var candidates = medias.filter(function(m) {
+            var typeMatch = m.type === mediaType;
+            var regionMatch = !region || m.region === region;
             return typeMatch && regionMatch;
           });
           
           if (candidates.length > 0) {
-            const selected = candidates[0];
-            log(`Found ${mediaType} region: ${selected.region || 'none'}`);
+            var selected = candidates[0];
+            log('Encontrado ' + mediaType + ' region: ' + (selected.region || 'ninguna'));
             return selected;
           }
         }
       }
       
-      log(`No media found for types: ${mediaTypes.join(', ')}`);
+      log('No se encontró media para tipos: ' + mediaTypes.join(', '));
       return null;
     }
 
     function findVideo(medias, preferredRegion) {
-      const regionPriority = preferredRegion ? [preferredRegion, 'eu', 'us', 'wor', null] : ['eu', 'us', 'wor', null];
+      var regionPriority = preferredRegion ? [preferredRegion, 'eu', 'us', 'wor', null] : ['eu', 'us', 'wor', null];
       
-      for (const region of regionPriority) {
-        const candidates = medias.filter(m => {
-          const typeMatch = m.type === 'video';
-          const regionMatch = !region || m.region === region;
+      for (var i = 0; i < regionPriority.length; i++) {
+        var region = regionPriority[i];
+        var candidates = medias.filter(function(m) {
+          var typeMatch = m.type === 'video';
+          var regionMatch = !region || m.region === region;
           return typeMatch && regionMatch;
         });
         
@@ -731,12 +744,13 @@
     }
 
     async function simulateScraping() {
-      const scrapingBtn = document.getElementById('scrapingBtn');
-      const stopBtn = document.getElementById('stopBtn');
-      const progressText = document.getElementById('progressText');
+      var scrapingBtn = document.getElementById('scrapingBtn');
+      var stopBtn = document.getElementById('stopBtn');
+      var progressText = document.getElementById('progressText');
       
       isScraping = true;
       shouldStop = false;
+      failedDownloads = [];
       scrapingBtn.disabled = true;
       stopBtn.classList.remove('hidden');
       scrapingBtn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Procesando...';
@@ -744,134 +758,136 @@
       document.getElementById('progressGlobal').classList.add('flex');
 
       document.getElementById('logSection').classList.remove('hidden');
-      log('Iniciando scraping desde ScreenScraper...');
+      log('=== INICIANDO SCRAPING ===');
 
-      const destFolderSelect = document.getElementById('destFolderSelect');
-      const customFolderInput = document.getElementById('customFolderInput');
+      var destFolderSelect = document.getElementById('destFolderSelect');
+      var customFolderInput = document.getElementById('customFolderInput');
       
       // Get media configuration
-      const imageType = document.getElementById('imageType').value;
-      const logoType = document.getElementById('logoType').value;
-      const preferredRegion = document.getElementById('preferredRegion').value;
-      const downloadVideos = document.getElementById('downloadVideos').checked;
+      var imageType = document.getElementById('imageType').value;
+      var boxType = document.getElementById('boxType').value;
+      var logoType = document.getElementById('logoType').value;
+      var preferredRegion = document.getElementById('preferredRegion').value;
+      var scanRatings = document.getElementById('scanRatings').checked;
+      var downloadVideos = document.getElementById('downloadVideos').checked;
       
-      // Get credentials from form with validation
-      const ssUser = document.getElementById('ssUser').value.trim();
-      const ssPass = document.getElementById('ssPass').value;
-      const devid = document.getElementById('devId').value.trim();
-      const devpass = document.getElementById('devPass').value;
-      let destFolder = destFolderSelect.value;
+      // Get credentials
+      var ssUser = document.getElementById('ssUser').value.trim();
+      var ssPass = document.getElementById('ssPass').value;
+      var devid = document.getElementById('devId').value.trim();
+      var devpass = document.getElementById('devPass').value;
+      var destFolder = destFolderSelect.value;
       if (destFolder === 'custom') {
         destFolder = customFolderInput.value.trim() || 'images';
       }
       
       // Get download mode
-      const downloadMode = document.querySelector('input[name="downloadMode"]:checked').value;
+      var downloadMode = document.querySelector('input[name="downloadMode"]:checked').value;
 
       // Validate credentials
       if (!ssUser || !ssPass) {
-        log('ERROR: Enter ScreenScraper user and password');
+        log('ERROR: Ingresa usuario y password de ScreenScraper');
         isScraping = false;
         scrapingBtn.disabled = false;
         stopBtn.classList.add('hidden');
         document.getElementById('progressGlobal').classList.add('hidden');
-        scrapingBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Download Covers';
+        scrapingBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Iniciar Scraping';
         return;
       }
 
       log('Usuario: ' + ssUser);
-      log('Carpeta imagenes: /' + destFolder);
-      log('Devid: ' + devid);
-      log('Modo: ' + downloadMode);
+      log('Carpeta: /' + destFolder);
+      log('Imagen: ' + imageType + ' | Region: ' + preferredRegion);
+      log('Modo: ' + (downloadMode === 'direct' ? 'Directo' : 'Scripts'));
 
-      let processed = 0;
-      let updated = 0;
-      let totalToProcess = 0;
-      for (const key of selectedSystems) {
-        const data = scannedData[key];
+      var processed = 0;
+      var updated = 0;
+      var totalToProcess = 0;
+      for (var key in selectedSystems) {
+        var data = scannedData[key];
         if (data) {
-          totalToProcess += data.games.filter(g => !g.hasCover).length;
+          totalToProcess += data.games.filter(function(g) { return !g.hasCover; }).length;
         }
       }
 
-      for (const systemKey of selectedSystems) {
+      for (var systemKey in selectedSystems) {
         if (shouldStop) {
           log('Proceso detenido por el usuario');
           break;
         }
         
-        const systemData = scannedData[systemKey];
+        var systemData = scannedData[systemKey];
         if (!systemData) continue;
 
-        const systemeid = SYSTEM_IDS[systemKey] || 0;
+        var systemeid = SYSTEM_IDS[systemKey] || 0;
         if (!systemeid) {
           log('Sistema no soportado: ' + systemKey);
           continue;
         }
 
-        const gamesWithoutCover = systemData.games.filter(g => !g.hasCover);
-        let systemProcessed = 0;
+        var gamesWithoutCover = systemData.games.filter(function(g) { return !g.hasCover; });
+        var systemProcessed = 0;
         
-        for (const game of gamesWithoutCover) {
+        for (var i = 0; i < gamesWithoutCover.length; i++) {
           if (shouldStop) {
             log('Proceso detenido por el usuario');
             break;
           }
           
-          const searchName = cleanRomName(game.name);
-          const region = getRegionFromFilename(game.name);
-          log('Buscando: ' + searchName + ' (' + systemKey + ')');
+          var game = gamesWithoutCover[i];
+          var searchName = cleanRomName(game.name);
+          var region = getRegionFromFilename(game.name);
           progressText.textContent = (processed + 1) + '/' + totalToProcess;
 
           try {
-            const jeuData = await scrapeGame(ssUser, ssPass, systemeid, game.name, region, devid, devpass);
+            var jeuData = await scrapeGame(ssUser, ssPass, systemeid, game.name, region, devid, devpass);
 
             if (jeuData && jeuData.jeu && jeuData.jeu.id) {
-              const medias = jeuData.medias || [];
-              let downloaded = false;
+              var medias = jeuData.medias || [];
+              var downloaded = false;
 
               // Find main image based on user preferences
-              const selectedMedia = findMedia(medias, preferredRegion, imageType, logoType);
+              var selectedMedia = findMedia(medias, preferredRegion, imageType, boxType, logoType);
               if (selectedMedia && selectedMedia.url) {
-                const cdnUrl = selectedMedia.url;
-                log('Using URL: ' + cdnUrl);
+                var cdnUrl = selectedMedia.url;
                 
                 if (downloadMode === 'direct') {
                   // Direct download mode
-                  const blob = await downloadImage(cdnUrl);
+                  var blob = await downloadImage(cdnUrl);
                   if (blob && blob.size > 0) {
-                    const imageName = getBasename(game.name) + '.png';
-                    const saved = await saveImage(systemData, imageName, blob, destFolder);
+                    var imageName = getBasename(game.name) + '.png';
+                    var saved = await saveImage(systemData, imageName, blob, destFolder);
                     if (saved) {
-                      const imagePath = '/' + destFolder + '/' + imageName;
+                      var imagePath = '/' + destFolder + '/' + imageName;
                       await updateGamelistXml(systemData, game.path, imagePath);
                       game.hasCover = true;
                       game.imageName = imagePath;
                       downloaded = true;
-                      log('Imagen guardada: ' + imageName);
+                      log('COVER: ' + imageName);
                     }
                   } else {
-                    log('Error al descargar imagen: ' + searchName);
+                    log('FALLO imagen: ' + searchName);
+                    failedDownloads.push(searchName);
                   }
                 } else {
                   // Script generation mode
                   addDownloadUrl(systemKey, searchName, cdnUrl, destFolder);
                   downloaded = true;
-                  log('URL agregada para script: ' + searchName);
                 }
               } else {
-                log('No media found for ' + searchName);
+                log('Sin media para: ' + searchName);
+                failedDownloads.push(searchName);
               }
 
               // Handle video download
-              if (downloadVideos && !shouldStop && downloaded) {
-                const videoMedia = findVideo(medias, preferredRegion);
+              if (downloadVideos && downloaded && !shouldStop) {
+                var videoMedia = findVideo(medias, preferredRegion);
                 if (videoMedia && videoMedia.url) {
-                  const videoBlob = await downloadImage(videoMedia.url);
+                  var videoBlob = await downloadImage(videoMedia.url);
                   if (videoBlob && videoBlob.size > 0) {
-                    const videoName = getBasename(game.name) + '.mp4';
+                    var videoName = getBasename(game.name) + '.mp4';
                     await saveVideo(systemData, videoName, videoBlob, 'media');
-                    log('Video guardado: ' + videoName);
+                    log('VIDEO: ' + videoName);
                   }
                 }
               }
@@ -880,115 +896,100 @@
                 updated++;
               }
             } else {
-              log('Juego no encontrado: ' + searchName);
+              log('No encontrado: ' + searchName);
+              failedDownloads.push(searchName);
             }
           } catch (e) {
             log('Error: ' + e.message);
+            failedDownloads.push(searchName);
           }
 
           systemProcessed++;
           processed++;
           renderSystemsProgress(systemKey, systemProcessed, gamesWithoutCover.length);
-          await new Promise(r => setTimeout(r, 1000));
+          await new Promise(function(r) { setTimeout(r, 1000); });
         }
       }
 
-      log('Scraping completado! Covers: ' + updated);
+      log('=== SCRAPING COMPLETADO ===');
+      log('Covers actualizados: ' + updated);
+      
+      if (failedDownloads.length > 0) {
+        log('FALLOS (' + failedDownloads.length + '): ' + failedDownloads.slice(0, 5).join(', ') + (failedDownloads.length > 5 ? '...' : ''));
+      }
       
       isScraping = false;
       scrapingBtn.disabled = false;
       stopBtn.classList.add('hidden');
-      scrapingBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Download Covers';
+      scrapingBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Iniciar Scraping';
 
       renderSystems();
     }
 
     function stopScraping() {
       shouldStop = true;
-      log('Stopping process...');
+      log('Deteniendo proceso...');
     }
 
     function renderSystemsProgress(systemKey, current, total) {
-      const systemCard = document.getElementById(`system-${systemKey}`);
+      var systemCard = document.getElementById('system-' + systemKey);
       if (!systemCard) return;
       
-      const progressBar = systemCard.querySelector('.progress-fill');
-      const progressTextEl = systemCard.querySelector('.system-progress-text');
+      var progressBar = systemCard.querySelector('.progress-fill');
+      var progressTextEl = systemCard.querySelector('.system-progress-text');
       if (progressBar && progressTextEl) {
-        const percentage = Math.round((current / total) * 100);
-        progressBar.style.width = `${percentage}%`;
-        progressTextEl.textContent = current + '/' + total + ' downloaded';
+        var percentage = Math.round((current / total) * 100);
+        progressBar.style.width = percentage + '%';
+        progressTextEl.textContent = current + '/' + total + ' descargados';
       }
-    }
-
-    function toggleSystem(key) {
-      if (selectedSystems.has(key)) {
-        selectedSystems.delete(key);
-      } else {
-        selectedSystems.add(key);
-      }
-      renderSystems();
-    }
-
-    function selectAllSystems() {
-      selectedSystems = new Set(Object.keys(scannedData));
-      renderSystems();
-    }
-
-    function deselectAllSystems() {
-      selectedSystems.clear();
-      renderSystems();
     }
 
     function renderSystems() {
-      const container = document.getElementById('systemsList');
+      var container = document.getElementById('systemsList');
       
       if (Object.keys(scannedData).length === 0) {
         container.innerHTML = '<p class="text-center text-gray-500">No se encontraron juegos</p>';
         return;
       }
 
-      let totalRoms = 0;
-      let totalMissing = 0;
+      var totalRoms = 0;
+      var totalMissing = 0;
 
-      container.innerHTML = Object.entries(scannedData).map(([key, data]) => {
-        const missing = data.games.filter(g => !g.hasCover).length;
-        const total = data.games.length;
-        const isSelected = selectedSystems.has(key);
+      var html = '';
+      for (var key in scannedData) {
+        var data = scannedData[key];
+        var missing = data.games.filter(function(g) { return !g.hasCover; }).length;
+        var total = data.games.length;
+        var isSelected = selectedSystems.has(key);
         totalRoms += total;
         totalMissing += isSelected ? missing : 0;
 
-        const percentage = total > 0 ? Math.round(((total - missing) / total) * 100) : 0;
+        var percentage = total > 0 ? Math.round(((total - missing) / total) * 100) : 0;
 
-        return `
-          <div class="system-card ${isSelected ? 'border-indigo-500' : 'border-gray-200'}" id="system-${key}">
-            <div class="flex items-center gap-3 mb-2">
-              <input type="checkbox" class="system-checkbox w-5 h-5 text-indigo-600" data-system="${key}" ${isSelected ? 'checked' : ''}>
-              <h3 class="font-semibold text-lg uppercase">${data.name || key}</h3>
-              <span class="status-badge ${missing === 0 ? 'status-complete' : 'status-pending'}">
-                ${missing === 0 ? 'Complete' : missing + ' missing'}
-              </span>
-            </div>
-            <div class="progress-bar mb-2">
-              <div class="progress-fill" style="width: ${percentage}%"></div>
-            </div>
-            <div class="text-sm text-gray-600 mb-2 flex justify-between">
-              <span>${total} ROMs - ${missing} missing - ${percentage}%</span>
-              <span class="system-progress-text text-indigo-600 font-medium">0/${missing} downloaded</span>
-            </div>
-            <div class="max-h-48 overflow-y-auto border-t border-gray-200 pt-2">
-              ${data.games.map(g => `
-                <div class="game-item">
-                  <span class="text-sm truncate flex-1 mr-2">${g.name}</span>
-                  <span class="status-badge ${g.hasCover ? 'status-complete' : 'status-missing'}">
-                    ${g.hasCover ? 'OK' : 'Pending'}
-                  </span>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `;
-      }).join('');
+        var gamesHtml = '';
+        for (var i = 0; i < data.games.length; i++) {
+          var g = data.games[i];
+          gamesHtml += '<div class="game-item">' +
+            '<span class="text-sm truncate flex-1 mr-2">' + g.name + '</span>' +
+            '<span class="status-badge ' + (g.hasCover ? 'status-complete' : 'status-missing') + '">' +
+            (g.hasCover ? 'OK' : 'Pendiente') +
+            '</span></div>';
+        }
+
+        html += '<div class="system-card ' + (isSelected ? 'border-indigo-500' : 'border-gray-200') + '" id="system-' + key + '">' +
+          '<div class="flex items-center gap-3 mb-2">' +
+          '<input type="checkbox" class="system-checkbox w-5 h-5 text-indigo-600" data-system="' + key + '" ' + (isSelected ? 'checked' : '') + '>' +
+          '<h3 class="font-semibold text-lg uppercase">' + (data.name || key) + '</h3>' +
+          '<span class="status-badge ' + (missing === 0 ? 'status-complete' : 'status-pending') + '">' +
+          (missing === 0 ? 'Completo' : missing + ' sin cover') +
+          '</span></div>' +
+          '<div class="progress-bar mb-2"><div class="progress-fill" style="width: ' + percentage + '%"></div></div>' +
+          '<div class="text-sm text-gray-600 mb-2 flex justify-between">' +
+          '<span>' + total + ' ROMs - ' + missing + ' sin cover - ' + percentage + '%</span>' +
+          '<span class="system-progress-text text-indigo-600 font-medium">0/' + missing + ' descargados</span></div>' +
+          '<div class="max-h-48 overflow-y-auto border-t border-gray-200 pt-2">' + gamesHtml + '</div></div>';
+      }
+      container.innerHTML = html;
 
       document.getElementById('totalSystems').textContent = Object.keys(scannedData).length;
       document.getElementById('totalRoms').textContent = totalRoms;
@@ -1005,16 +1006,17 @@
         document.getElementById('folderPath').textContent = directoryHandle.name;
         document.getElementById('folderPath').classList.remove('hidden');
 
-        log(`Carpeta seleccionada: ${directoryHandle.name}`);
+        log('Carpeta seleccionada: ' + directoryHandle.name);
         log('Escaneando estructura...');
 
-        const systems = await findSystemFolders(directoryHandle);
+        var systems = await findSystemFolders(directoryHandle);
 
-        log(`Encontrados ${Object.keys(systems).length} sistemas`);
+        log('Encontrados ' + Object.keys(systems).length + ' sistemas');
 
-        for (const [key, data] of Object.entries(systems)) {
+        for (var key in systems) {
+          var data = systems[key];
           data.games = await checkCovers(data);
-          log(key + ': ' + data.roms.length + ' ROMs, ' + data.images.length + ' images');
+          log(key + ': ' + data.roms.length + ' ROMs, ' + data.images.length + ' imagenes');
         }
 
         scannedData = systems;
@@ -1027,44 +1029,44 @@
 
       } catch (e) {
         if (e.name !== 'AbortError') {
-          log(`Error: ${e.message}`);
+          log('Error: ' + e.message);
           console.error(e);
         }
       }
     }
     
-    const selectFolderBtn = document.getElementById('selectFolderBtn');
-    const scrapingBtn = document.getElementById('scrapingBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const testLoginBtn = document.getElementById('testLoginBtn');
-    const destFolderSelect = document.getElementById('destFolderSelect');
-    const generateScriptsBtn = document.getElementById('generateScriptsBtn');
+    var selectFolderBtn = document.getElementById('selectFolderBtn');
+    var scrapingBtn = document.getElementById('scrapingBtn');
+    var stopBtn = document.getElementById('stopBtn');
+    var testLoginBtn = document.getElementById('testLoginBtn');
+    var destFolderSelect = document.getElementById('destFolderSelect');
+    var generateScriptsBtn = document.getElementById('generateScriptsBtn');
     
     if (selectFolderBtn) selectFolderBtn.addEventListener('click', handleSelectFolder);
     if (scrapingBtn) scrapingBtn.addEventListener('click', simulateScraping);
     if (stopBtn) stopBtn.addEventListener('click', stopScraping);
     if (testLoginBtn) testLoginBtn.addEventListener('click', function() {
-      const user = document.getElementById('ssUser')?.value.trim() || '';
-      const pass = document.getElementById('ssPass')?.value || '';
-      const devid = document.getElementById('devId')?.value.trim() || '';
-      const devpass = document.getElementById('devPass')?.value || '';
+      var user = document.getElementById('ssUser').value.trim() || '';
+      var pass = document.getElementById('ssPass').value || '';
+      var devid = document.getElementById('devId').value.trim() || '';
+      var devpass = document.getElementById('devPass').value || '';
       if (user && pass) {
         testLogin(user, pass, devid, devpass);
       } else {
-        log('Enter user and password');
+        log('Ingresa usuario y password');
       }
     });
     if (generateScriptsBtn) generateScriptsBtn.addEventListener('click', function() {
       if (downloadUrls.length > 0) {
         generateScripts();
       } else {
-        log('No URLs accumulated. Run scraping in "Scripts" mode first.');
+        log('No hay URLs acumuladas. Ejecuta scraping en modo "Scripts" primero.');
       }
     });
     
     document.addEventListener('change', function(e) {
       if (e.target.classList.contains('system-checkbox')) {
-        const key = e.target.dataset.system;
+        var key = e.target.dataset.system;
         if (e.target.checked) {
           selectedSystems.add(key);
         } else {
@@ -1075,7 +1077,7 @@
     });
     
     if (destFolderSelect) destFolderSelect.addEventListener('change', function() {
-      const customInput = document.getElementById('customFolderInput');
+      var customInput = document.getElementById('customFolderInput');
       if (this.value === 'custom') {
         customInput.classList.remove('hidden');
       } else {
@@ -1085,8 +1087,8 @@
 
     // Load saved credentials
     window.addEventListener('load', function() {
-      const savedUser = localStorage.getItem('ssUser');
-      const savedPass = localStorage.getItem('ssPass');
+      var savedUser = localStorage.getItem('ssUser');
+      var savedPass = localStorage.getItem('ssPass');
       if (savedUser) document.getElementById('ssUser').value = savedUser;
       if (savedPass) document.getElementById('ssPass').value = savedPass;
     });
