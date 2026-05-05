@@ -27,10 +27,21 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
   <div class="max-w-4xl mx-auto p-6">
-    <header class="text-center mb-8">
+    <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
       <p class="text-gray-600">Online cover download</p>
     </header>
+
+    <!-- Terminal-style Event Log at top -->
+    <div class="card mb-6 bg-gray-900 border border-gray-700">
+      <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-2">
+        <h3 class="font-medium text-gray-300">Terminal</h3>
+        <div class="flex gap-2">
+          <button id="clearLogBtn" class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded hover:bg-gray-600">Limpiar</button>
+        </div>
+      </div>
+      <div id="logContent" class="bg-gray-900 text-green-400 font-mono text-xs h-40 overflow-y-auto p-2 rounded"></div>
+    </div>
 
     <div id="warningSection" class="hidden">
       <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
@@ -89,8 +100,6 @@
           <label class="text-sm font-medium">ScreenScraper:</label>
           <input id="ssUser" type="text" placeholder="Usuario" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
           <input id="ssPass" type="password" placeholder="Password" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
-          <input id="devId" type="text" placeholder="DevID" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" title="Developer ID">
-          <input id="devPass" type="password" placeholder="DevPass" class="border border-gray-300 rounded px-3 py-2 text-sm w-20" title="Developer Password">
           <label class="flex items-center gap-1 text-sm">
             <input type="checkbox" id="saveCredentials" class="w-4 h-4"> Recordar
           </label>
@@ -160,21 +169,13 @@
           
           <!-- Download Mode -->
           <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium">Modo de Descarga:</label>
-            <div class="flex gap-3 mt-1">
-              <label class="flex items-center gap-1 text-sm">
-                <input type="radio" name="downloadMode" value="direct" checked> Directo
-              </label>
-              <label class="flex items-center gap-1 text-sm">
-                <input type="radio" name="downloadMode" value="script"> Scripts
-              </label>
-            </div>
+            
           </div>
         </div>
         
         <!-- Script Generator Button -->
         <div class="flex items-center gap-4 mt-4">
-          <button id="generateScriptsBtn" class="btn bg-green-600 text-white hover:bg-green-700 flex items-center gap-2">
+          
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
             </svg>
@@ -226,16 +227,7 @@
       </div>
     </div>
 
-    <div id="logSection" class="mt-6">
-      <div class="card">
-        <div class="flex justify-between items-center mb-2">
-          <h3 class="font-medium">Registro de Actividad</h3>
-          <button id="clearLogBtn" class="text-sm bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Limpiar</button>
-        </div>
-        <div id="logContent" class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm h-48 overflow-y-auto"></div>
-      </div>
     </div>
-  </div>
 
   <script>
     const ROM_EXTENSIONS = ['.nes', '.snes', '.sfc', '.gb', '.gbc', '.gba', '.n64', '.z64', '.nds', '.3ds', '.cia', '.xci', '.xwb', '.gcm', '.iso', '.wbfs', '.wad', '.a26', '.lnx', '.jag', '.j64', '.md', '.gen', '.sms', '.gg', '.s32x', '.32x', '.pce', '.ngp', '.ngc', '.crypt', '.fb', '.nsp', '.kv', '.m3u', '.zip', '.7z'];
@@ -248,7 +240,6 @@
     let selectedSystems = new Set();
     let isScraping = false;
     let shouldStop = false;
-    let downloadUrls = [];
     let failedDownloads = [];
 
     const isChrome = /Chrome/.test(navigator.userAgent) && /Google/.test(navigator.vendor);
@@ -262,9 +253,13 @@
     }
 
     function log(msg) {
+      // Obfuscate developer credentials in logs
+      let safeMsg = msg.replace(DEV_PASSWORD, '***');
+      safeMsg = safeMsg.replace(DEV_ID, '***');
+      
       const logEl = document.getElementById('logContent');
       const time = new Date().toLocaleTimeString();
-      logEl.innerHTML += '<div>[' + time + '] ' + msg + '</div>';
+      logEl.innerHTML += '<div>[' + time + '] ' + safeMsg + '</div>';
       logEl.scrollTop = logEl.scrollHeight;
     }
 
@@ -555,6 +550,10 @@
     const SOFT_NAME = 'SDCoverManager';
     const MY_PROXY = './proxy.php?url=';
     
+    // Hardcoded developer credentials
+    const DEV_ID = 'koko004';
+    const DEV_PASSWORD = 'EhkHQozlUSq';
+    
     const SYSTEM_MAP = {
       'gb': 9, 'gbc': 10, 'gba': 25, 'nes': 3, 'snes': 4, 'sfc': 4,
       'n64': 14, 'nds': 28, '3ds': 43, 'wii': 17, 'wiiu': 41,
@@ -570,16 +569,16 @@
     // Legacy support
     const SYSTEM_IDS = SYSTEM_MAP;
 
-    async function testLogin(user, pass, devid, devpass) {
+    async function testLogin(user, pass) {
       log('Probando conexion...');
       try {
         const params = new URLSearchParams({
           output: 'json',
           ssid: user,
-          sspassword: pass
+          sspassword: pass,
+          devid: DEV_ID,
+          devpassword: DEV_PASSWORD
         });
-        if (devid) params.append('devid', devid);
-        if (devpass) params.append('devpassword', devpass);
         const url = SCREENSCRAPER_API + '/ssuserInfos.php?' + params;
         const response = await fetch(url);
         if (!response.ok) {
@@ -613,10 +612,12 @@
       }
     }
 
-    async function scrapeGame(user, pass, systemeid, romData, region, devid, devpass) {
+    async function scrapeGame(user, pass, systemeid, romData, region) {
       const romName = romData.name;
       const romHandle = romData.handle;
       const fileSize = romData.size || 0;
+      const devid = DEV_ID;
+      const devpass = DEV_PASSWORD;
       
       // Calculate hash if possible
       let hash = null;
@@ -747,81 +748,6 @@
         }
       }
       return null;
-    }
-
-    function addDownloadUrl(systemKey, gameName, imageUrl, destFolder) {
-      downloadUrls.push({
-        system: systemKey,
-        gameName: gameName,
-        url: imageUrl,
-        folder: destFolder || 'images'
-      });
-      log('URL agregada para script: ' + gameName);
-    }
-
-    function generateScripts() {
-      const urls = downloadUrls;
-      const scriptCount = urls.length;
-      
-      if (scriptCount === 0) {
-        log('No hay URLs para generar scripts');
-        return;
-      }
-      
-      document.getElementById('scriptCount').textContent = scriptCount;
-      document.getElementById('scriptInfo').classList.remove('hidden');
-      
-      // Generate PowerShell script for Windows (descargar_r36s.bat)
-      let psContent = '@echo off\n';
-      psContent += 'REM Script de descarga para SD Cover Manager\n';
-      psContent += 'REM Total archivos: ' + scriptCount + '\n\n';
-      psContent += 'echo Iniciando descarga de ' + scriptCount + ' archivos...\n\n';
-      
-      urls.forEach(function(u, i) {
-        psContent += 'echo [' + (i+1) + '/' + scriptCount + '] Descargando ' + u.gameName + '.png\n';
-        psContent += 'powershell -Command "Invoke-WebRequest -Uri ' + "'" + u.url + "'" + ' -OutFile ' + "'" + u.system + '/' + u.folder + '/' + u.gameName + '.png' + "'" + ' -TimeoutSec 30"\n';
-      });
-      
-      psContent += '\necho Descarga completada! ' + scriptCount + ' archivos procesados.\npause';
-
-      // Generate Linux script (descargar_r36s.sh)
-      let shContent = '#!/bin/bash\n';
-      shContent += '# Script de descarga para SD Cover Manager\n';
-      shContent += '# Total archivos: ' + scriptCount + '\n\n';
-      shContent += 'echo "Iniciando descarga de ' + scriptCount + ' archivos..."\n\n';
-      
-      urls.forEach(function(u, i) {
-        shContent += 'echo "[' + (i+1) + '/' + scriptCount + '] Descargando ' + u.gameName + '.png"\n';
-        shContent += 'mkdir -p "' + u.system + '/' + u.folder + '"\n';
-        shContent += 'curl -L -s --max-time 30 "' + u.url + '" -o "' + u.system + '/' + u.folder + '/' + u.gameName + '.png" || echo "Fallido: ' + u.gameName + '"\n';
-      });
-      
-      shContent += '\necho "Descarga completada! ' + scriptCount + ' archivos procesados."';
-
-      // Download PowerShell script
-      const psBlob = new Blob([psContent], { type: 'text/plain' });
-      const psUrl = URL.createObjectURL(psBlob);
-      const psLink = document.createElement('a');
-      psLink.href = psUrl;
-      psLink.download = 'descargar_r36s.bat';
-      psLink.click();
-      
-      // Download Linux script after short delay
-      setTimeout(function() {
-        const shBlob = new Blob([shContent], { type: 'text/plain' });
-        const shUrl = URL.createObjectURL(shBlob);
-        const shLink = document.createElement('a');
-        shLink.href = shUrl;
-        shLink.download = 'descargar_r36s.sh';
-        shLink.click();
-        
-        setTimeout(function() {
-          URL.revokeObjectURL(psUrl);
-          URL.revokeObjectURL(shUrl);
-        }, 1000);
-      }, 100);
-      
-      log('Generados scripts para ' + scriptCount + ' archivos');
     }
 
     async function ensureFolderExists(systemHandle, folderName) {
@@ -1022,9 +948,6 @@
         videoFolder = videoCustomFolderInput.value.trim() || 'videos';
       }
       
-      // Get download mode
-      var downloadMode = document.querySelector('input[name="downloadMode"]:checked').value;
-
       // Validate credentials
       if (!ssUser || !ssPass) {
         log('ERROR: Ingresa usuario y password de ScreenScraper');
@@ -1040,7 +963,6 @@
       log('Carpeta imagenes: /' + destFolder);
       log('Carpeta videos: /' + videoFolder);
       log('Media: img=' + imageType + ' box=' + boxType + ' logo=' + logoType + ' region=' + preferredRegion);
-      log('Modo: ' + (downloadMode === 'direct' ? 'Directo' : 'Scripts'));
 
       var processed = 0;
       var updated = 0;
@@ -1086,7 +1008,7 @@
           progressText.textContent = (processed + 1) + '/' + totalToProcess;
 
           try {
-            var jeuData = await scrapeGame(ssUser, ssPass, systemeid, game, region, devid, devpass);
+            var jeuData = await scrapeGame(ssUser, ssPass, systemeid, game, region);
 
             if (jeuData && jeuData.jeu && jeuData.jeu.id) {
               var medias = jeuData.medias || [];
@@ -1106,8 +1028,7 @@
                 if (selectedMedia && selectedMedia.url) {
                   var cdnUrl = selectedMedia.url;
                   
-                  if (downloadMode === 'direct') {
-                    var blob = await downloadImage(cdnUrl);
+                  var blob = await downloadImage(cdnUrl);
                     if (blob && blob.size > 0) {
                       var ext = (mediaType === 'video') ? '.mp4' : '.png';
                       var mediaName = getBasename(game.name) + '_' + mediaType + ext;
@@ -1133,16 +1054,11 @@
                     } else {
                       log('FALLO ' + mediaType + ': ' + searchName);
                     }
-                  } else {
-                    // Script generation mode
-                    var folder = (mediaType === 'video') ? videoFolder : destFolder;
-                    addDownloadUrl(systemKey, searchName + '_' + mediaType, cdnUrl, folder);
-                    downloaded = true;
+}
                   }
                 }
-              }
 
-              // Handle video download (legacy support)
+                // Handle video download
               if (downloadVideos && !shouldStop) {
                 var videoMedia = findVideo(medias, preferredRegion);
                 if (videoMedia && videoMedia.url) {
@@ -1352,7 +1268,7 @@
     var stopBtn = document.getElementById('stopBtn');
     var testLoginBtn = document.getElementById('testLoginBtn');
     var destFolderSelect = document.getElementById('destFolderSelect');
-    var generateScriptsBtn = document.getElementById('generateScriptsBtn');
+    
     
     if (selectFolderBtn) selectFolderBtn.addEventListener('click', handleSelectFolder);
     if (scrapingBtn) scrapingBtn.addEventListener('click', simulateScraping);
@@ -1360,16 +1276,12 @@
     if (testLoginBtn) testLoginBtn.addEventListener('click', function() {
       var user = document.getElementById('ssUser').value.trim() || '';
       var pass = document.getElementById('ssPass').value || '';
-      var devid = document.getElementById('devId').value.trim() || '';
-      var devpass = document.getElementById('devPass').value || '';
       if (user && pass) {
-        testLogin(user, pass, devid, devpass);
+        testLogin(user, pass);
       } else {
         log('Ingresa usuario y password');
       }
     });
-    if (generateScriptsBtn) generateScriptsBtn.addEventListener('click', function() {
-      if (downloadUrls.length > 0) {
         generateScripts();
       } else {
         log('No hay URLs acumuladas. Ejecuta scraping en modo "Scripts" primero.');
