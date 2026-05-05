@@ -226,9 +226,12 @@
       </div>
     </div>
 
-    <div id="logSection" class="mt-6 hidden">
+    <div id="logSection" class="mt-6">
       <div class="card">
-        <h3 class="font-medium mb-2">Registro de Actividad</h3>
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="font-medium">Registro de Actividad</h3>
+          <button id="clearLogBtn" class="text-sm bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Limpiar</button>
+        </div>
         <div id="logContent" class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm h-48 overflow-y-auto"></div>
       </div>
     </div>
@@ -552,11 +555,20 @@
     const SOFT_NAME = 'SDCoverManager';
     const MY_PROXY = './proxy.php?url=';
     
-    const SYSTEM_IDS = {
-      'nes': 3, 'snes': 4, 'gb': 5, 'gbc': 6, 'gba': 7, 
-      'n64': 10, 'nds': 11, 'psx': 12, 'psp': 13, 'genesis': 15, 
-      'sms': 16, 'pce': 17, 'ngp': 18, 'wii': 19, '3ds': 20
+    const SYSTEM_MAP = {
+      'gb': 9, 'gbc': 10, 'gba': 25, 'nes': 3, 'snes': 4, 'sfc': 4,
+      'n64': 14, 'nds': 28, '3ds': 43, 'wii': 17, 'wiiu': 41,
+      'mastersystem': 2, 'sms': 2, 'genesis': 1, 'megadrive': 1,
+      'sega32x': 11, 'gamegear': 21, 'neogeo': 142, 'mame': 75,
+      'fbneo': 75, 'psx': 57, 'ps1': 57, 'psp': 61, 'ps2': 58,
+      'pce': 31, 'tg16': 31, 'tgcd': 31, 'wswan': 45, 'wswanc': 46,
+      'lynx': 26, 'ngp': 18, 'ngpc': 19, 'atarilynx': 26,
+      'snesmini': 4, 'nesmini': 3, 'switch': 130,
+      'gamecube': 16, 'dreamcast': 64, 'saturn': 62
     };
+    
+    // Legacy support
+    const SYSTEM_IDS = SYSTEM_MAP;
 
     async function testLogin(user, pass, devid, devpass) {
       log('Probando conexion...');
@@ -606,76 +618,54 @@
       const romHandle = romData.handle;
       const fileSize = romData.size || 0;
       
-      // Try first with hash
+      // Calculate hash if possible
       let hash = null;
       if (romHandle && fileSize > 0) {
         hash = await calculateRomHash(romHandle, fileSize);
       }
       
-      // First attempt: try with CRC32 hash
+      // === ATTEMPT 1: CRC32 Hash ===
       if (hash) {
         const hashUrl = SCREENSCRAPER_API + '/jeuInfos.php?output=json&devid=' + encodeURIComponent(devid) + '&devpassword=' + encodeURIComponent(devpass) + '&softname=' + encodeURIComponent(SOFT_NAME) + '&ssid=' + encodeURIComponent(user) + '&sspassword=' + encodeURIComponent(pass) + '&systemeid=' + systemeid + '&crc=' + hash;
         
-        log('Buscando por hash: ' + romName + ' (CRC: ' + hash + ')');
+        log('Buscando por CRC: ' + romName + ' [' + hash + ']');
         
         try {
           const response = await fetch(hashUrl);
-          if (response.ok) {
+          if (response.status === 404) {
+            // Hash found nothing, try fallback with cleaned name
+            log('CRC no encontrado, intentando nombre limpio...');
+          } else if (response.ok) {
             const text = await response.text();
             if (!text.startsWith('Erreur') && text.includes('"jeu"')) {
               const data = JSON.parse(text);
               if (data.response && data.response.jeu) {
                 const jeu = data.response.jeu;
                 const medias = data.response.jeu.medias || [];
-                log('Encontrado por hash: ' + jeu.nom);
+                log('Encontrado por CRC: ' + jeu.nom);
                 return { jeu: { id: jeu.id, nom: jeu.nom }, medias: medias };
               }
             }
           }
         } catch (e) {
-          // Continue to fallback
+          log('Error CRC: ' + e.message);
         }
       }
       
-      // Fallback 1: try with cleaned name (no special chars)
+      // === ATTEMPT 2: Fallback with cleaned name (only if hash failed or returned 404) ===
       const cleanName = cleanRomNameForSearch(romName);
-      if (cleanName !== romName) {
-        const cleanUrl = SCREENSCRAPER_API + '/jeuInfos.php?output=json&devid=' + encodeURIComponent(devid) + '&devpassword=' + encodeURIComponent(devpass) + '&softname=' + encodeURIComponent(SOFT_NAME) + '&ssid=' + encodeURIComponent(user) + '&sspassword=' + encodeURIComponent(pass) + '&systemeid=' + systemeid + '&romnom=' + encodeURIComponent(cleanName);
-        
-        log('Buscando (nombre limpio): ' + cleanName);
-        
-        try {
-          const response = await fetch(cleanUrl);
-          if (response.ok) {
-            const text = await response.text();
-            if (!text.startsWith('Erreur') && text.includes('"jeu"')) {
-              const data = JSON.parse(text);
-              if (data.response && data.response.jeu) {
-                const jeu = data.response.jeu;
-                const medias = data.response.jeu.medias || [];
-                log('Encontrado (nombre limpio): ' + jeu.nom);
-                return { jeu: { id: jeu.id, nom: jeu.nom }, medias: medias };
-              }
-            }
-          }
-        } catch (e) {
-          // Continue to last fallback
-        }
-      }
+      const cleanUrl = SCREENSCRAPER_API + '/jeuInfos.php?output=json&devid=' + encodeURIComponent(devid) + '&devpassword=' + encodeURIComponent(devpass) + '&softname=' + encodeURIComponent(SOFT_NAME) + '&ssid=' + encodeURIComponent(user) + '&sspassword=' + encodeURIComponent(pass) + '&systemeid=' + systemeid + '&romnom=' + encodeURIComponent(cleanName);
       
-      // Fallback 2: original rom name
-      const url = SCREENSCRAPER_API + '/jeuInfos.php?output=json&devid=' + encodeURIComponent(devid) + '&devpassword=' + encodeURIComponent(devpass) + '&softname=' + encodeURIComponent(SOFT_NAME) + '&ssid=' + encodeURIComponent(user) + '&sspassword=' + encodeURIComponent(pass) + '&systemeid=' + systemeid + '&romnom=' + encodeURIComponent(romName);
-      
-      log('Buscando: ' + romName);
+      log('Buscando: ' + cleanName);
       
       try {
-        const response = await fetch(url);
+        const response = await fetch(cleanUrl);
         if (!response.ok) {
-          throw new Error('HTTP error: ' + response.status);
+          throw new Error('HTTP ' + response.status);
         }
         const text = await response.text();
         if (text.startsWith('Erreur')) {
-          log('ScreenScraper API error: ' + text);
+          log('API error: ' + text);
           return null;
         }
         const data = JSON.parse(text);
@@ -683,16 +673,31 @@
         if (data.response && data.response.jeu) {
           const jeu = data.response.jeu;
           const medias = data.response.jeu.medias || [];
-          const results = { jeu: { id: jeu.id, nom: jeu.nom }, medias: medias };
-          log('Encontrado: ' + jeu.nom + ' (' + medias.length + ' media)');
-          return results;
-        } else if (data.error) {
-          log('ScreenScraper API error: ' + data.error);
-          return null;
+          log('Encontrado: ' + jeu.nom);
+          return { jeu: { id: jeu.id, nom: jeu.nom }, medias: medias };
         }
+        
+        // Try original name as last resort
+        if (cleanName !== romName) {
+          const origUrl = SCREENSCRAPER_API + '/jeuInfos.php?output=json&devid=' + encodeURIComponent(devid) + '&devpassword=' + encodeURIComponent(devpass) + '&softname=' + encodeURIComponent(SOFT_NAME) + '&ssid=' + encodeURIComponent(user) + '&sspassword=' + encodeURIComponent(pass) + '&systemeid=' + systemeid + '&romnom=' + encodeURIComponent(romName);
+          
+          const origResponse = await fetch(origUrl);
+          if (origResponse.ok) {
+            const origText = await origResponse.text();
+            if (!origText.startsWith('Erreur') && origText.includes('"jeu"')) {
+              const origData = JSON.parse(origText);
+              if (origData.response && origData.response.jeu) {
+                const jeu = origData.response.jeu;
+                log('Encontrado (original): ' + jeu.nom);
+                return { jeu: { id: jeu.id, nom: jeu.nom }, medias: origData.response.jeu.medias || [] };
+              }
+            }
+          }
+        }
+        
         return null;
       } catch (e) {
-        log('Error requesting game info: ' + e.message);
+        log('Error busqueda: ' + e.message);
         return null;
       }
     }
@@ -1059,10 +1064,11 @@
         var systemData = scannedData[systemKey];
         if (!systemData) continue;
 
-        var systemeid = SYSTEM_IDS[systemKey] || 0;
+        var systemeid = SYSTEM_MAP[systemKey.toLowerCase()] || 0;
         if (!systemeid) {
-          log('Sistema no soportado: ' + systemKey);
-          continue;
+          log('Sistema no reconocido: ' + systemKey + ', usando busqueda global');
+        } else {
+          log('Sistema: ' + systemKey + ' (ID: ' + systemeid + ')');
         }
 
         var gamesWithoutCover = systemData.games.filter(function(g) { return !g.hasCover; });
@@ -1400,13 +1406,22 @@
         customInput.classList.add('hidden');
       }
     });
+    
+    // Clear log button
+    var clearLogBtn = document.getElementById('clearLogBtn');
+    if (clearLogBtn) clearLogBtn.addEventListener('click', function() {
+      document.getElementById('logContent').innerHTML = '';
+      log('Log limpiado');
+    });
 
-    // Load saved credentials
+    // Load saved credentials and show welcome
     window.addEventListener('load', function() {
       var savedUser = localStorage.getItem('ssUser');
       var savedPass = localStorage.getItem('ssPass');
       if (savedUser) document.getElementById('ssUser').value = savedUser;
       if (savedPass) document.getElementById('ssPass').value = savedPass;
+      log('=== SD Cover Manager listo ===');
+      log('Selecciona una carpeta para comenzar');
     });
   </script>
 </body>
