@@ -40,7 +40,7 @@
           <button id="clearLogBtn" class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded hover:bg-gray-600">Limpiar</button>
         </div>
       </div>
-      <div id="logContent" class="bg-gray-900 text-green-400 font-mono text-xs h-40 overflow-y-auto p-2 rounded"></div>
+      <div id="eventLog" class="bg-gray-900 text-green-400 p-4 rounded mb-4 h-64 overflow-y-auto font-mono text-xs"></div>
     </div>
 
     <div id="warningSection" class="hidden">
@@ -100,9 +100,6 @@
           <label class="text-sm font-medium">ScreenScraper:</label>
           <input id="ssUser" type="text" placeholder="Usuario" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
           <input id="ssPass" type="password" placeholder="Password" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
-          <label class="flex items-center gap-1 text-sm">
-            <input type="checkbox" id="saveCredentials" class="w-4 h-4"> Recordar
-          </label>
           <button type="button" id="testLoginBtn" class="text-sm bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">Test</button>
         </div>
 
@@ -257,7 +254,7 @@
       let safeMsg = msg.replace(DEV_PASSWORD, '***');
       safeMsg = safeMsg.replace(DEV_ID, '***');
       
-      const logEl = document.getElementById('logContent');
+      const logEl = document.getElementById('eventLog');
       const time = new Date().toLocaleTimeString();
       logEl.innerHTML += '<div>[' + time + '] ' + safeMsg + '</div>';
       logEl.scrollTop = logEl.scrollHeight;
@@ -1312,7 +1309,7 @@
     // Clear log button
     var clearLogBtn = document.getElementById('clearLogBtn');
     if (clearLogBtn) clearLogBtn.addEventListener('click', function() {
-      document.getElementById('logContent').innerHTML = '';
+      document.getElementById('eventLog').innerHTML = '';
       log('Log limpiado');
     });
 
