@@ -909,20 +909,23 @@
       var logoType = document.getElementById('logoType').value;
       var preferredRegion = document.getElementById('preferredRegion').value;
       var scanRatings = document.getElementById('scanRatings').checked;
-      var downloadVideos = document.getElementById('downloadVideos').checked;
+      var downloadVideosEl = document.getElementById('downloadVideos');
+      var downloadVideos = downloadVideosEl ? downloadVideosEl.checked : false;
       
       // Get credentials (devid/devpass are hardcoded)
-      var ssUser = document.getElementById('ssUser').value.trim();
-      var ssPass = document.getElementById('ssPass').value;
+      var ssUserEl = document.getElementById('ssUser');
+      var ssPassEl = document.getElementById('ssPass');
+      var ssUser = ssUserEl ? ssUserEl.value.trim() : '';
+      var ssPass = ssPassEl ? ssPassEl.value : '';
       var devid = DEVID;
       var devpass = DEVPASS;
-      var destFolder = destFolderSelect.value;
+      var destFolder = destFolderSelect ? destFolderSelect.value : 'images';
       if (destFolder === 'custom') {
-        destFolder = customFolderInput.value.trim() || 'images';
+        destFolder = customFolderInput ? (customFolderInput.value.trim() || 'images') : 'images';
       }
-      var videoFolder = videoFolderSelect.value;
+      var videoFolder = videoFolderSelect ? videoFolderSelect.value : 'videos';
       if (videoFolder === 'custom') {
-        videoFolder = videoCustomFolderInput.value.trim() || 'videos';
+        videoFolder = videoCustomFolderInput ? (videoCustomFolderInput.value.trim() || 'videos') : 'videos';
       }
       
       // Validate credentials
