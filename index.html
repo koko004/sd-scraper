@@ -911,11 +911,11 @@
       var scanRatings = document.getElementById('scanRatings').checked;
       var downloadVideos = document.getElementById('downloadVideos').checked;
       
-      // Get credentials
+      // Get credentials (devid/devpass are hardcoded)
       var ssUser = document.getElementById('ssUser').value.trim();
       var ssPass = document.getElementById('ssPass').value;
-      var devid = document.getElementById('devId').value.trim();
-      var devpass = document.getElementById('devPass').value;
+      var devid = DEVID;
+      var devpass = DEVPASS;
       var destFolder = destFolderSelect.value;
       if (destFolder === 'custom') {
         destFolder = customFolderInput.value.trim() || 'images';
