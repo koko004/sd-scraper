@@ -1028,37 +1028,35 @@
                 if (selectedMedia && selectedMedia.url) {
                   var cdnUrl = selectedMedia.url;
                   
-                  var blob = await downloadImage(cdnUrl);
-                    if (blob && blob.size > 0) {
-                      var ext = (mediaType === 'video') ? '.mp4' : '.png';
-                      var mediaName = getBasename(game.name) + '_' + mediaType + ext;
-                      var folder = (mediaType === 'video') ? videoFolder : destFolder;
-                      
-                      if (mediaType === 'video') {
-                        await saveVideo(systemData, mediaName, blob, folder);
-                        log('VIDEO ' + mediaType + ': ' + mediaName);
-                      } else {
-                        var saved = await saveImage(systemData, mediaName, blob, folder);
-                        if (saved) {
-                          // First non-video media becomes the main cover
-                          if (!game.hasCover) {
-                            var imagePath = '/' + folder + '/' + mediaName;
-                            await updateGamelistXml(systemData, game.path, imagePath);
-                            game.hasCover = true;
-                            game.imageName = imagePath;
-                          }
-                          downloaded = true;
-                          log('COVER ' + mediaType + ': ' + mediaName);
-                        }
-                      }
+var blob = await downloadImage(cdnUrl);
+                  if (blob && blob.size > 0) {
+                    var ext = (mediaType === 'video') ? '.mp4' : '.png';
+                    var mediaName = getBasename(game.name) + '_' + mediaType + ext;
+                    var folder = (mediaType === 'video') ? videoFolder : destFolder;
+                    
+                    if (mediaType === 'video') {
+                      await saveVideo(systemData, mediaName, blob, folder);
+                      log('VIDEO ' + mediaType + ': ' + mediaName);
                     } else {
-                      log('FALLO ' + mediaType + ': ' + searchName);
+                      var saved = await saveImage(systemData, mediaName, blob, folder);
+                      if (saved) {
+                        if (!game.hasCover) {
+                          var imagePath = '/' + folder + '/' + mediaName;
+                          await updateGamelistXml(systemData, game.path, imagePath);
+                          game.hasCover = true;
+                          game.imageName = imagePath;
+                        }
+                        downloaded = true;
+                        log('COVER ' + mediaType + ': ' + mediaName);
+                      }
                     }
-}
+                  } else {
+                    log('FALLO ' + mediaType + ': ' + searchName);
                   }
                 }
+              }
 
-                // Handle video download
+              // Handle video download
               if (downloadVideos && !shouldStop) {
                 var videoMedia = findVideo(medias, preferredRegion);
                 if (videoMedia && videoMedia.url) {
