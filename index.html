@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.74</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.75</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -253,11 +253,16 @@
       return ext;
     }
 
-    function getGameName(jeu) {
+    function getGameName(jeu, preferredRegion) {
       if (!jeu) return 'Unknown';
-      const nameFields = ['nom', 'nom_du_jeu', 'nom_ss', 'nom_eu', 'nom_us', 'nom_jp', 'nom_fr', 'nom_de', 'nom_es', 'nom_it', 'nom_jp', 'nom_ko', 'nom_zh', 'game_name', 'name', 'title'];
-      for (const field of nameFields) {
-        if (jeu[field]) return jeu[field];
+      if (jeu.nom) return jeu.nom;
+      if (jeu.noms && Array.isArray(jeu.noms) && jeu.noms.length > 0) {
+        const regions = preferredRegion ? [preferredRegion, 'eu', 'us', 'jp', 'ss', 'wor'] : ['eu', 'us', 'jp', 'ss', 'wor'];
+        for (const region of regions) {
+          const found = jeu.noms.find(n => n.region === region);
+          if (found && found.text) return found.text;
+        }
+        return jeu.noms[0].text;
       }
       const keys = Object.keys(jeu);
       if (keys.length > 0) {
@@ -635,8 +640,8 @@
               if (data.response && data.response.jeu) {
                 const jeu = data.response.jeu;
                 const medias = data.response.jeu.medias || [];
-                log('Encontrado por CRC: ' + getGameName(jeu));
-                return { jeu: { id: jeu.id, nom: getGameName(jeu) }, medias: medias };
+                log('Encontrado por CRC: ' + getGameName(jeu, region));
+                return { jeu: { id: jeu.id, nom: getGameName(jeu, region) }, medias: medias };
               }
             }
           }
@@ -666,8 +671,8 @@
         if (data.response && data.response.jeu) {
           const jeu = data.response.jeu;
           const medias = data.response.jeu.medias || [];
-          log('Encontrado: ' + getGameName(jeu));
-          return { jeu: { id: jeu.id, nom: getGameName(jeu) }, medias: medias };
+          log('Encontrado: ' + getGameName(jeu, region));
+          return { jeu: { id: jeu.id, nom: getGameName(jeu, region) }, medias: medias };
         }
         
         // Try original name as last resort
@@ -681,8 +686,8 @@
               const origData = JSON.parse(origText);
 if (origData.response && origData.response.jeu) {
                 const jeu = origData.response.jeu;
-                log('Encontrado (original): ' + getGameName(jeu));
-                return { jeu: { id: jeu.id, nom: getGameName(jeu) }, medias: origData.response.jeu.medias || [] };
+                log('Encontrado (original): ' + getGameName(jeu, region));
+                return { jeu: { id: jeu.id, nom: getGameName(jeu, region) }, medias: origData.response.jeu.medias || [] };
               }
             }
           }
