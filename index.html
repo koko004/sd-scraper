@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.72</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.73</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -251,6 +251,10 @@
     function getExtension(filename) {
       const ext = filename.toLowerCase().match(/\.[^.]+$/)?.[0] || '';
       return ext;
+    }
+
+    function getGameName(jeu) {
+      return jeu.nom || jeu.nom_du_jeu || jeu.nom_ss || jeu.nom_eu || jeu.nom_us || jeu.nom_jp || 'Unknown';
     }
 
     function getBasename(filename) {
@@ -622,8 +626,8 @@
               if (data.response && data.response.jeu) {
                 const jeu = data.response.jeu;
                 const medias = data.response.jeu.medias || [];
-                log('Encontrado por CRC: ' + jeu.nom);
-                return { jeu: { id: jeu.id, nom: jeu.nom }, medias: medias };
+                log('Encontrado por CRC: ' + getGameName(jeu));
+                return { jeu: { id: jeu.id, nom: getGameName(jeu) }, medias: medias };
               }
             }
           }
@@ -653,8 +657,8 @@
         if (data.response && data.response.jeu) {
           const jeu = data.response.jeu;
           const medias = data.response.jeu.medias || [];
-          log('Encontrado: ' + jeu.nom);
-          return { jeu: { id: jeu.id, nom: jeu.nom }, medias: medias };
+          log('Encontrado: ' + getGameName(jeu));
+          return { jeu: { id: jeu.id, nom: getGameName(jeu) }, medias: medias };
         }
         
         // Try original name as last resort
@@ -666,10 +670,10 @@
             const origText = await origResponse.text();
             if (!origText.startsWith('Erreur') && origText.includes('"jeu"')) {
               const origData = JSON.parse(origText);
-              if (origData.response && origData.response.jeu) {
+if (origData.response && origData.response.jeu) {
                 const jeu = origData.response.jeu;
-                log('Encontrado (original): ' + jeu.nom);
-                return { jeu: { id: jeu.id, nom: jeu.nom }, medias: origData.response.jeu.medias || [] };
+                log('Encontrado (original): ' + getGameName(jeu));
+                return { jeu: { id: jeu.id, nom: getGameName(jeu) }, medias: origData.response.jeu.medias || [] };
               }
             }
           }
