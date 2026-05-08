@@ -989,13 +989,13 @@
         var gamesWithoutCover = systemData.games.filter(function(g) { return !g.hasCover; });
         var systemProcessed = 0;
         
-        for (var i = 0; i < gamesWithoutCover.length; i++) {
+        for (var g = 0; g < gamesWithoutCover.length; g++) {
           if (shouldStop) {
             log('Proceso detenido por el usuario');
             break;
           }
           
-          var game = gamesWithoutCover[i];
+          var game = gamesWithoutCover[g];
           var searchName = cleanRomName(game.name);
           var region = getRegionFromFilename(game.name);
           progressText.textContent = (processed + 1) + '/' + totalToProcess;
