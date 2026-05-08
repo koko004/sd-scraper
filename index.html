@@ -993,56 +993,94 @@
             if (jeuData && jeuData.jeu && jeuData.jeu.id) {
               var medias = jeuData.medias || [];
               var downloaded = false;
-              var mediaTypes = [];
+              var romBaseName = getBasename(game.name);
               
-              // Add all selected media types
-              if (imageType && imageType !== 'none') mediaTypes.push(imageType);
-              if (boxType && boxType !== 'none') mediaTypes.push(boxType);
-              if (logoType && logoType !== 'none') mediaTypes.push(logoType);
+              // ES-DE Media Mapping: type -> {folder, suffix, ext}
+              var esdeMediaConfig = {
+                'screenshot': { folder: 'media', suffix: '-screenshots', ext: '.png', apiType: 'screenshot' },
+                'titlescreen': { folder: 'media', suffix: '-screenshots', ext: '.png', apiType: 'titlescreen' },
+                'mixrbv1': { folder: 'media', suffix: '-screenshots', ext: '.png', apiType: 'mixrbv1' },
+                'mixrbv2': { folder: 'media', suffix: '-screenshots', ext: '.png', apiType: 'mixrbv2' },
+                'box-2D': { folder: 'media', suffix: '-covers', ext: '.png', apiType: 'box-2d' },
+                'box-3D': { folder: 'media', suffix: '-covers', ext: '.png', apiType: 'box-3d' },
+                'wheel': { folder: 'media', suffix: '-marquees', ext: '.png', apiType: 'wheel' },
+                'marquee': { folder: 'media', suffix: '-marquees', ext: '.png', apiType: 'marquee' },
+                'video': { folder: 'videos', suffix: '-videos', ext: '.mp4', apiType: 'video' }
+              };
               
-              // Download each media type
-              for (var m = 0; m < mediaTypes.length; m++) {
-                var mediaType = mediaTypes[m];
-                var selectedMedia = findSpecificMedia(medias, preferredRegion, mediaType);
+              // Download all selected media types based on selectors
+              var downloadTasks = [];
+              
+              // Image type (screenshot/titlescreen/mix)
+              if (imageType && imageType !== 'none') {
+                downloadTasks.push({ config: esdeMediaConfig[imageType], romName: romBaseName });
+              }
+              // Box type
+              if (boxType && boxType !== 'none') {
+                downloadTasks.push({ config: esdeMediaConfig[boxType], romName: romBaseName });
+              }
+              // Logo type
+              if (logoType && logoType !== 'none') {
+                downloadTasks.push({ config: esdeMediaConfig[logoType], romName: romBaseName });
+              }
+              // Videos
+              if (downloadVideos) {
+                downloadTasks.push({ config: esdeMediaConfig['video'], romName: romBaseName });
+              }
+              
+              // Execute all download tasks for this game
+              for (var t = 0; t < downloadTasks.length; t++) {
+                var task = downloadTasks[t];
+                var config = task.config;
+                var romName = task.romName;
+                
+                if (!config) continue;
+                
+                // Find media in API response
+                var selectedMedia = findSpecificMedia(medias, preferredRegion, config.apiType);
                 
                 if (selectedMedia && selectedMedia.url) {
                   var cdnUrl = selectedMedia.url;
                   var blob = await downloadImage(cdnUrl);
+                  
                   if (blob && blob.size > 0) {
-                    var ext = (mediaType === 'video') ? '.mp4' : '.png';
-                    var mediaName = getBasename(game.name) + '_' + mediaType + ext;
-                    var folder = (mediaType === 'video') ? videoFolder : destFolder;
-                    if (mediaType === 'video') {
-                      await saveVideo(systemData, mediaName, blob, folder);
-                      log('VIDEO ' + mediaType + ': ' + mediaName);
-                    } else {
-                      var saved = await saveImage(systemData, mediaName, blob, folder);
-                      if (saved) {
-                        if (!game.hasCover) {
-                          var imagePath = '/' + folder + '/' + mediaName;
-                          await updateGamelistXml(systemData, game.path, imagePath);
-                          game.hasCover = true;
-                          game.imageName = imagePath;
+                    var fileName = romName + config.suffix + config.ext;
+                    
+                    // Create folder structure
+                    if (config.folder === 'media') {
+                      // Check if subfolder needed for manuals
+                      if (config.suffix === '-manuals') {
+                        await ensureFolderExists(systemData.folderHandle, 'media');
+                        await ensureFolderExists(systemData.folderHandle, 'media/manuals');
+                        var saved = await saveImage(systemData, fileName, blob, 'media/manuals');
+                        if (saved) {
+                          downloaded = true;
+                          log('MANUAL: ' + fileName);
                         }
+                      } else {
+                        await ensureFolderExists(systemData.folderHandle, 'media');
+                        var saved = await saveImage(systemData, fileName, blob, 'media');
+                        if (saved) {
+                          // Update first image as main cover in gamelist
+                          if (!game.hasCover) {
+                            await updateGamelistXml(systemData, game.path, 'media/' + fileName);
+                            game.hasCover = true;
+                            game.imageName = 'media/' + fileName;
+                          }
+                          downloaded = true;
+                          log('MEDIA: ' + fileName);
+                        }
+                      }
+                    } else if (config.folder === 'videos') {
+                      await ensureFolderExists(systemData.folderHandle, 'videos');
+                      var saved = await saveVideo(systemData, fileName, blob, 'videos');
+                      if (saved) {
                         downloaded = true;
-                        log('COVER ' + mediaType + ': ' + mediaName);
+                        log('VIDEO: ' + fileName);
                       }
                     }
                   } else {
-                    log('FALLO ' + mediaType + ': ' + searchName);
-                  }
-                }
-              }
-
-              // Handle video download
-              if (downloadVideos && !shouldStop) {
-                var videoMedia = findVideo(medias, preferredRegion);
-                if (videoMedia && videoMedia.url) {
-                  var videoBlob = await downloadImage(videoMedia.url);
-                  if (videoBlob && videoBlob.size > 0) {
-                    var videoName = getBasename(game.name) + '.mp4';
-                    await saveVideo(systemData, videoName, videoBlob, videoFolder);
-                    log('VIDEO: ' + videoName);
+                    log('FALLO: ' + romName + config.suffix);
                   }
                 }
               }
