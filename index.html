@@ -844,36 +844,49 @@
       return null;
     }
 
-    function findSpecificMedia(medias, preferredRegion, mediaType) {
+    // Find media by specific type from ScreenScraper JSON response
+    function findMediaByType(medias, preferredRegion, searchType) {
       var regionPriority = preferredRegion ? [preferredRegion, 'eu', 'us', 'jp', 'fr', 'wor', null] : ['eu', 'us', 'jp', 'fr', 'wor', null];
       
-      for (var i = 0; i < regionPriority.length; i++) {
-        var region = regionPriority[i];
-        var candidates = medias.filter(function(m) {
-          var typeMatch = m.type === mediaType;
-          var regionMatch = !region || m.region === region;
-          return typeMatch && regionMatch;
-        });
+      // Map search types to ScreenScraper API types
+      var typeMapping = {
+        'screenshot': ['screenshot', 'ss'],
+        'titlescreen': ['titlescreen', 'title', 'tt'],
+        'mixrbv1': ['mixrbv1', 'mix'],
+        'mixrbv2': ['mixrbv2', 'mix'],
+        'box-2D': ['box-2d', 'box2d', 'box'],
+        'box-3D': ['box-3d', 'box3d'],
+        'wheel': ['wheel', 'marquee'],
+        'marquee': ['marquee', 'wheel'],
+        'video': ['video', 'video-full', 'video-mono'],
+        'manual': ['manual', 'manual-pdf', 'pdf']
+      };
+      
+      var apiTypes = typeMapping[searchType] || [searchType];
+      
+      // Search by region priority
+      for (var r = 0; r < regionPriority.length; r++) {
+        var region = regionPriority[r];
         
-        if (candidates.length > 0) {
-          return candidates[0];
+        // Try each API type
+        for (var t = 0; t < apiTypes.length; t++) {
+          var candidates = medias.filter(function(m) {
+            var typeMatch = m.type && m.type.toLowerCase() === apiTypes[t].toLowerCase();
+            var regionMatch = !region || (m.region && m.region.toLowerCase() === region.toLowerCase());
+            return typeMatch && regionMatch;
+          });
+          
+          if (candidates.length > 0) {
+            return candidates[0];
+          }
         }
       }
       
-      return null;
-    }
-
-    function findVideo(medias, preferredRegion) {
-      var regionPriority = preferredRegion ? [preferredRegion, 'eu', 'us', 'wor', null] : ['eu', 'us', 'wor', null];
-      
-      for (var i = 0; i < regionPriority.length; i++) {
-        var region = regionPriority[i];
+      // Fallback: try without region filter
+      for (var t = 0; t < apiTypes.length; t++) {
         var candidates = medias.filter(function(m) {
-          var typeMatch = m.type === 'video';
-          var regionMatch = !region || m.region === region;
-          return typeMatch && regionMatch;
+          return m.type && m.type.toLowerCase() === apiTypes[t].toLowerCase();
         });
-        
         if (candidates.length > 0) {
           return candidates[0];
         }
@@ -1041,8 +1054,8 @@
                 
                 if (!config) continue;
                 
-                // Find media in API response
-                var selectedMedia = findSpecificMedia(medias, preferredRegion, config.apiType);
+                // Find media in API response using improved search
+                var selectedMedia = findMediaByType(medias, preferredRegion, config.apiType);
                 
                 if (selectedMedia && selectedMedia.url) {
                   var cdnUrl = selectedMedia.url;
