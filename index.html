@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.87</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.88</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -211,10 +211,10 @@
     </div>
 
   <script>
-    const ROM_EXTENSIONS = ['.nes', '.snes', '.sfc', '.gb', '.gbc', '.gba', '.n64', '.z64', '.nds', '.3ds', '.cia', '.xci', '.xwb', '.gcm', '.iso', '.wbfs', '.wad', '.a26', '.lnx', '.jag', '.j64', '.gen', '.sms', '.gg', '.s32x', '.32x', '.pce', '.ngp', '.ngc', '.crypt', '.fb', '.nsp', '.kv', '.m3u', '.zip', '.7z', '.bin', '.p8', '.apk', '.jar'];
+    const ROM_EXTENSIONS = ['.nes', '.snes', '.sfc', '.gb', '.gbc', '.gba', '.n64', '.z64', '.nds', '.3ds', '.cia', '.xci', '.xwb', '.gcm', '.iso', '.wbfs', '.wad', '.a26', '.lnx', '.jag', '.j64', '.gen', '.sms', '.gg', '.s32x', '.32x', '.pce', '.ngp', '.ngc', '.crypt', '.fb', '.nsp', '.kv', '.m3u', '.zip', '.7z', '.bin', '.p8', '.apk', '.jar', '.jad', '.pymo'];
     const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif'];
     const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.mkv', '.avi'];
-    const SYSTEMS = ['pico-8', 'snes', 'sfc', 'gba', 'gbc', 'gb', 'nes', 'n64', 'nds', '3ds', 'wii', 'psx', 'psp', 'ps2', 'megadrive', 'genesis', 'mastersystem', 'sms', 'gamegear', 'saturn', 'dreamcast', 'gamecube', 'wiiu', 'lynx', 'atarilynx', 'wswan', 'wswanc', 'tg16', 'sega32x', 'neogeo', 'mame', 'fbneo', 'switch', 'cps1', 'cps2', 'cps3', 'atomiswave', 'snesmini', 'nesmini', 'pico8', 'j2me', 'pymo'];
+    const SYSTEMS = ['pymo', 'pico-8', 'snes', 'sfc', 'gba', 'gbc', 'gb', 'nes', 'n64', 'nds', '3ds', 'wii', 'psx', 'psp', 'ps2', 'megadrive', 'genesis', 'mastersystem', 'sms', 'gamegear', 'saturn', 'dreamcast', 'gamecube', 'wiiu', 'lynx', 'atarilynx', 'wswan', 'wswanc', 'tg16', 'sega32x', 'neogeo', 'mame', 'fbneo', 'switch', 'cps1', 'cps2', 'cps3', 'atomiswave', 'snesmini', 'nesmini', 'pico8', 'j2me'];
 
     let directoryHandle = null;
     let scannedData = {};
