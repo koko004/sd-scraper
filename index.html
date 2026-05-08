@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.91</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.92</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -205,6 +205,20 @@
         </div>
       </div>
 
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex gap-2">
+          <button id="selectAllBtn" class="btn bg-indigo-600 text-white hover:bg-indigo-700 text-sm">
+            Seleccionar Todos
+          </button>
+          <button id="deselectAllBtn" class="btn bg-gray-500 text-white hover:bg-gray-600 text-sm">
+            Deseleccionar Todos
+          </button>
+        </div>
+        <div class="text-sm text-gray-600">
+          <span id="totalSystems">0</span> sistemas - <span id="totalRoms">0</span> ROMs
+        </div>
+      </div>
+
       <div id="systemsList" class="space-y-4"></div>
     </div>
 
@@ -289,8 +303,6 @@
       let name = getBasename(filename);
       // Remove dashes with spaces (e.g., "Pokemon - Liquid Crystal" -> "Pokemon Liquid Crystal")
       name = name.replace(/\s*-\s*/g, ' ');
-      // Replace & with "and"
-      name = name.replace(/&/g, 'and');
       // Remove parentheses and brackets
       name = name.replace(/\s*\([^)]*\)\s*/g, ' ');
       name = name.replace(/\s*\[.*\]\s*/g, ' ');
@@ -579,7 +591,7 @@
     const DEV_PASSWORD = 'EhkHQozlUSq';
     
     const SYSTEM_MAP = {
-      'gb': 9, 'gbc': 10, 'gba': 25, 'nes': 3, 'snes': 4, 'sfc': 4,
+      'gb': 9, 'gbc': 10, 'gba': 12, 'nes': 3, 'snes': 4, 'sfc': 4,
       'n64': 14, 'nds': 28, '3ds': 43, 'wii': 17, 'wiiu': 41,
       'mastersystem': 2, 'sms': 2, 'genesis': 1, 'megadrive': 1,
       'sega32x': 11, 'gamegear': 21, 'neogeo': 142, 'mame': 75,
@@ -1386,7 +1398,7 @@ if (origData.response && origData.response.jeu) {
     });
     
     var videoFolderSelect = document.getElementById('videoFolderSelect');
-    if (videoFolderSelect) videoFolderSelect.addEventListener('change', function() {
+if (videoFolderSelect) videoFolderSelect.addEventListener('change', function() {
       var customInput = document.getElementById('videoCustomFolderInput');
       if (this.value === 'custom') {
         customInput.classList.remove('hidden');
@@ -1395,21 +1407,19 @@ if (origData.response && origData.response.jeu) {
       }
     });
     
-    // Clear log button
-    var clearLogBtn = document.getElementById('clearLogBtn');
-    if (clearLogBtn) clearLogBtn.addEventListener('click', function() {
-      document.getElementById('eventLog').innerHTML = '';
-      log('Log limpiado');
+    var selectAllBtn = document.getElementById('selectAllBtn');
+    var deselectAllBtn = document.getElementById('deselectAllBtn');
+    
+    if (selectAllBtn) selectAllBtn.addEventListener('click', function() {
+      for (var key in scannedData) {
+        selectedSystems.add(key);
+      }
+      renderSystems();
     });
-
-    // Load saved credentials and show welcome
-    window.addEventListener('load', function() {
-      var savedUser = localStorage.getItem('ssUser');
-      var savedPass = localStorage.getItem('ssPass');
-      if (savedUser) document.getElementById('ssUser').value = savedUser;
-      if (savedPass) document.getElementById('ssPass').value = savedPass;
-      log('=== SD Cover Manager listo ===');
-      log('Selecciona una carpeta para comenzar');
+    
+    if (deselectAllBtn) deselectAllBtn.addEventListener('click', function() {
+      selectedSystems.clear();
+      renderSystems();
     });
   </script>
 </body>
