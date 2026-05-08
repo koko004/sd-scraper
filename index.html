@@ -995,7 +995,7 @@
               var downloaded = false;
               var romBaseName = getBasename(game.name);
               
-              // ES-DE Media Mapping: type -> {folder, suffix, ext}
+// ES-DE Media Mapping: type -> {folder, suffix, ext}
               var esdeMediaConfig = {
                 'screenshot': { folder: 'media', suffix: '-screenshots', ext: '.png', apiType: 'screenshot' },
                 'titlescreen': { folder: 'media', suffix: '-screenshots', ext: '.png', apiType: 'titlescreen' },
@@ -1005,15 +1005,20 @@
                 'box-3D': { folder: 'media', suffix: '-covers', ext: '.png', apiType: 'box-3d' },
                 'wheel': { folder: 'media', suffix: '-marquees', ext: '.png', apiType: 'wheel' },
                 'marquee': { folder: 'media', suffix: '-marquees', ext: '.png', apiType: 'marquee' },
-                'video': { folder: 'videos', suffix: '-videos', ext: '.mp4', apiType: 'video' }
+                'video': { folder: 'videos', suffix: '-videos', ext: '.mp4', apiType: 'video' },
+                'manual': { folder: 'manuals', suffix: '-manuals', ext: '.pdf', apiType: 'manual' }
               };
-              
+               
               // Download all selected media types based on selectors
               var downloadTasks = [];
               
               // Image type (screenshot/titlescreen/mix)
               if (imageType && imageType !== 'none') {
                 downloadTasks.push({ config: esdeMediaConfig[imageType], romName: romBaseName });
+              }
+              // Manuals (when scanRatings is checked)
+              if (scanRatings) {
+                downloadTasks.push({ config: esdeMediaConfig['manual'], romName: romBaseName });
               }
               // Box type
               if (boxType && boxType !== 'none') {
@@ -1050,9 +1055,8 @@
                     if (config.folder === 'media') {
                       // Check if subfolder needed for manuals
                       if (config.suffix === '-manuals') {
-                        await ensureFolderExists(systemData.folderHandle, 'media');
-                        await ensureFolderExists(systemData.folderHandle, 'media/manuals');
-                        var saved = await saveImage(systemData, fileName, blob, 'media/manuals');
+                        await ensureFolderExists(systemData.folderHandle, 'manuals');
+                        var saved = await saveImage(systemData, fileName, blob, 'manuals');
                         if (saved) {
                           downloaded = true;
                           log('MANUAL: ' + fileName);
