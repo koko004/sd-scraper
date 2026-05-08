@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.81</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.82</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -214,7 +214,7 @@
     const ROM_EXTENSIONS = ['.nes', '.snes', '.sfc', '.gb', '.gbc', '.gba', '.n64', '.z64', '.nds', '.3ds', '.cia', '.xci', '.xwb', '.gcm', '.iso', '.wbfs', '.wad', '.a26', '.lnx', '.jag', '.j64', '.gen', '.sms', '.gg', '.s32x', '.32x', '.pce', '.ngp', '.ngc', '.crypt', '.fb', '.nsp', '.kv', '.m3u', '.zip', '.7z', '.bin', '.p8', '.apk', '.jar'];
     const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif'];
     const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.mkv', '.avi'];
-    const SYSTEMS = ['gb', 'gbc', 'gba', 'nes', 'snes', 'sfc', 'n64', 'nds', '3ds', 'wii', 'psx', 'psp', 'ps2', 'genesis', 'megadrive', 'mastersystem', 'sms', 'gamegear', 'saturn', 'dreamcast', 'gamecube', 'wiiu', 'lynx', 'atarilynx', 'wswan', 'wswanc', 'tg16', 'sega32x', 'neogeo', 'mame', 'fbneo', 'switch', 'cps1', 'cps2', 'cps3', 'atomiswave', 'snesmini', 'nesmini', 'pico8', 'pico-8', 'j2me', 'pymo'];
+    const SYSTEMS = ['snes', 'sfc', 'gba', 'gbc', 'gb', 'nes', 'n64', 'nds', '3ds', 'wii', 'psx', 'psp', 'ps2', 'megadrive', 'genesis', 'mastersystem', 'sms', 'gamegear', 'saturn', 'dreamcast', 'gamecube', 'wiiu', 'lynx', 'atarilynx', 'wswan', 'wswanc', 'tg16', 'sega32x', 'neogeo', 'mame', 'fbneo', 'switch', 'cps1', 'cps2', 'cps3', 'atomiswave', 'snesmini', 'nesmini', 'pico8', 'pico-8', 'j2me', 'pymo'];
 
     let directoryHandle = null;
     let scannedData = {};
@@ -374,7 +374,7 @@
           }
         } else if (entry.kind === 'directory') {
           const folderName = entry.name.toLowerCase();
-          if (folderName.startsWith('.') || folderName === 'tmp' || folderName === 'temp' || folderName === 'themes' || folderName === 'media' || folderName === 'portmaster' || folderName === 'tools' || folderName === 'backup' || folderName === 'bin' || folderName === 'scripts' || folderName === 'config' || folderName === 'saves' || folderName === 'save' || folderName === 'states' || folderName === 'roms' || folderName === 'cache') {
+          if (folderName.startsWith('.') || folderName === 'tmp' || folderName === 'temp' || folderName === 'themes' || folderName === 'media' || folderName === 'portmaster' || folderName === 'tools' || folderName === 'backup' || folderName === 'bin' || folderName === 'scripts' || folderName === 'config' || folderName === 'saves' || folderName === 'save' || folderName === 'states' || folderName === 'roms' || folderName === 'cache' || folderName === 'lib' || folderName === 'bios' || folderName === 'system' || folderName === 'emulators' || folderName === 'languages' || folderName === 'skins') {
             continue;
           }
           
@@ -442,7 +442,7 @@
           }
         }
 
-        const excludedFolders = ['media', 'themes', 'portmaster', 'tools', 'backup', 'bin', 'scripts', 'config', 'saves', 'save', 'states', 'roms', 'cache'];
+        const excludedFolders = ['media', 'themes', 'portmaster', 'tools', 'backup', 'bin', 'scripts', 'config', 'saves', 'save', 'states', 'roms', 'cache', 'lib', 'bios', 'system', 'emulators', 'languages', 'skins'];
         for (const folder of results.folders) {
           const folderLower = folder.name.toLowerCase();
           if (!folder.name.startsWith('.') && !excludedFolders.includes(folderLower)) {
