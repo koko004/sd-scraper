@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.73</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.74</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -254,7 +254,16 @@
     }
 
     function getGameName(jeu) {
-      return jeu.nom || jeu.nom_du_jeu || jeu.nom_ss || jeu.nom_eu || jeu.nom_us || jeu.nom_jp || 'Unknown';
+      if (!jeu) return 'Unknown';
+      const nameFields = ['nom', 'nom_du_jeu', 'nom_ss', 'nom_eu', 'nom_us', 'nom_jp', 'nom_fr', 'nom_de', 'nom_es', 'nom_it', 'nom_jp', 'nom_ko', 'nom_zh', 'game_name', 'name', 'title'];
+      for (const field of nameFields) {
+        if (jeu[field]) return jeu[field];
+      }
+      const keys = Object.keys(jeu);
+      if (keys.length > 0) {
+        console.log('DEBUG - Available jeu fields:', keys);
+      }
+      return 'Unknown';
     }
 
     function getBasename(filename) {
