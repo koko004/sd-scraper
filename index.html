@@ -848,18 +848,18 @@
     function findMediaByType(medias, preferredRegion, searchType) {
       var regionPriority = preferredRegion ? [preferredRegion, 'eu', 'us', 'jp', 'fr', 'wor', null] : ['eu', 'us', 'jp', 'fr', 'wor', null];
       
-      // Map search types to ScreenScraper API types
+      // Map menu options to ScreenScraper API types
       var typeMapping = {
-        'screenshot': ['screenshot', 'ss'],
-        'titlescreen': ['titlescreen', 'title', 'tt'],
-        'mixrbv1': ['mixrbv1', 'mix'],
-        'mixrbv2': ['mixrbv2', 'mix'],
-        'box-2D': ['box-2d', 'box2d', 'box'],
-        'box-3D': ['box-3d', 'box3d'],
-        'wheel': ['wheel', 'marquee'],
-        'marquee': ['marquee', 'wheel'],
+        'ss': ['ss'],
+        'sstitle': ['sstitle'],
+        'mixrbv1': ['mixrbv1'],
+        'mixrbv2': ['mixrbv2'],
+        'box-2d': ['box-2d', 'box2d'],
+        'box-3d': ['box-3d', 'box3d'],
+        'wheel-hd': ['wheel-hd', 'wheel'],
+        'wheel-steel': ['wheel-steel', 'wheel'],
         'video': ['video', 'video-full', 'video-mono'],
-        'manual': ['manual', 'manual-pdf', 'pdf']
+        'manual': ['manual', 'manual-pdf']
       };
       
       var apiTypes = typeMapping[searchType] || [searchType];
@@ -1008,18 +1008,24 @@
               var downloaded = false;
               var romBaseName = getBasename(game.name);
               
-// ES-DE Media Mapping: type -> {folder, suffix, ext}
+// ES-DE Media Mapping: menu option -> {folder, suffix, ext, apiType}
               var esdeMediaConfig = {
-                'screenshot': { folder: 'media', suffix: '-screenshots', ext: '.png', apiType: 'screenshot' },
-                'titlescreen': { folder: 'media', suffix: '-screenshots', ext: '.png', apiType: 'titlescreen' },
-                'mixrbv1': { folder: 'media', suffix: '-screenshots', ext: '.png', apiType: 'mixrbv1' },
-                'mixrbv2': { folder: 'media', suffix: '-screenshots', ext: '.png', apiType: 'mixrbv2' },
-                'box-2D': { folder: 'media', suffix: '-covers', ext: '.png', apiType: 'box-2d' },
-                'box-3D': { folder: 'media', suffix: '-covers', ext: '.png', apiType: 'box-3d' },
-                'wheel': { folder: 'media', suffix: '-marquees', ext: '.png', apiType: 'wheel' },
-                'marquee': { folder: 'media', suffix: '-marquees', ext: '.png', apiType: 'marquee' },
-                'video': { folder: 'videos', suffix: '-videos', ext: '.mp4', apiType: 'video' },
-                'manual': { folder: 'manuals', suffix: '-manuals', ext: '.pdf', apiType: 'manual' }
+                // Imagen Principal
+                'screenshot': { folder: 'media', suffix: '-image', ext: '.png', apiType: 'ss' },
+                'titlescreen': { folder: 'media', suffix: '-image', ext: '.png', apiType: 'sstitle' },
+                'mixrbv1': { folder: 'media', suffix: '-image', ext: '.png', apiType: 'mixrbv1' },
+                'mixrbv2': { folder: 'media', suffix: '-image', ext: '.png', apiType: 'mixrbv2' },
+                'box-2D': { folder: 'media', suffix: '-image', ext: '.png', apiType: 'box-2d' },
+                'box-3D': { folder: 'media', suffix: '-image', ext: '.png', apiType: 'box-3d' },
+                // Tipo de Caja
+                'caja2d': { folder: 'media', suffix: '-thumb', ext: '.png', apiType: 'box-2d' },
+                'caja3d': { folder: 'media', suffix: '-thumb', ext: '.png', apiType: 'box-3d' },
+                // Tipo de Logo
+                'wheel': { folder: 'media', suffix: '-marquee', ext: '.png', apiType: 'wheel-hd' },
+                'marquee': { folder: 'media', suffix: '-marquee', ext: '.png', apiType: 'wheel-steel' },
+                // Videos y Manuales
+                'video': { folder: 'videos', suffix: '-video', ext: '.mp4', apiType: 'video' },
+                'manual': { folder: 'manuals', suffix: '-manual', ext: '.pdf', apiType: 'manual' }
               };
                
               // Download all selected media types based on selectors
