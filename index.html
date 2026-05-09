@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.02</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.03</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -432,17 +432,20 @@
       // Try first folder (most common case)
       let folder = (parts[0] || '').toLowerCase();
       
-      // Match exact folder name
-      for (const sys of SYSTEMS) {
-        if (folder === sys) return sys;
-      }
+      // Check against SYSTEM_MAP keys (dynamically loaded from API)
+      if (SYSTEM_MAP[folder]) return folder;
       
       // Try second part if first didn't match (for paths like /pico-8/carts)
       if (parts.length > 1) {
         folder = (parts[1] || '').toLowerCase();
-        for (const sys of SYSTEMS) {
-          if (folder === sys) return sys;
-        }
+        if (SYSTEM_MAP[folder]) return folder;
+      }
+      
+      // Try variations without special characters
+      const folderClean = folder.replace(/[^a-z0-9]/g, '');
+      for (const sys of Object.keys(SYSTEM_MAP)) {
+        const sysClean = sys.replace(/[^a-z0-9]/g, '');
+        if (folderClean === sysClean) return sys;
       }
       
       return 'other';
@@ -593,7 +596,7 @@
     const DEV_PASSWORD = 'EhkHQozlUSq';
     
     // Welcome messages after constants are initialized
-    log('=== SD Cover Manager v1.02 listo ===');
+    log('=== SD Cover Manager v1.03 listo ===');
     log('Selecciona una carpeta para comenzar');
     
     // Default fallback system map (used until API loads)
