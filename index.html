@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.01</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.02</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -230,7 +230,7 @@
     const ROM_EXTENSIONS = ['.nes', '.snes', '.sfc', '.gb', '.gbc', '.gba', '.n64', '.z64', '.nds', '.3ds', '.cia', '.xci', '.xwb', '.gcm', '.iso', '.wbfs', '.wad', '.a26', '.lnx', '.jag', '.j64', '.gen', '.sms', '.gg', '.s32x', '.32x', '.pce', '.ngp', '.ngc', '.crypt', '.fb', '.nsp', '.kv', '.m3u', '.zip', '.7z', '.bin', '.p8', '.apk', '.jar', '.pymo'];
     const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif'];
     const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.mkv', '.avi'];
-    let SYSTEMS = ['pymo', 'pico-8', 'snes', 'sfc', 'gba', 'gbc', 'gb', 'nes', 'n64', 'nds', '3ds', 'wii', 'psx', 'psp', 'ps2', 'megadrive', 'genesis', 'mastersystem', 'sms', 'gamegear', 'saturn', 'dreamcast', 'gamecube', 'wiiu', 'lynx', 'atarilynx', 'wswan', 'wswanc', 'tg16', 'sega32x', 'neogeo', 'mame', 'fbneo', 'switch', 'cps1', 'cps2', 'cps3', 'atomiswave', 'snesmini', 'nesmini', 'pico8', 'j2me'];
+    let SYSTEMS = ['pymo', 'pico-8', 'snes', 'sfc', 'gba', 'gbc', 'gb', 'nes', 'n64', 'nds', '3ds', 'wii', 'psx', 'psp', 'ps2', 'megadrive', 'genesis', 'mastersystem', 'sms', 'gamegear', 'saturn', 'dreamcast', 'gamecube', 'wiiu', 'lynx', 'atarilynx', 'wswan', 'wswanc', 'tg16', 'sega32x', 'neogeo', 'mame', 'fbneo', 'switch', 'cps1', 'cps2', 'cps3', 'atomiswave', 'snesmini', 'nesmini', 'pico8', 'j2me', 'c64', 'pcengine', 'amiga', 'atari800', 'oric', 'ti99', 'zxspectrum', 'amstradpcw', 'apple2', 'macintosh', 'intellivision', 'colecovision', 'vectrex', 'fba', 'fbn', 'doom', 'quake', 'scummvm', 'vice', 'mupen64plus', 'ppsspp', 'rpcs3', 'pcsx2', 'cemu', 'yuzu', 'ryujinx', 'cemuhook', 'citra', 'dolphin', 'duckstation', 'pcsx1', 'epsxe', 'retroarch', 'batocera'];
 
     let directoryHandle = null;
     let scannedData = {};
@@ -593,7 +593,7 @@
     const DEV_PASSWORD = 'EhkHQozlUSq';
     
     // Welcome messages after constants are initialized
-    log('=== SD Cover Manager v1.01 listo ===');
+    log('=== SD Cover Manager v1.02 listo ===');
     log('Selecciona una carpeta para comenzar');
     
     // Default fallback system map (used until API loads)
@@ -608,6 +608,10 @@
       'snesmini': 4, 'nesmini': 3, 'switch': 130,
       'gamecube': 16, 'dreamcast': 64, 'saturn': 62,
       'cps1': 38, 'cps2': 41, 'cps3': 6, 'atomiswave': 53,
+      'c64': 64, 'pcengine': 31, 'amiga': 151, 'atari800': 87,
+      'oric': 99, 'ti99': 156, 'zxspectrum': 85, 'amstradpcw': 223,
+      'apple2': 76, 'macintosh': 163, 'intellivision': 48,
+      'colecovision': 48, 'vectrex': 84,
       'pico8': 999, 'pico-8': 999, 'j2me': 999, 'pymo': 999
     };
     
