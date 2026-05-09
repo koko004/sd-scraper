@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.98</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.99</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -261,10 +261,6 @@
       logEl.innerHTML += '<div>[' + time + '] ' + safeMsg + '</div>';
       logEl.scrollTop = logEl.scrollHeight;
     }
-    
-    // Welcome messages on load
-    log('=== SD Cover Manager v0.98 listo ===');
-    log('Selecciona una carpeta para comenzar');
 
     function getExtension(filename) {
       const ext = filename.toLowerCase().match(/\.[^.]+$/)?.[0] || '';
@@ -593,6 +589,10 @@
     // Hardcoded developer credentials
     const DEV_ID = 'koko004';
     const DEV_PASSWORD = 'EhkHQozlUSq';
+    
+    // Welcome messages after constants are initialized
+    log('=== SD Cover Manager v0.99 listo ===');
+    log('Selecciona una carpeta para comenzar');
     
     // Default fallback system map (used until API loads)
     let SYSTEM_MAP = {
