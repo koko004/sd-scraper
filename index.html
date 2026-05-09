@@ -261,6 +261,10 @@
       logEl.innerHTML += '<div>[' + time + '] ' + safeMsg + '</div>';
       logEl.scrollTop = logEl.scrollHeight;
     }
+    
+    // Welcome messages on load
+    log('=== SD Cover Manager v0.98 listo ===');
+    log('Selecciona una carpeta para comenzar');
 
     function getExtension(filename) {
       const ext = filename.toLowerCase().match(/\.[^.]+$/)?.[0] || '';
