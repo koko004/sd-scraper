@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SD Cover Manager</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com?version=3.4.0"></script>
   <style>
     :root { --primary: #6366f1; --primary-dark: #4f46e5; }
     body { font-family: system-ui, -apple-system, sans-serif; }
@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v0.99</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.00</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -119,12 +119,14 @@
         </div>
         
         <!-- ScreenScraper Credentials -->
-        <div class="flex flex-wrap items-center gap-2 mb-4">
-          <label class="text-sm font-medium">ScreenScraper:</label>
-          <input id="ssUser" type="text" placeholder="Usuario" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
-          <input id="ssPass" type="password" placeholder="Password" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
-          <button type="button" id="testLoginBtn" class="text-sm bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600">Test</button>
-        </div>
+        <form onsubmit="return false;">
+          <div class="flex flex-wrap items-center gap-2 mb-4">
+            <label class="text-sm font-medium">ScreenScraper:</label>
+            <input id="ssUser" type="text" placeholder="Usuario" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
+            <input id="ssPass" type="password" placeholder="Password" class="border border-gray-300 rounded px-3 py-2 text-sm w-28">
+            <button type="button" id="testLoginBtn" class="text-sm bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600">Test</button>
+          </div>
+        </form>
 
         <!-- Media Configuration Panel - Grid Layout -->
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
@@ -591,7 +593,7 @@
     const DEV_PASSWORD = 'EhkHQozlUSq';
     
     // Welcome messages after constants are initialized
-    log('=== SD Cover Manager v0.99 listo ===');
+    log('=== SD Cover Manager v1.00 listo ===');
     log('Selecciona una carpeta para comenzar');
     
     // Default fallback system map (used until API loads)
