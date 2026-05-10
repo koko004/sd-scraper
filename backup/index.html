@@ -6,247 +6,81 @@
   <title>SD Cover Manager</title>
   <script src="https://cdn.tailwindcss.com?version=3.4.0"></script>
   <style>
-    :root {
-      --retro-green: #00ff41;
-      --retro-green-bright: #39ff14;
-      --retro-orange: #ffaa00;
-      --retro-red: #ff3355;
-      --retro-bg: #0a0c10;
-      --retro-border: #2a2f38;
-      --retro-panel: #11151b;
-    }
-    
-    /* RETRO CRT STYLES */
-    body {
-      background: var(--retro-bg);
-      font-family: 'Courier New', 'VT323', monospace;
-      image-rendering: pixelated;
-      color: var(--retro-green);
-    }
-    
-    .crt-container {
-      position: relative;
-      background: var(--retro-panel);
-      border: 8px solid var(--retro-border);
-      box-shadow: 
-        0 0 0 12px #11151b,
-        0 0 0 16px #1a1f26,
-        inset 0 0 80px rgba(0, 255, 65, 0.05),
-        0 0 40px rgba(0, 255, 65, 0.1);
-    }
-    
-    .crt-container::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(rgba(255,255,255,0.03) 50%, transparent 50%);
-      background-size: 100% 4px;
-      pointer-events: none;
-      z-index: 2;
-      animation: scanlines 1.2s linear infinite;
-    }
-    
-    @keyframes scanlines {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(4px); }
-    }
-    
-    /* Retro Button */
-    .retro-btn {
-      font-family: 'Courier New', monospace;
-      font-weight: bold;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      background: linear-gradient(#3a3f48, #1f242b);
-      border: 4px solid var(--retro-green);
-      color: var(--retro-green);
-      box-shadow: 
-        0 0 0 2px #11151b,
-        inset 0 4px 0 #4a5059,
-        inset 0 -4px 0 #11151b;
-      transition: all 0.1s ease;
-      padding: 10px 20px;
-    }
-    
-    .retro-btn:hover {
-      background: linear-gradient(#4a5059, #2a3038);
-      color: var(--retro-green-bright);
-      border-color: var(--retro-green-bright);
-      box-shadow: 
-        0 0 0 2px #11151b,
-        0 0 12px rgba(57, 255, 20, 0.6),
-        inset 0 4px 0 #5f656f;
-    }
-    
-    .retro-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      border-color: #444;
-      color: #555;
-    }
-    
-    .retro-btn-green { background: linear-gradient(#1a4d1a, #0d260d); }
-    .retro-btn-red { background: linear-gradient(#4d1a1a, #260d0d); border-color: var(--retro-red); color: var(--retro-red); }
-    .retro-btn-red:hover { border-color: #ff5577; box-shadow: 0 0 12px rgba(255, 51, 85, 0.6); }
-    
-    /* Retro Input */
-    .retro-input {
-      background: var(--retro-bg);
-      border: 3px solid var(--retro-border);
-      color: var(--retro-green);
-      font-family: 'Courier New', monospace;
-      padding: 10px 14px;
-    }
-    
-    .retro-input:focus {
-      border-color: var(--retro-green);
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(0, 255, 65, 0.15);
-      background: #0f1218;
-    }
-    
-    /* Retro Select */
-    .retro-select {
-      background: var(--retro-bg);
-      border: 3px solid var(--retro-border);
-      color: var(--retro-green);
-      font-family: 'Courier New', monospace;
-      padding: 8px 12px;
-    }
-    
-    .retro-select:focus {
-      border-color: var(--retro-green);
-    }
-    
-    /* Terminal */
-    .terminal {
-      background: var(--retro-bg);
-      border: 3px solid var(--retro-border);
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      color: #00cc33;
-      max-height: 240px;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: var(--retro-green) #1a1f26;
-    }
-    
-    .terminal::-webkit-scrollbar { width: 8px; }
-    .terminal::-webkit-scrollbar-thumb { background: var(--retro-green); }
-    
-    /* Retro Panel */
-    .retro-panel {
-      background: var(--retro-panel);
-      border: 4px solid var(--retro-border);
-      box-shadow: 
-        0 0 0 3px #0a0c10,
-        inset 0 0 30px rgba(0, 0, 0, 0.6);
-      padding: 16px;
-    }
-    
-    /* System Card */
-    .system-card {
-      background: var(--retro-panel);
-      border: 4px solid var(--retro-border);
-      transition: all 0.15s ease;
-      padding: 12px;
-      margin-bottom: 8px;
-    }
-    
-    .system-card:hover {
-      border-color: var(--retro-green);
-      box-shadow: 0 0 0 1px var(--retro-green);
-    }
-    
-    .system-card.selected {
-      border-color: var(--retro-orange);
-      box-shadow: 0 0 0 1px var(--retro-orange);
-    }
-    
-    /* Progress Bar */
-    .retro-progress {
-      background: #1a1f26;
-      border: 3px solid var(--retro-border);
-      height: 22px;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .retro-progress-bar {
-      background: linear-gradient(90deg, var(--retro-green), var(--retro-green-bright));
-      height: 100%;
-      transition: width 0.4s ease;
-      box-shadow: 0 0 12px var(--retro-green);
-    }
-    
-    /* Status LED */
-    .led {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      border: 2px solid #11151b;
-      box-shadow: 0 0 6px currentColor;
-    }
-    
-    .led-green { background: var(--retro-green); box-shadow: 0 0 8px var(--retro-green); }
-    .led-orange { background: var(--retro-orange); box-shadow: 0 0 8px var(--retro-orange); }
-    .led-red { background: var(--retro-red); box-shadow: 0 0 8px var(--retro-red); }
-    
-    /* Utility classes */
-    .text-green-retro { color: var(--retro-green); }
-    .text-orange-retro { color: var(--retro-orange); }
-    .border-retro { border-color: var(--retro-border); }
+    :root { --primary: #6366f1; --primary-dark: #4f46e5; }
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    .card { @apply bg-white rounded-lg shadow-md p-4; }
+    .btn { @apply px-4 py-2 rounded-lg font-medium transition-all; }
+    .btn-primary { @apply bg-indigo-600 text-white hover:bg-indigo-700; }
+    .btn-secondary { @apply bg-gray-200 text-gray-800 hover:bg-gray-300; }
+    .status-badge { @apply px-2 py-1 rounded text-xs font-medium; }
+    .status-complete { @apply bg-green-100 text-green-800; }
+    .status-pending { @apply bg-yellow-100 text-yellow-800; }
+    .status-missing { @apply bg-red-100 text-red-800; }
+    .progress-bar { @apply h-2 bg-gray-200 rounded-full overflow-hidden; }
+    .progress-fill { @apply h-full bg-indigo-500 transition-all; }
+    .system-card { @apply border border-gray-200 rounded-lg p-3 mb-2; }
+    .game-item { @apply flex items-center justify-between py-2 border-b border-gray-100; }
+    .game-item:last-child { @apply border-b-0; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .scanning { animation: pulse 1s infinite; }
   </style>
 </head>
-<body class="bg-gray-900 min-h-screen">
-  <div class="max-w-4xl mx-auto p-4">
-    <header class="text-center mb-4">
-      <h1 class="text-2xl font-bold text-green-retro mb-1">SD COVER MANAGER</h1>
-      <p class="text-gray-500 text-xs">RETRO ROM COVER DOWNLOADER <span class="bg-gray-800 px-2 py-0.5 rounded ml-2">v1.12</span></p>
+<body class="bg-gray-50 min-h-screen">
+  <div class="max-w-4xl mx-auto p-6">
+    <header class="text-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.11</span></p>
     </header>
 
-    <!-- Terminal -->
-    <div class="crt-container mb-4">
-      <div class="flex justify-between items-center border-b border-gray-700 pb-2 px-3 py-2">
-        <h3 class="font-medium text-gray-400 text-sm">TERMINAL</h3>
-        <button id="clearLogBtn" class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded hover:bg-gray-600 retro-btn text-xs">LIMPIAR</button>
+    <!-- Terminal-style Event Log at top -->
+    <div class="card mb-6 bg-gray-900 border border-gray-700">
+      <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-2">
+        <h3 class="font-medium text-gray-300">Terminal</h3>
+        <div class="flex gap-2">
+          <button id="clearLogBtn" class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded hover:bg-gray-600">Limpiar</button>
+        </div>
       </div>
-      <div id="eventLog" class="terminal p-3 h-64"></div>
+      <div id="eventLog" class="bg-gray-900 text-green-400 p-4 rounded mb-4 h-64 overflow-y-auto font-mono text-xs"></div>
     </div>
 
     <!-- Botones de control bajo la consola -->
-    <div class="mb-4 flex justify-center gap-4">
-      <div id="progressGlobal" class="hidden flex items-center gap-2 retro-progress px-3">
-        <div class="led led-green"></div>
-        <span id="progressText" class="text-sm font-medium text-green-retro">0/0</span>
+    <div class="mb-6 flex justify-center gap-4">
+      <div id="progressGlobal" class="hidden flex items-center gap-2 bg-indigo-100 px-4 py-2 rounded-lg">
+        <svg class="w-5 h-5 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span id="progressText" class="text-sm font-medium text-indigo-800">0/0</span>
       </div>
-      <button id="scrapingBtn" class="retro-btn retro-btn-green flex items-center gap-2" disabled>
+      <button id="scrapingBtn" class="btn bg-green-600 text-white hover:bg-green-700 flex items-center gap-2" disabled>
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
         </svg>
-        INICIAR
+        Iniciar Scraping
       </button>
-      <button id="stopBtn" class="retro-btn retro-btn-red flex items-center gap-2 hidden">
+      <button id="stopBtn" class="btn bg-red-600 text-white hover:bg-red-700 flex items-center gap-2 hidden">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
-        DETENER
+        Detener
       </button>
     </div>
 
     <div id="warningSection" class="hidden">
-      <div class="retro-panel border-red-500 mb-4">
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
         <div class="flex items-start gap-3">
-          <div class="led led-red"></div>
+          <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
           <div>
-            <h3 class="font-medium text-red-400">NAVEGADOR NO COMPATIBLE</h3>
-            <p id="warningText" class="text-sm text-gray-400 mt-1"></p>
+            <h3 class="font-medium text-yellow-800">Navegador no compatible</h3>
+            <p id="warningText" class="text-sm text-yellow-700 mt-1"></p>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="folderSection" class="retro-panel mb-4">
+    <div id="folderSection" class="card mb-6">
       <div class="flex flex-col items-center gap-4">
         <button id="selectFolderBtn" class="btn btn-primary flex items-center gap-2">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -762,7 +596,7 @@
     const DEV_PASSWORD = 'EhkHQozlUSq';
     
     // Welcome messages after constants are initialized
-    log('=== SD Cover Manager v1.12 listo ===');
+    log('=== SD Cover Manager v1.11 listo ===');
     log('Selecciona una carpeta para comenzar');
     
     // Default fallback system map (used until API loads)
