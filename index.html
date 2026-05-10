@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.10</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.11</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -596,7 +596,7 @@
     const DEV_PASSWORD = 'EhkHQozlUSq';
     
     // Welcome messages after constants are initialized
-    log('=== SD Cover Manager v1.10 listo ===');
+    log('=== SD Cover Manager v1.11 listo ===');
     log('Selecciona una carpeta para comenzar');
     
     // Default fallback system map (used until API loads)
@@ -1147,6 +1147,8 @@ if (origData.response && origData.response.jeu) {
                 // Tipo de Caja
                 'caja2d': { folder: destFolder, suffix: '-thumb', ext: '.png', apiType: 'box-2d' },
                 'caja3d': { folder: destFolder, suffix: '-thumb', ext: '.png', apiType: 'box-3d' },
+                'box-2D': { folder: destFolder, suffix: '-thumb', ext: '.png', apiType: 'box-2d' },
+                'box-3D': { folder: destFolder, suffix: '-thumb', ext: '.png', apiType: 'box-3d' },
                 // Tipo de Logo
                 'wheel': { folder: destFolder, suffix: '-marquee', ext: '.png', apiType: 'wheel-hd' },
                 'marquee': { folder: destFolder, suffix: '-marquee', ext: '.png', apiType: 'wheel-steel' },
