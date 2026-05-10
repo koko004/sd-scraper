@@ -697,7 +697,7 @@ export default function SDScrapperRetro() {
     setDownloadedCovers([]);
     setFailedDownloads([]);
 
-    addLog('=== STARTING SCRAPING v1.32 ===', 'info');
+    addLog('=== STARTING SCRAPING v1.33 ===', 'info');
     addLog('Usuario: ' + credentials.ssid, 'info');
 
     // Request write permission for the folder
@@ -928,7 +928,7 @@ export default function SDScrapperRetro() {
             <div className="text-4xl">📼</div>
             <div>
               <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPPER</h1>
-              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.32</div>
+              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.33</div>
             </div>
           </div>
 
@@ -989,11 +989,11 @@ export default function SDScrapperRetro() {
               <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }} className="space-y-4">
                 <div>
                   <div className="text-xs mb-1.5 tracking-widest text-[#ffaa00]/80">SSID / USERNAME</div>
-                  <input type="text" value={credentials.ssid} onChange={(e) => setCredentials({...credentials, ssid: e.target.value})} className="retro-input w-full text-lg" placeholder="YOUR USERNAME" />
+                  <input type="text" value={credentials.ssid} onChange={(e) => setCredentials({...credentials, ssid: e.target.value})} className="retro-input w-full text-lg" placeholder="YOUR USERNAME" autoComplete="username" />
                 </div>
                 <div>
                   <div className="text-xs mb-1.5 tracking-widest text-[#ffaa00]/80">SSPASS / PASSWORD</div>
-                  <input type="password" value={credentials.sspass} onChange={(e) => setCredentials({...credentials, sspass: e.target.value})} className="retro-input w-full text-lg" />
+                  <input type="password" value={credentials.sspass} onChange={(e) => setCredentials({...credentials, sspass: e.target.value})} className="retro-input w-full text-lg" autoComplete="current-password" />
                 </div>
                 <button type="submit" disabled={isScraping} className="retro-btn w-full py-3.5 text-base mt-2 tracking-[1.5px]">VERIFY & CONNECT</button>
                 <div className="text-center text-[10px] text-[#ffaa00]/60 tracking-widest">FREE ACCOUNT REQUIRED</div>
