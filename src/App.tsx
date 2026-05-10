@@ -656,7 +656,7 @@ export default function SDScrapperRetro() {
     setDownloadedCovers([]);
     setFailedDownloads([]);
 
-    addLog('=== STARTING SCRAPING v1.20 ===', 'info');
+    addLog('=== STARTING SCRAPING v1.26 ===', 'info');
     addLog('Usuario: ' + credentials.ssid, 'info');
 
     // Request write permission for the folder
@@ -695,7 +695,13 @@ export default function SDScrapperRetro() {
     const newCovers: DownloadedCover[] = [];
     const failed: any[] = [];
 
+    addLog('Starting downloads (1 request every 2 seconds)...', 'info');
+
     for (let i = 0; i < gamesToProcess.length; i++) {
+      // Delay between games to avoid server overload
+      if (i > 0) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
       if (stopRef.current) {
         addLog('=== STOPPED ===', 'info');
         break;
@@ -724,11 +730,72 @@ export default function SDScrapperRetro() {
               const imageName = getBasename(game.name) + '-image' + ext;
               const saved = await saveImage(system, imageName, blob, folder);
               if (saved) {
-addLog('✓ Image: ' + imageName, 'success');
-              addLog('✓ Box: ' + boxName, 'success');
-              addLog('✓ Logo: ' + logoName, 'success');
-              addLog('✓ Video: ' + videoName, 'success');
-              addLog('✓ Manual: ' + manualName, 'success');
+                addLog('✓ Image: ' + imageName, 'success');
+                downloadedCount++;
+              }
+            }
+          }
+        }
+        
+        // 2. Download box (if different from image)
+        if (boxType && boxType !== 'none' && boxType !== imageType) {
+          const boxMedia = findMediaByType(medias, preferredRegion, boxType);
+          if (boxMedia?.url) {
+            const blob = await downloadImage(boxMedia.url);
+            if (blob) {
+              const boxName = getBasename(game.name) + '-thumb.png';
+              const saved = await saveImage(system, boxName, blob, folder);
+              if (saved) {
+                addLog('✓ Box: ' + boxName, 'success');
+                downloadedCount++;
+              }
+            }
+          }
+        }
+        
+        // 3. Download logo (wheel/marquee)
+        if (logoType && logoType !== 'none') {
+          const logoMedia = findMediaByType(medias, preferredRegion, logoType);
+          if (logoMedia?.url) {
+            const blob = await downloadImage(logoMedia.url);
+            if (blob) {
+              const logoName = getBasename(game.name) + '-marquee.png';
+              const saved = await saveImage(system, logoName, blob, folder);
+              if (saved) {
+                addLog('✓ Logo: ' + logoName, 'success');
+                downloadedCount++;
+              }
+            }
+          }
+        }
+        
+        // 4. Download video
+        if (downloadVideos) {
+          const videoFolder = videoDestFolder === 'custom' ? (videoCustomFolder || 'videos') : videoDestFolder;
+          const videoMedia = findMediaByType(medias, preferredRegion, 'video');
+          if (videoMedia?.url) {
+            const blob = await downloadImage(videoMedia.url);
+            if (blob) {
+              const videoName = getBasename(game.name) + '.mp4';
+              const saved = await saveVideo(system, videoName, blob, videoFolder);
+              if (saved) {
+                addLog('✓ Video: ' + videoName, 'success');
+                downloadedCount++;
+              }
+            }
+          }
+        }
+        
+        // 5. Download manual
+        if (downloadManual) {
+          const manualMedia = findMediaByType(medias, preferredRegion, 'manual');
+          if (manualMedia?.url) {
+            const blob = await downloadImage(manualMedia.url);
+            if (blob) {
+              const manualName = getBasename(game.name) + '.pdf';
+              const saved = await saveImage(system, manualName, blob, 'manuals');
+              if (saved) {
+                addLog('✓ Manual: ' + manualName, 'success');
                 downloadedCount++;
               }
             }
@@ -819,7 +886,7 @@ addLog('✓ Image: ' + imageName, 'success');
             <div className="text-4xl">📼</div>
             <div>
               <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPPER</h1>
-              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.20</div>
+              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.26</div>
             </div>
           </div>
 
