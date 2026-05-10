@@ -645,6 +645,43 @@ export default function SDScrapperRetro() {
     }
   };
 
+  const readGamelistXml = async (systemData: System) => {
+    try {
+      const fileHandle = await systemData.folderHandle.getFileHandle('gamelist.xml');
+      const file = await fileHandle.getFile();
+      return await file.text();
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const updateGamelistXml = async (systemData: System, gameFile: string, imageFile: string | null) => {
+    try {
+      let xml = await readGamelistXml(systemData);
+      if (!xml) {
+        xml = '<?xml version="1.0" encoding="UTF-8"?>\n<gameList>\n</gameList>';
+      }
+      const gameName = getBasename(gameFile);
+      const imageName = imageFile || gameName + '-image.png';
+      const gamePath = gameFile;
+      if (xml.includes('<path>' + gamePath + '</path>')) {
+        const imgRegex = new RegExp('(<path>' + gameName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\\\?[^<]*</path>)[\\s\\S]*?(<image>[^<]*)', 'i');
+        xml = xml.replace(imgRegex, '$1<image>' + imageName + '</image>');
+      } else {
+        const gameEntry = '  <game>\n    <path>' + gamePath + '</path>\n    <name>' + gameName + '</name>\n    <image>' + imageName + '</image>\n  </game>';
+        xml = xml.replace('<gameList>', '<gameList>\n' + gameEntry);
+      }
+      const fileHandle = await systemData.folderHandle.getFileHandle('gamelist.xml', { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(xml);
+      await writable.close();
+      return true;
+    } catch (e) {
+      console.error('Error updating gamelist.xml:', e);
+      return false;
+    }
+  };
+
   const startScraping = async () => {
     if (!isLoggedIn || selectedSystems.length === 0 || systems.length === 0) {
       addLog('ERROR: Missing login or systems selected', 'error');
@@ -660,7 +697,7 @@ export default function SDScrapperRetro() {
     setDownloadedCovers([]);
     setFailedDownloads([]);
 
-    addLog('=== STARTING SCRAPING v1.30 ===', 'info');
+    addLog('=== STARTING SCRAPING v1.31 ===', 'info');
     addLog('Usuario: ' + credentials.ssid, 'info');
 
     // Request write permission for the folder
@@ -735,6 +772,7 @@ export default function SDScrapperRetro() {
               const saved = await saveImage(system, imageName, blob, folder);
               if (saved) {
                 addLog('✓ Image: ' + imageName, 'success');
+                await updateGamelistXml(system, game.name, imageName);
                 downloadedCount++;
               }
             }
@@ -890,7 +928,7 @@ export default function SDScrapperRetro() {
             <div className="text-4xl">📼</div>
             <div>
               <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPPER</h1>
-              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.30</div>
+              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.31</div>
             </div>
           </div>
 
