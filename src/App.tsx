@@ -87,6 +87,9 @@ const [destFolder, setDestFolder] = useState('images');
   const [imageType, setImageType] = useState('mixrbv2');
   const [boxType, setBoxType] = useState('box-3D');
   const [logoType, setLogoType] = useState('wheel');
+  const [downloadVideos, setDownloadVideos] = useState(false);
+  const [downloadManual, setDownloadManual] = useState(false);
+  const [scanRatings, setScanRatings] = useState(false);
   const [preferredRegion, setPreferredRegion] = useState('eu');
 
   const [isScraping, setIsScraping] = useState(false);
@@ -750,7 +753,7 @@ const [destFolder, setDestFolder] = useState('images');
     setDownloadedCovers([]);
     setFailedDownloads([]);
 
-    addLog('=== STARTING SCRAPING v1.36 ===', 'info');
+    addLog('=== STARTING SCRAPING v1.37 ===', 'info');
     addLog('Usuario: ' + credentials.ssid, 'info');
 
     // Request write permission for the folder
@@ -985,7 +988,7 @@ const [destFolder, setDestFolder] = useState('images');
             <div className="text-4xl">📼</div>
             <div>
               <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPPER</h1>
-              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.36</div>
+              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.37</div>
             </div>
           </div>
 
