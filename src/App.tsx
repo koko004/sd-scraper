@@ -111,7 +111,17 @@ export default function SDScrapperRetro() {
 
   const directoryHandleRef = useRef<any>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
+  const terminal2Ref = useRef<HTMLDivElement>(null);
   const stopRef = useRef(false);
+
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+    if (terminal2Ref.current) {
+      terminal2Ref.current.scrollTop = terminal2Ref.current.scrollHeight;
+    }
+  }, [logs]);
 
   useEffect(() => {
     if (!window.showDirectoryPicker) {
@@ -650,7 +660,7 @@ export default function SDScrapperRetro() {
     setDownloadedCovers([]);
     setFailedDownloads([]);
 
-    addLog('=== STARTING SCRAPING v1.29 ===', 'info');
+    addLog('=== STARTING SCRAPING v1.30 ===', 'info');
     addLog('Usuario: ' + credentials.ssid, 'info');
 
     // Request write permission for the folder
@@ -880,7 +890,7 @@ export default function SDScrapperRetro() {
             <div className="text-4xl">📼</div>
             <div>
               <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPPER</h1>
-              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.29</div>
+              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.30</div>
             </div>
           </div>
 
@@ -1179,7 +1189,7 @@ export default function SDScrapperRetro() {
                 </div>
               )}
 
-              <div className="terminal p-4 font-mono text-xs leading-relaxed h-48 overflow-y-auto ">
+              <div ref={terminal2Ref} className="terminal p-4 font-mono text-xs leading-relaxed h-48 overflow-y-auto">
                 {logs.length === 0 && <div className="opacity-60">INITIALIZING...</div>}
                 {logs.map(log => (
                   <div key={log.id} className={log.type === 'success' ? 'text-[#39ff14]' : log.type === 'error' ? 'text-[#ff3355]' : 'text-[#00cc33]'}>
