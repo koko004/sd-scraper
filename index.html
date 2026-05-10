@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.04</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.05</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -596,7 +596,7 @@
     const DEV_PASSWORD = 'EhkHQozlUSq';
     
     // Welcome messages after constants are initialized
-    log('=== SD Cover Manager v1.04 listo ===');
+    log('=== SD Cover Manager v1.05 listo ===');
     log('Selecciona una carpeta para comenzar');
     
     // Default fallback system map (used until API loads)
@@ -1137,20 +1137,20 @@ if (origData.response && origData.response.jeu) {
               
 // ES-DE Media Mapping: menu option -> {folder, suffix, ext, apiType}
               var esdeMediaConfig = {
-                // Imagen Principal
-                'screenshot': { folder: 'media', suffix: '-image', ext: '.png', apiType: 'ss' },
-                'titlescreen': { folder: 'media', suffix: '-image', ext: '.png', apiType: 'sstitle' },
-                'mixrbv1': { folder: 'media', suffix: '-image', ext: '.png', apiType: 'mixrbv1' },
-                'mixrbv2': { folder: 'media', suffix: '-image', ext: '.png', apiType: 'mixrbv2' },
-                'box-2D': { folder: 'media', suffix: '-image', ext: '.png', apiType: 'box-2d' },
-                'box-3D': { folder: 'media', suffix: '-image', ext: '.png', apiType: 'box-3d' },
+                // Imagen Principal - usa la carpeta seleccionada por el usuario
+                'screenshot': { folder: destFolder, suffix: '-image', ext: '.png', apiType: 'ss' },
+                'titlescreen': { folder: destFolder, suffix: '-image', ext: '.png', apiType: 'sstitle' },
+                'mixrbv1': { folder: destFolder, suffix: '-image', ext: '.png', apiType: 'mixrbv1' },
+                'mixrbv2': { folder: destFolder, suffix: '-image', ext: '.png', apiType: 'mixrbv2' },
+                'box-2D': { folder: destFolder, suffix: '-image', ext: '.png', apiType: 'box-2d' },
+                'box-3D': { folder: destFolder, suffix: '-image', ext: '.png', apiType: 'box-3d' },
                 // Tipo de Caja
-                'box-2D': { folder: 'media', suffix: '-thumb', ext: '.png', apiType: 'box-2d' },
-                'box-3D': { folder: 'media', suffix: '-thumb', ext: '.png', apiType: 'box-3d' },
+                'caja2d': { folder: destFolder, suffix: '-thumb', ext: '.png', apiType: 'box-2d' },
+                'caja3d': { folder: destFolder, suffix: '-thumb', ext: '.png', apiType: 'box-3d' },
                 // Tipo de Logo
-                'wheel': { folder: 'media', suffix: '-marquee', ext: '.png', apiType: 'wheel-hd' },
-                'marquee': { folder: 'media', suffix: '-marquee', ext: '.png', apiType: 'wheel-steel' },
-                // Videos y Manuales
+                'wheel': { folder: destFolder, suffix: '-marquee', ext: '.png', apiType: 'wheel-hd' },
+                'marquee': { folder: destFolder, suffix: '-marquee', ext: '.png', apiType: 'wheel-steel' },
+                // Videos y Manuales - usan carpetas fijas
                 'video': { folder: 'videos', suffix: '-video', ext: '.mp4', apiType: 'video' },
                 'manual': { folder: 'manuals', suffix: '-manual', ext: '.pdf', apiType: 'manual' }
               };
