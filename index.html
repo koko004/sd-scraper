@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.05</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.06</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -596,7 +596,7 @@
     const DEV_PASSWORD = 'EhkHQozlUSq';
     
     // Welcome messages after constants are initialized
-    log('=== SD Cover Manager v1.05 listo ===');
+    log('=== SD Cover Manager v1.06 listo ===');
     log('Selecciona una carpeta para comenzar');
     
     // Default fallback system map (used until API loads)
@@ -1150,8 +1150,8 @@ if (origData.response && origData.response.jeu) {
                 // Tipo de Logo
                 'wheel': { folder: destFolder, suffix: '-marquee', ext: '.png', apiType: 'wheel-hd' },
                 'marquee': { folder: destFolder, suffix: '-marquee', ext: '.png', apiType: 'wheel-steel' },
-                // Videos y Manuales - usan carpetas fijas
-                'video': { folder: 'videos', suffix: '-video', ext: '.mp4', apiType: 'video' },
+                // Videos y Manuales - usan carpetas configuradas por el usuario
+                'video': { folder: videoFolder, suffix: '-video', ext: '.mp4', apiType: 'video' },
                 'manual': { folder: 'manuals', suffix: '-manual', ext: '.pdf', apiType: 'manual' }
               };
                
