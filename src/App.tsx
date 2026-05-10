@@ -754,7 +754,7 @@ export default function SDScrapperRetro() {
     setDownloadedCovers([]);
     setFailedDownloads([]);
 
-    addLog('=== STARTING SCRAPING v1.34 ===', 'info');
+    addLog('=== STARTING SCRAPING v1.35 ===', 'info');
     addLog('Usuario: ' + credentials.ssid, 'info');
 
     // Request write permission for the folder
@@ -829,7 +829,7 @@ export default function SDScrapperRetro() {
               const saved = await saveImage(system, imageName, blob, folder);
               if (saved) {
                 addLog('✓ Image: ' + imageName, 'success');
-                const videoName = downloadVideo ? getBasename(game.name) + '-video.mp4' : null;
+                const videoName = downloadVideos ? getBasename(game.name) + '-video.mp4' : null;
                 const boxName = boxType && boxType !== 'none' && boxType !== imageType ? getBasename(game.name) + '-thumb.png' : null;
                 const marqueeName = logoType && logoType !== 'none' ? getBasename(game.name) + '-marquee.png' : null;
                 const thumbName = boxType && boxType !== 'none' ? getBasename(game.name) + '-thumb.png' : null;
@@ -989,7 +989,7 @@ export default function SDScrapperRetro() {
             <div className="text-4xl">📼</div>
             <div>
               <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPPER</h1>
-              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.34</div>
+              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.35</div>
             </div>
           </div>
 
