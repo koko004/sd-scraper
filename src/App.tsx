@@ -111,12 +111,11 @@ export default function SDScrapperRetro() {
 
   const directoryHandleRef = useRef<any>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
+  const logsEndRef = useRef<HTMLDivElement>(null);
   const stopRef = useRef(false);
 
   useEffect(() => {
-    if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
-    }
+    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [logs]);
 
   useEffect(() => {
@@ -656,7 +655,7 @@ export default function SDScrapperRetro() {
     setDownloadedCovers([]);
     setFailedDownloads([]);
 
-    addLog('=== STARTING SCRAPING v1.26 ===', 'info');
+    addLog('=== STARTING SCRAPING v1.27 ===', 'info');
     addLog('Usuario: ' + credentials.ssid, 'info');
 
     // Request write permission for the folder
@@ -886,7 +885,7 @@ export default function SDScrapperRetro() {
             <div className="text-4xl">📼</div>
             <div>
               <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPPER</h1>
-              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.26</div>
+              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.27</div>
             </div>
           </div>
 
@@ -924,13 +923,14 @@ export default function SDScrapperRetro() {
               </div>
               <button onClick={() => setLogs([])} className="text-xs px-2 py-1 border border-[#2a2f38] hover:border-[#00ff41] text-[#00ff41]/60">CLEAR</button>
             </div>
-            <div ref={terminalRef} className="terminal p-3 h-40 overflow-y-auto font-mono text-xs">
+            <div ref={terminalRef} className="terminal p-3 h-40 overflow-y-auto font-mono text-xs scroll-smooth">
               {logs.length === 0 && <div className="opacity-60">waiting for action...</div>}
               {logs.map(log => (
                 <div key={log.id} className={log.type === 'success' ? 'text-[#39ff14]' : log.type === 'error' ? 'text-[#ff3355]' : 'text-[#00cc33]'}>
                   [{new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'})}] {log.message}
                 </div>
               ))}
+              <div ref={logsEndRef} />
             </div>
           </div>
 
@@ -1185,7 +1185,7 @@ export default function SDScrapperRetro() {
                 </div>
               )}
 
-              <div className="terminal p-4 font-mono text-xs leading-relaxed h-48 overflow-y-auto">
+              <div className="terminal p-4 font-mono text-xs leading-relaxed h-48 overflow-y-auto scroll-smooth">
                 {logs.length === 0 && <div className="opacity-60">INITIALIZING...</div>}
                 {logs.map(log => (
                   <div key={log.id} className={log.type === 'success' ? 'text-[#39ff14]' : log.type === 'error' ? 'text-[#ff3355]' : 'text-[#00cc33]'}>
