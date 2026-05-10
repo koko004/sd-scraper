@@ -144,6 +144,11 @@ export default function SDScrapperRetro() {
     return filename.replace(/\.[^.]+$/, '');
   };
 
+  const escapeXml = (str: string) => {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+  };
+
   const cleanRomNameForSearch = (filename: string) => {
     let name = getBasename(filename);
     name = name.replace(/\s*-\s*/g, ' ');
@@ -655,7 +660,7 @@ export default function SDScrapperRetro() {
     }
   };
 
-  const updateGamelistXml = async (systemData: System, gameFile: string, imageFile: string | null) => {
+  const updateGamelistXml = async (systemData: System, gameFile: string, imageFile: string | null, jeuData?: any, videoFile?: string | null, boxFile?: string | null, marqueeFile?: string | null, thumbFile?: string | null) => {
     try {
       let xml = await readGamelistXml(systemData);
       if (!xml) {
@@ -664,13 +669,65 @@ export default function SDScrapperRetro() {
       const gameName = getBasename(gameFile);
       const imageName = imageFile || gameName + '-image.png';
       const gamePath = gameFile;
+      
+      let gameEntry = '';
+      
       if (xml.includes('<path>' + gamePath + '</path>')) {
-        const imgRegex = new RegExp('(<path>' + gameName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\\\?[^<]*</path>)[\\s\\S]*?(<image>[^<]*)', 'i');
-        xml = xml.replace(imgRegex, '$1<image>' + imageName + '</image>');
+        const existingEntryRegex = new RegExp('(<game>[\\s\\S]*?<path>' + gamePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '</path>[\\s\\S]*?</game>)', 'i');
+        const match = xml.match(existingEntryRegex);
+        if (match && jeuData) {
+          let existing = match[1];
+          existing = existing.replace(/<image>[^<]*<\/image>/, '<image>' + imageName + '</image>');
+          if (videoFile) existing = existing.replace(/<video>[^<]*<\/video>/, '<video>' + videoFile + '</video>') || existing + '\n    <video>' + videoFile + '</video>';
+          if (marqueeFile) existing = existing.replace(/<marquee>[^<]*<\/marquee>/, '<marquee>' + marqueeFile + '</marquee>') || existing + '\n    <marquee>' + marqueeFile + '</marquee>';
+          if (thumbFile) existing = existing.replace(/<thumbnail>[^<]*<\/thumbnail>/, '<thumbnail>' + thumbFile + '</thumbnail>') || existing + '\n    <thumbnail>' + thumbFile + '</thumbnail>';
+          if (boxFile) existing = existing.replace(/<bezel>[^<]*<\/bezel>/, '<bezel>' + boxFile + '</bezel>') || existing + '\n    <bezel>' + boxFile + '</bezel>';
+          xml = xml.replace(existingEntryRegex, existing);
+        }
       } else {
-        const gameEntry = '  <game>\n    <path>' + gamePath + '</path>\n    <name>' + gameName + '</name>\n    <image>' + imageName + '</image>\n  </game>';
+        gameEntry = '  <game>\n';
+        gameEntry += '    <path>' + gamePath + '</path>\n';
+        gameEntry += '    <name>' + (jeuData?.noms?.[0]?.text || jeuData?.nom || gameName) + '</name>\n';
+        
+        if (imageFile) gameEntry += '    <image>' + imageName + '</image>\n';
+        if (videoFile) gameEntry += '    <video>' + videoFile + '</video>\n';
+        if (marqueeFile) gameEntry += '    <marquee>' + marqueeFile + '</marquee>\n';
+        if (thumbFile) gameEntry += '    <thumbnail>' + thumbFile + '</thumbnail>\n';
+        if (boxFile) gameEntry += '    <bezel>' + boxFile + '</bezel>\n';
+        
+        if (jeuData) {
+          if (jeuData.description) gameEntry += '    <desc>' + escapeXml(jeuData.description.substring(0, 2000)) + '</desc>\n';
+          
+          if (jeuData.genres?.genre) {
+            const genres = Array.isArray(jeuData.genres.genre) ? jeuData.genres.genre.map((g: any) => g.nom).join(', ') : jeuData.genres.genre?.nom;
+            if (genres) gameEntry += '    <genre>' + escapeXml(genres) + '</genre>\n';
+          }
+          
+          if (jeuData.datederelease) {
+            const date = jeuData.datederelease.replace(/-/g, '');
+            gameEntry += '    <releasedate>' + date + 'T000000</releasedate>\n';
+          }
+          
+          if (jeuData.developpeur) gameEntry += '    <developer>' + escapeXml(jeuData.developpeur) + '</developer>\n';
+          if (jeuData.editeur) gameEntry += '    <publisher>' + escapeXml(jeuData.editeur) + '</publisher>\n';
+          
+          if (jeuData.note) {
+            const rating = typeof jeuData.note === 'object' ? (jeuData.note.note || 0) / 20 : parseFloat(jeuData.note) / 20;
+            gameEntry += '    <rating>' + rating.toFixed(2) + '</rating>\n';
+          }
+          
+          if (jeuData.joueurs) gameEntry += '    <players>' + jeuData.joueurs + '</players>\n';
+          
+          if (jeuData.families?.family) {
+            const families = Array.isArray(jeuData.families.family) ? jeuData.families.family.map((f: any) => f.nom).join(', ') : jeuData.families.family?.nom;
+            if (families) gameEntry += '    <family>' + escapeXml(families) + '</family>\n';
+          }
+        }
+        
+        gameEntry += '  </game>';
         xml = xml.replace('<gameList>', '<gameList>\n' + gameEntry);
       }
+      
       const fileHandle = await systemData.folderHandle.getFileHandle('gamelist.xml', { create: true });
       const writable = await fileHandle.createWritable();
       await writable.write(xml);
@@ -697,7 +754,7 @@ export default function SDScrapperRetro() {
     setDownloadedCovers([]);
     setFailedDownloads([]);
 
-    addLog('=== STARTING SCRAPING v1.33 ===', 'info');
+    addLog('=== STARTING SCRAPING v1.34 ===', 'info');
     addLog('Usuario: ' + credentials.ssid, 'info');
 
     // Request write permission for the folder
@@ -772,7 +829,11 @@ export default function SDScrapperRetro() {
               const saved = await saveImage(system, imageName, blob, folder);
               if (saved) {
                 addLog('✓ Image: ' + imageName, 'success');
-                await updateGamelistXml(system, game.name, imageName);
+                const videoName = downloadVideo ? getBasename(game.name) + '-video.mp4' : null;
+                const boxName = boxType && boxType !== 'none' && boxType !== imageType ? getBasename(game.name) + '-thumb.png' : null;
+                const marqueeName = logoType && logoType !== 'none' ? getBasename(game.name) + '-marquee.png' : null;
+                const thumbName = boxType && boxType !== 'none' ? getBasename(game.name) + '-thumb.png' : null;
+                await updateGamelistXml(system, game.name, imageName, result.jeu, videoName, boxName, marqueeName, thumbName);
                 downloadedCount++;
               }
             }
@@ -928,7 +989,7 @@ export default function SDScrapperRetro() {
             <div className="text-4xl">📼</div>
             <div>
               <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPPER</h1>
-              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.33</div>
+              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.34</div>
             </div>
           </div>
 
