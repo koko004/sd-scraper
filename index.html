@@ -112,6 +112,28 @@
       color: var(--retro-green);
       font-family: 'Courier New', monospace;
       padding: 8px 12px;
+      cursor: pointer;
+    }
+    
+    .retro-select:focus {
+      border-color: var(--retro-green);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 255, 65, 0.15);
+    }
+    
+    /* Retro Panel */
+    .retro-panel {
+      background: var(--retro-panel);
+      border: 3px solid var(--retro-border);
+    }
+    
+    /* Retro Select */
+    .retro-select {
+      background: var(--retro-bg);
+      border: 3px solid var(--retro-border);
+      color: var(--retro-green);
+      font-family: 'Courier New', monospace;
+      padding: 8px 12px;
     }
     
     .retro-select:focus {
@@ -265,22 +287,22 @@
           <h3 class="font-medium">Configuracion</h3>
           <div class="flex items-center gap-2">
             <label class="text-sm font-medium">Carpeta Imagenes:</label>
-            <select id="destFolderSelect" class="border border-gray-300 rounded px-3 py-2 text-sm">
+            <select id="destFolderSelect" class="retro-select text-sm">
               <option value="images">/images</option>
               <option value="media">/media</option>
               <option value="custom">Personalizada</option>
             </select>
-            <input id="customFolderInput" type="text" placeholder="Nombre carpeta" class="border border-gray-300 rounded px-3 py-2 text-sm w-32 hidden">
+            <input id="customFolderInput" type="text" placeholder="Nombre carpeta" class="retro-input text-sm w-32 hidden">
           </div>
           <div class="flex items-center gap-2">
             <label class="text-sm font-medium">Carpeta Videos:</label>
-            <select id="videoFolderSelect" class="border border-gray-300 rounded px-3 py-2 text-sm">
+            <select id="videoFolderSelect" class="retro-select text-sm">
               <option value="videos">/videos</option>
               <option value="media">/media</option>
               <option value="movies">/movies</option>
               <option value="custom">Personalizada</option>
             </select>
-            <input id="videoCustomFolderInput" type="text" placeholder="Nombre carpeta" class="border border-gray-300 rounded px-3 py-2 text-sm w-32 hidden">
+            <input id="videoCustomFolderInput" type="text" placeholder="Nombre carpeta" class="retro-input text-sm w-32 hidden">
           </div>
         </div>
         
@@ -288,20 +310,20 @@
         <form onsubmit="return false;">
           <div class="flex flex-wrap items-center gap-2 mb-4">
             <label class="text-sm font-medium">ScreenScraper:</label>
-            <input id="ssUser" type="text" placeholder="Usuario" class="border border-gray-300 rounded px-3 py-2 text-sm w-28" autocomplete="username">
-            <input id="ssPass" type="password" placeholder="Password" class="border border-gray-300 rounded px-3 py-2 text-sm w-28" autocomplete="current-password">
+            <input id="ssUser" type="text" placeholder="Usuario" class="retro-input text-sm w-28" autocomplete="username">
+            <input id="ssPass" type="password" placeholder="Password" class="retro-input text-sm w-28" autocomplete="current-password">
             <button type="button" id="testLoginBtn" class="text-sm bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600">Test</button>
           </div>
         </form>
 
         <!-- Media Configuration Panel - Grid Layout -->
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
-          <div class="col-span-full text-sm font-semibold text-gray-700 mb-2">Opciones de Media</div>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4 p-4 retro-panel rounded-lg">
+          <div class="col-span-full text-sm font-semibold text-green-400 mb-2">Opciones de Media</div>
           
           <!-- Image Type Selection -->
           <div class="flex flex-col gap-1">
             <label class="text-sm font-medium">Tipo de Imagen:</label>
-            <select id="imageType" class="border border-gray-300 rounded px-3 py-2 text-sm">
+            <select id="imageType" class="retro-select text-sm">
               <option value="screenshot">Screenshot</option>
               <option value="titlescreen">Titlescreen</option>
               <option value="mixrbv1">Mix V1</option>
@@ -314,7 +336,7 @@
           <!-- Box Type Selection -->
           <div class="flex flex-col gap-1">
             <label class="text-sm font-medium">Tipo de Caja:</label>
-            <select id="boxType" class="border border-gray-300 rounded px-3 py-2 text-sm">
+            <select id="boxType" class="retro-select text-sm">
               <option value="none">Ninguno</option>
               <option value="box-2D">Caja 2D</option>
               <option value="box-3D">Caja 3D</option>
@@ -324,7 +346,7 @@
           <!-- Logo Type Selection -->
           <div class="flex flex-col gap-1">
             <label class="text-sm font-medium">Tipo de Logo:</label>
-            <select id="logoType" class="border border-gray-300 rounded px-3 py-2 text-sm">
+            <select id="logoType" class="retro-select text-sm">
               <option value="none">Ninguno</option>
               <option value="wheel">Rueda</option>
               <option value="marquee">Marquesina</option>
@@ -334,7 +356,7 @@
           <!-- Region Selection -->
           <div class="flex flex-col gap-1">
             <label class="text-sm font-medium">Region Preferida:</label>
-            <select id="preferredRegion" class="border border-gray-300 rounded px-3 py-2 text-sm">
+            <select id="preferredRegion" class="retro-select text-sm">
               <option value="eu">EU (Europa)</option>
               <option value="us">US (USA)</option>
               <option value="jp">JP (Japan)</option>
@@ -361,28 +383,28 @@
       <div class="grid grid-cols-3 gap-4 mb-6">
         <div class="card text-center">
           <div class="text-2xl font-bold text-indigo-600" id="totalSystems">0</div>
-          <div class="text-sm text-gray-600">Sistemas</div>
+          <div class="text-sm text-green-300">Sistemas</div>
         </div>
         <div class="card text-center">
           <div class="text-2xl font-bold text-indigo-600" id="totalRoms">0</div>
-          <div class="text-sm text-gray-600">Total ROMs</div>
+          <div class="text-sm text-green-300">Total ROMs</div>
         </div>
         <div class="card text-center">
           <div class="text-2xl font-bold text-yellow-600" id="totalMissing">0</div>
-          <div class="text-sm text-gray-600">Sin Cover</div>
+          <div class="text-sm text-green-300">Sin Cover</div>
         </div>
       </div>
 
       <div class="flex justify-between items-center mb-4">
         <div class="flex gap-2">
-          <button id="selectAllBtn" class="btn bg-indigo-600 text-white hover:bg-indigo-700 text-sm">
+          <button id="selectAllBtn" class="retro-btn text-sm">
             Seleccionar Todos
           </button>
-          <button id="deselectAllBtn" class="btn bg-gray-500 text-white hover:bg-gray-600 text-sm">
+          <button id="deselectAllBtn" class="retro-btn text-sm">
             Deseleccionar Todos
           </button>
         </div>
-        <div class="text-sm text-gray-600">
+        <div class="text-sm text-green-300">
           <span id="totalSystems">0</span> sistemas - <span id="totalRoms">0</span> ROMs
         </div>
       </div>
@@ -1528,7 +1550,7 @@ if (origData.response && origData.response.jeu) {
           (missing === 0 ? 'Completo' : missing + ' sin cover') +
           '</span></div>' +
           '<div class="progress-bar mb-2"><div class="progress-fill" style="width: ' + percentage + '%"></div></div>' +
-          '<div class="text-sm text-gray-600 mb-2 flex justify-between">' +
+          '<div class="text-sm text-green-300 mb-2 flex justify-between">' +
           '<span>' + total + ' ROMs - ' + missing + ' sin cover - ' + percentage + '%</span>' +
           '<span class="system-progress-text text-indigo-600 font-medium">0/' + missing + ' descargados</span></div>' +
           '<div class="max-h-48 overflow-y-auto border-t border-gray-200 pt-2">' + gamesHtml + '</div></div>';
