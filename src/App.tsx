@@ -86,6 +86,8 @@ export default function SDScrapperRetro() {
   const [videoCustomFolder, setVideoCustomFolder] = useState('');
   const [downloadBoxart, setDownloadBoxart] = useState(true);
   const [downloadVideos, setDownloadVideos] = useState(false);
+  const [downloadManual, setDownloadManual] = useState(false);
+  const [scanRatings, setScanRatings] = useState(false);
   const [imageType, setImageType] = useState('screenshot');
   const [boxType, setBoxType] = useState('box-2D');
   const [logoType, setLogoType] = useState('none');
@@ -109,6 +111,7 @@ export default function SDScrapperRetro() {
 
   const directoryHandleRef = useRef<any>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
+  const stopRef = useRef(false);
 
   useEffect(() => {
     if (terminalRef.current) {
@@ -326,7 +329,7 @@ export default function SDScrapperRetro() {
 
   const testLogin = async () => {
     if (!credentials.ssid || !credentials.sspass) {
-      addLog('ERROR: Ingresa usuario y password de ScreenScraper', 'error');
+      addLog('ERROR: Enter ScreenScraper username and password', 'error');
       return false;
     }
     addLog('Probando conexion...', 'info');
@@ -366,11 +369,11 @@ export default function SDScrapperRetro() {
 
   const handleSelectFolder = async () => {
     try {
-      addLog('Abriendo selector de carpeta...', 'info');
+      addLog('Opening folder selector...', 'info');
       const handle = await (window as any).showDirectoryPicker();
       directoryHandleRef.current = handle;
       setFolderSelected(true);
-      addLog('✓ Carpeta seleccionada correctamente', 'success');
+      addLog('✓ Folder selected successfully', 'success');
       addLog('Presiona "SCAN ROM DIRECTORIES" para buscar ROMs', 'info');
     } catch (e: any) {
       if (e.name !== 'AbortError') {
@@ -383,14 +386,14 @@ export default function SDScrapperRetro() {
 
   const handleScanRoms = async () => {
     if (!directoryHandleRef.current) {
-      addLog('ERROR: Selecciona una carpeta primero', 'error');
+      addLog('ERROR: Select a folder first', 'error');
       return;
     }
-    addLog('=== INICIANDO ESCANEO ===', 'info');
-    addLog('Analizando estructura de carpetas...', 'info');
+    addLog('=== STARTING SCAN ===', 'info');
+    addLog('Analyzing folder structure...', 'info');
     setIsScanning(true);
     try {
-      addLog('Esto puede tomar unos segundos...', 'info');
+      addLog('This may take a few seconds...', 'info');
       const scannedSystems = await findSystemFolders(directoryHandleRef.current);
       
       const systemsArray: System[] = [];
@@ -416,16 +419,16 @@ export default function SDScrapperRetro() {
       systemsArray.sort((a, b) => b.romCount - a.romCount);
       
       if (systemsArray.length === 0) {
-        addLog('ERROR: No se encontraron ROMs en la carpeta', 'error');
-        addLog('Asegurate de seleccionar la carpeta raiz de las ROMs', 'info');
+        addLog('ERROR: No ROMs found in folder', 'error');
+        addLog('Make sure to select the ROMs root folder', 'info');
       } else {
         setSystems(systemsArray);
         setSelectedSystems(systemsArray.map(s => s.id));
-        addLog('=== ESCANEO COMPLETO ===', 'success');
-        addLog(systemsArray.length + ' sistemas detectados', 'info');
-        addLog(systemsArray.reduce((a, s) => a + s.romCount, 0) + ' ROMs encontradas', 'info');
-        addLog(systemsArray.reduce((a, s) => a + s.missing, 0) + ' covers faltantes', 'info');
-        addLog('Selecciona los sistemas y presiona START SCRAPPING', 'info');
+        addLog('=== SCAN COMPLETE ===', 'success');
+        addLog(systemsArray.length + ' systems detected', 'info');
+        addLog(systemsArray.reduce((a, s) => a + s.romCount, 0) + ' ROMs found', 'info');
+        addLog(systemsArray.reduce((a, s) => a + s.missing, 0) + ' covers missing', 'info');
+        addLog('Select systems and press START SCRAPPING', 'info');
       }
     } catch (e) {
       addLog('ERROR escaneando: ' + (e as Error).message, 'error');
@@ -457,6 +460,43 @@ export default function SDScrapperRetro() {
         if (candidates.length > 0) return candidates[0];
       }
     }
+    return null;
+  };
+
+  const findMediaByType = (medias: any[], region: string, searchType: string) => {
+    const typeMapping: any = {
+      'screenshot': ['ss', 'screenshot', 'ss eu', 'ss us', 'ss jp'],
+      'titlescreen': ['sstitle', 'titlescreen', 'sstitle eu', 'sstitle us'],
+      'mixrbv1': ['mixrbv1', 'mix rb v1'],
+      'mixrbv2': ['mixrbv2', 'mix rb v2', 'mixrbv2 eu', 'mixrbv2 us'],
+      'box-2D': ['box-2d', 'box2d', 'box', 'boxart', 'box-2d eu', 'box-2d us'],
+      'box-3D': ['box-3d', 'box3d', 'box-3d eu', 'box-3d us'],
+      'wheel': ['wheel-hd', 'wheel', 'wheel-steel', 'wheel hd'],
+      'marquee': ['wheel-steel', 'marquee', 'marquee', 'wheel steel'],
+      'video': ['video', 'video-full', 'video-mp4', 'video mp4'],
+      'manual': ['manual', 'manual-pdf', 'manuel', 'manuel-pdf']
+    };
+    
+    const apiTypes = typeMapping[searchType] || [searchType];
+    const regionPriority = region ? [region, 'eu', 'us', 'jp', 'fr', 'wor', null] : ['eu', 'us', 'jp', 'fr', 'wor', null];
+    
+    for (const reg of regionPriority) {
+      for (const type of apiTypes) {
+        const candidates = medias.filter((m: any) => {
+          const typeMatch = m.type?.toLowerCase() === type.toLowerCase();
+          const regionMatch = !reg || m.region?.toLowerCase() === reg;
+          return typeMatch && regionMatch;
+        });
+        if (candidates.length > 0) return candidates[0];
+      }
+    }
+    
+    // Fallback: try without region
+    for (const type of apiTypes) {
+      const candidates = medias.filter((m: any) => m.type?.toLowerCase() === type.toLowerCase());
+      if (candidates.length > 0) return candidates[0];
+    }
+    
     return null;
   };
 
@@ -530,15 +570,30 @@ export default function SDScrapperRetro() {
 
   const requestWritePermission = async (handle: any) => {
     try {
-      if (handle.handle) {
-        const permission = await handle.handle.queryPermission({ mode: 'readwrite' });
-        if (permission === 'granted') return true;
-        const request = await handle.handle.requestPermission({ mode: 'readwrite' });
-        return request === 'granted';
+      if (!handle) return false;
+      
+      // Check if already has permission
+      try {
+        const permission = await handle.queryPermission({ mode: 'readwrite' });
+        if (permission === 'granted') {
+          console.log('Permission already granted');
+          return true;
+        }
+      } catch (e) {
+        console.log('Need to request permission');
       }
-      return true;
+      
+      // Request permission
+      try {
+        const requested = await handle.requestPermission({ mode: 'readwrite' });
+        console.log('Permission result:', requested);
+        return requested === 'granted';
+      } catch (e2) {
+        console.error('Error requesting permission:', e2);
+        return false;
+      }
     } catch (e) {
-      console.error('Error requesting permission:', e);
+      console.error('Error checking permission:', e);
       return false;
     }
   };
@@ -546,6 +601,14 @@ export default function SDScrapperRetro() {
   const saveImage = async (systemData: System, imageName: string, blob: Blob, folder: string) => {
     try {
       const folderHandle = systemData.folderHandle;
+      
+      // Request permission for this specific folder
+      try {
+        await folderHandle.requestPermission({ mode: 'readwrite' });
+      } catch (e) {
+        console.log('Folder permission already granted or not needed');
+      }
+      
       const imageFolderHandle = await ensureFolderExists(folderHandle, folder);
       const fileHandle = await imageFolderHandle.getFileHandle(imageName, { create: true });
       const writable = await fileHandle.createWritable();
@@ -558,44 +621,74 @@ export default function SDScrapperRetro() {
     }
   };
 
+  const saveVideo = async (systemData: System, videoName: string, blob: Blob, folder: string) => {
+    try {
+      const folderHandle = systemData.folderHandle;
+      
+      try {
+        await folderHandle.requestPermission({ mode: 'readwrite' });
+      } catch (e) {}
+      
+      const videoFolderHandle = await ensureFolderExists(folderHandle, folder);
+      const fileHandle = await videoFolderHandle.getFileHandle(videoName, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return true;
+    } catch (e) {
+      console.error('Save video error:', e);
+      return false;
+    }
+  };
+
   const startScraping = async () => {
     if (!isLoggedIn || selectedSystems.length === 0 || systems.length === 0) {
-      addLog('Faltan datos: login o sistemas seleccionados', 'error');
+      addLog('ERROR: Missing login or systems selected', 'error');
       return;
     }
 
     setIsScraping(true);
     setShouldStop(false);
+    stopRef.current = false;
     setProgress(0);
     setLogs([]);
     setProcessedCount(0);
     setDownloadedCovers([]);
     setFailedDownloads([]);
 
-    addLog('=== INICIANDO SCRAPING v1.12 ===', 'info');
+    addLog('=== STARTING SCRAPING v1.20 ===', 'info');
     addLog('Usuario: ' + credentials.ssid, 'info');
 
     // Request write permission for the folder
-    addLog('Solicitando permisos de escritura...', 'info');
+    addLog('Requesting write permissions...', 'info');
     const hasPermission = await requestWritePermission(directoryHandleRef.current);
     if (!hasPermission) {
-      addLog('ERROR: Permisos de escritura denegados', 'error');
+      addLog('ERROR: Write permissions denied', 'error');
       setIsScraping(false);
       return;
     }
-    addLog('✓ Permisos de escritura obtenidos', 'success');
+    addLog('✓ Write permissions granted', 'success');
 
     const folder = destFolder === 'custom' ? (customFolder || 'images') : destFolder;
-    addLog('Carpeta destino: /' + folder, 'info');
+    addLog('Destination folder: /' + folder, 'info');
 
     const gamesToProcess: { game: Game, system: System }[] = [];
-    selectedSystems.forEach(sysId => {
+    for (const sysId of selectedSystems) {
       const sysData = systems.find(s => s.id === sysId);
       if (sysData && sysData.roms) {
+        // Request permission for each system folder
+        if (sysData.folderHandle) {
+          try {
+            await sysData.folderHandle.requestPermission({ mode: 'readwrite' });
+          } catch (e) {}
+        }
+        
         const romsWithoutCover = sysData.roms.filter((r: Game) => !r.hasCover);
-        romsWithoutCover.forEach((g: Game) => gamesToProcess.push({ game: g, system: sysData }));
+        for (const g of romsWithoutCover) {
+          gamesToProcess.push({ game: g, system: sysData });
+        }
       }
-    });
+    }
 
     setTotalToProcess(gamesToProcess.length);
     let completed = 0;
@@ -603,38 +696,57 @@ export default function SDScrapperRetro() {
     const failed: any[] = [];
 
     for (let i = 0; i < gamesToProcess.length; i++) {
-      if (shouldStop) break;
+      if (stopRef.current) {
+        addLog('=== STOPPED ===', 'info');
+        break;
+      }
 
       const { game, system } = gamesToProcess[i];
       const systemIdNum = SYSTEM_MAP[system.system];
       setCurrentSystem(system.name);
       setCurrentGame(game.name);
 
-      addLog('Buscando: ' + game.name + ' [' + system.name + ']', 'info');
+      addLog('Searching: ' + game.name + ' [' + system.name + ']', 'info');
 
       const result = await scrapeGame(credentials.ssid, credentials.sspass, systemIdNum?.toString() || '999', game, preferredRegion);
 
       if (result && result.medias) {
-        const media = findMedia(result.medias, preferredRegion, imageType, boxType, logoType);
-        if (media && media.url) {
-          const blob = await downloadImage(media.url);
-          if (blob) {
-            const ext = media.type === 'box-2d' || media.type === 'box-3d' ? '.png' : '.png';
-            const imageName = getBasename(game.name) + ext;
-            const saved = await saveImage(system, imageName, blob, folder);
-            if (saved) {
-              addLog('Guardado: ' + imageName, 'success');
-              newCovers.push({
-                id: Date.now() + i,
-                game: game.name,
-                system: system.name,
-                image: URL.createObjectURL(blob),
-                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-              });
+        const medias = result.medias;
+        let downloadedCount = 0;
+        
+        // 1. Download main image (imageType)
+        if (imageType && imageType !== 'none') {
+          const media = findMediaByType(medias, preferredRegion, imageType);
+          if (media?.url) {
+            const blob = await downloadImage(media.url);
+            if (blob) {
+              const ext = '.png';
+              const imageName = getBasename(game.name) + '-image' + ext;
+              const saved = await saveImage(system, imageName, blob, folder);
+              if (saved) {
+addLog('✓ Image: ' + imageName, 'success');
+              addLog('✓ Box: ' + boxName, 'success');
+              addLog('✓ Logo: ' + logoName, 'success');
+              addLog('✓ Video: ' + videoName, 'success');
+              addLog('✓ Manual: ' + manualName, 'success');
+                downloadedCount++;
+              }
             }
           }
-        } else {
-          addLog('Sin media disponible', 'error');
+        }
+        
+        // 6. Scan ratings
+        if (scanRatings && result.jeu) {
+          let rating = null;
+          if (result.jeu.note) rating = typeof result.jeu.note === 'object' ? JSON.stringify(result.jeu.note) : result.jeu.note;
+          else if (result.jeu.note_md5) rating = result.jeu.note_md5;
+          if (rating) {
+            addLog('★ Rating: ' + rating + '/10', 'info');
+          }
+        }
+        
+        if (downloadedCount === 0) {
+          addLog('No media available for: ' + imageType, 'error');
           failed.push({ game: game.name, system: system.name });
         }
       } else {
@@ -651,8 +763,8 @@ export default function SDScrapperRetro() {
     setFailedDownloads(failed);
     setTimeout(() => {
       setProgress(100);
-      addLog('=== SCRAPING COMPLETO ===', 'success');
-      addLog(completed + '/' + gamesToProcess.length + ' juegos procesados', 'success');
+      addLog('=== SCRAPING COMPLETE ===', 'success');
+      addLog(completed + '/' + gamesToProcess.length + ' games processed', 'success');
       setIsScraping(false);
       setCurrentSystem('');
       setCurrentGame('');
@@ -660,8 +772,9 @@ export default function SDScrapperRetro() {
   };
 
   const stopScraping = () => {
+    stopRef.current = true;
     setShouldStop(true);
-    addLog('Deteniendo...', 'info');
+    addLog('Stopping...', 'info');
   };
 
   const resetAll = () => {
@@ -681,7 +794,7 @@ export default function SDScrapperRetro() {
     setIsLoggedIn(false);
     setLoggedUser('');
     setCredentials({ ssid: '', sspass: '' });
-    addLog('Sistema reseteado', 'info');
+    addLog('System reset', 'info');
   };
 
   const totalMissing = systems.filter(s => selectedSystems.includes(s.id)).reduce((sum, s) => sum + Number(s.missing || 0), 0);
@@ -706,7 +819,7 @@ export default function SDScrapperRetro() {
             <div className="text-4xl">📼</div>
             <div>
               <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPPER</h1>
-              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.12</div>
+              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.20</div>
             </div>
           </div>
 
@@ -911,6 +1024,22 @@ export default function SDScrapperRetro() {
                   <option value="jp">JP (Japan)</option>
                   <option value="fr">FR (France)</option>
                 </select>
+              </div>
+
+              <div className="pt-2 border-t border-[#2a2f38]">
+                <div className="text-xs text-[#ffaa00]/70 mb-2 tracking-widest">EXTRAS</div>
+                <label className="flex items-center gap-2 cursor-pointer mb-1.5">
+                  <input type="checkbox" checked={downloadVideos} onChange={(e) => setDownloadVideos(e.target.checked)} className="accent-[#00ff41] w-4 h-4" />
+                  <span className="text-xs">Download Videos</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer mb-1.5">
+                  <input type="checkbox" checked={downloadManual} onChange={(e) => setDownloadManual(e.target.checked)} className="accent-[#00ff41] w-4 h-4" />
+                  <span className="text-xs">Download Manual</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={scanRatings} onChange={(e) => setScanRatings(e.target.checked)} className="accent-[#00ff41] w-4 h-4" />
+                  <span className="text-xs">Scan Ratings</span>
+                </label>
               </div>
             </div>
           </div>
