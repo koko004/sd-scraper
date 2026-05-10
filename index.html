@@ -29,7 +29,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <header class="text-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">SD Cover Manager</h1>
-      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.09</span></p>
+      <p class="text-gray-600">Online cover download <span class="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">v1.10</span></p>
     </header>
 
     <!-- Terminal-style Event Log at top -->
@@ -596,7 +596,7 @@
     const DEV_PASSWORD = 'EhkHQozlUSq';
     
     // Welcome messages after constants are initialized
-    log('=== SD Cover Manager v1.09 listo ===');
+    log('=== SD Cover Manager v1.10 listo ===');
     log('Selecciona una carpeta para comenzar');
     
     // Default fallback system map (used until API loads)
@@ -1196,37 +1196,29 @@ if (origData.response && origData.response.jeu) {
                   
                   if (blob && blob.size > 0) {
                     var fileName = romName + config.suffix + config.ext;
+                    var targetFolder = config.folder;
                     
-                    // Create folder structure
-                    if (config.folder === 'media') {
-                      // Check if subfolder needed for manuals
-                      if (config.suffix === '-manuals') {
-                        await ensureFolderExists(systemData.folderHandle, 'manuals');
-                        var saved = await saveImage(systemData, fileName, blob, 'manuals');
-                        if (saved) {
-                          downloaded = true;
-                          log('MANUAL: ' + fileName);
-                        }
-                      } else {
-                        await ensureFolderExists(systemData.folderHandle, 'media');
-                        var saved = await saveImage(systemData, fileName, blob, 'media');
-                        if (saved) {
-                          // Update first image as main cover in gamelist
-                          if (!game.hasCover) {
-                            await updateGamelistXml(systemData, game.path, 'media/' + fileName);
-                            game.hasCover = true;
-                            game.imageName = 'media/' + fileName;
-                          }
-                          downloaded = true;
-                          log('MEDIA: ' + fileName);
-                        }
-                      }
-                    } else if (config.folder === 'videos') {
-                      await ensureFolderExists(systemData.folderHandle, 'videos');
-                      var saved = await saveVideo(systemData, fileName, blob, 'videos');
+                    // Ensure target folder exists
+                    await ensureFolderExists(systemData.folderHandle, targetFolder);
+                    
+                    // Save to appropriate folder
+                    if (targetFolder === 'videos') {
+                      var saved = await saveVideo(systemData, fileName, blob, targetFolder);
                       if (saved) {
                         downloaded = true;
                         log('VIDEO: ' + fileName);
+                      }
+                    } else {
+                      var saved = await saveImage(systemData, fileName, blob, targetFolder);
+                      if (saved) {
+                        // Update first image as main cover in gamelist
+                        if (targetFolder === 'media' && !game.hasCover) {
+                          await updateGamelistXml(systemData, game.path, 'media/' + fileName);
+                          game.hasCover = true;
+                          game.imageName = 'media/' + fileName;
+                        }
+                        downloaded = true;
+                        log(targetFolder === 'manuals' ? 'MANUAL: ' + fileName : 'MEDIA: ' + fileName);
                       }
                     }
                   } else {
