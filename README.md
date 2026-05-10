@@ -2,6 +2,12 @@
 
 Web tool for managing ROM covers of retro console with using web browser and ScreenScraper API.
 
+# Links
+- Working: https://www.sd-scrapper.gamer.gd/
+- Test: https://koko004.github.io/sd-scrapper/
+
+
+
 ## Screenshot
 <img width="1366" height="1022" alt="image" src="https://github.com/user-attachments/assets/e30c1404-5070-4698-ae9b-2944fb9a3dfd" />
 
