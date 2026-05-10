@@ -655,7 +655,7 @@ export default function SDScrapperRetro() {
     setDownloadedCovers([]);
     setFailedDownloads([]);
 
-    addLog('=== STARTING SCRAPING v1.27 ===', 'info');
+    addLog('=== STARTING SCRAPING v1.28 ===', 'info');
     addLog('Usuario: ' + credentials.ssid, 'info');
 
     // Request write permission for the folder
@@ -885,7 +885,7 @@ export default function SDScrapperRetro() {
             <div className="text-4xl">📼</div>
             <div>
               <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPPER</h1>
-              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.27</div>
+              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.28</div>
             </div>
           </div>
 
