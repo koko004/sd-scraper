@@ -667,7 +667,7 @@ const [destFolder, setDestFolder] = useState('images');
       }
       const gameName = getBasename(gameFile);
       const imageName = imageFile || gameName + '-image.png';
-      const gamePath = gameFile;
+      const gamePath = './' + gameFile;
       
       let gameEntry = '';
       
@@ -676,11 +676,11 @@ const [destFolder, setDestFolder] = useState('images');
         const match = xml.match(existingEntryRegex);
         if (match && jeuData) {
           let existing = match[1];
-          existing = existing.replace(/<image>[^<]*<\/image>/, '<image>' + imageName + '</image>');
-          if (videoFile) existing = existing.replace(/<video>[^<]*<\/video>/, '<video>' + videoFile + '</video>') || existing + '\n    <video>' + videoFile + '</video>';
-          if (marqueeFile) existing = existing.replace(/<marquee>[^<]*<\/marquee>/, '<marquee>' + marqueeFile + '</marquee>') || existing + '\n    <marquee>' + marqueeFile + '</marquee>';
-          if (thumbFile) existing = existing.replace(/<thumbnail>[^<]*<\/thumbnail>/, '<thumbnail>' + thumbFile + '</thumbnail>') || existing + '\n    <thumbnail>' + thumbFile + '</thumbnail>';
-          if (boxFile) existing = existing.replace(/<bezel>[^<]*<\/bezel>/, '<bezel>' + boxFile + '</bezel>') || existing + '\n    <bezel>' + boxFile + '</bezel>';
+          existing = existing.replace(/<image>[^<]*<\/image>/, '<image>./' + imageName + '</image>');
+          if (videoFile) existing = existing.replace(/<video>[^<]*<\/video>/, '<video>./' + videoFile + '</video>') || existing + '\n    <video>./' + videoFile + '</video>';
+          if (marqueeFile) existing = existing.replace(/<marquee>[^<]*<\/marquee>/, '<marquee>./' + marqueeFile + '</marquee>') || existing + '\n    <marquee>./' + marqueeFile + '</marquee>';
+          if (thumbFile) existing = existing.replace(/<thumbnail>[^<]*<\/thumbnail>/, '<thumbnail>./' + thumbFile + '</thumbnail>') || existing + '\n    <thumbnail>./' + thumbFile + '</thumbnail>';
+          
           xml = xml.replace(existingEntryRegex, existing);
         }
       } else {
@@ -688,11 +688,10 @@ const [destFolder, setDestFolder] = useState('images');
         gameEntry += '    <path>' + gamePath + '</path>\n';
         gameEntry += '    <name>' + (jeuData?.noms?.[0]?.text || jeuData?.nom || gameName) + '</name>\n';
         
-        if (imageFile) gameEntry += '    <image>' + imageName + '</image>\n';
-        if (videoFile) gameEntry += '    <video>' + videoFile + '</video>\n';
-        if (marqueeFile) gameEntry += '    <marquee>' + marqueeFile + '</marquee>\n';
-        if (thumbFile) gameEntry += '    <thumbnail>' + thumbFile + '</thumbnail>\n';
-        if (boxFile) gameEntry += '    <bezel>' + boxFile + '</bezel>\n';
+        if (imageFile) gameEntry += '    <image>./' + imageName + '</image>\n';
+        if (videoFile) gameEntry += '    <video>./' + videoFile + '</video>\n';
+        if (marqueeFile) gameEntry += '    <marquee>./' + marqueeFile + '</marquee>\n';
+        if (thumbFile) gameEntry += '    <thumbnail>./' + thumbFile + '</thumbnail>\n';
         
         if (jeuData) {
           if (jeuData.description) gameEntry += '    <desc>' + escapeXml(jeuData.description.substring(0, 2000)) + '</desc>\n';
@@ -721,6 +720,20 @@ const [destFolder, setDestFolder] = useState('images');
             const families = Array.isArray(jeuData.families.family) ? jeuData.families.family.map((f: any) => f.nom).join(', ') : jeuData.families.family?.nom;
             if (families) gameEntry += '    <family>' + escapeXml(families) + '</family>\n';
           }
+          
+          const region = jeuData.regions?.region?.[0]?.id || jeuData.region || 'unknown';
+          const lang = jeuData.langues?.langue?.[0]?.id || 'en';
+          if (region && region !== 'unknown') gameEntry += '    <region>' + region + '</region>\n';
+          if (lang) gameEntry += '    <lang>' + lang + '</lang>\n';
+          
+          const now = new Date();
+          const scrapeDate = now.getFullYear() + 
+            String(now.getMonth() + 1).padStart(2, '0') + 
+            String(now.getDate()).padStart(2, '0') + 'T' + 
+            String(now.getHours()).padStart(2, '0') + 
+            String(now.getMinutes()).padStart(2, '0') + 
+            String(now.getSeconds()).padStart(2, '0');
+          gameEntry += '    <scrap name="ScreenScraper" date="' + scrapeDate + '" />\n';
         }
         
         gameEntry += '  </game>';
@@ -753,7 +766,7 @@ const [destFolder, setDestFolder] = useState('images');
     setDownloadedCovers([]);
     setFailedDownloads([]);
 
-    addLog('=== STARTING SCRAPING v1.37 ===', 'info');
+    addLog('=== STARTING SCRAPING v1.38 ===', 'info');
     addLog('Usuario: ' + credentials.ssid, 'info');
 
     // Request write permission for the folder
@@ -988,7 +1001,7 @@ const [destFolder, setDestFolder] = useState('images');
             <div className="text-4xl">📼</div>
             <div>
               <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPPER</h1>
-              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.37</div>
+              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.38</div>
             </div>
           </div>
 
