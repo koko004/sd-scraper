@@ -436,7 +436,7 @@ const [destFolder, setDestFolder] = useState('images');
         addLog(systemsArray.length + ' systems detected', 'info');
         addLog(systemsArray.reduce((a, s) => a + s.romCount, 0) + ' ROMs found', 'info');
         addLog(systemsArray.reduce((a, s) => a + s.missing, 0) + ' covers missing', 'info');
-        addLog('Select systems and press START SCRAPPING', 'info');
+        addLog('Select systems and press START SCRAPING', 'info');
       }
     } catch (e) {
       addLog('ERROR escaneando: ' + (e as Error).message, 'error');
@@ -766,7 +766,7 @@ const [destFolder, setDestFolder] = useState('images');
     setDownloadedCovers([]);
     setFailedDownloads([]);
 
-    addLog('=== STARTING SCRAPING v1.39 ===', 'info');
+    addLog('=== STARTING SCRAPING v1.40 ===', 'info');
     addLog('Usuario: ' + credentials.ssid, 'info');
 
     // Request write permission for the folder
@@ -1001,7 +1001,7 @@ const [destFolder, setDestFolder] = useState('images');
             <div className="text-4xl">📼</div>
             <div>
               <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPER</h1>
-              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.39</div>
+              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.40</div>
             </div>
           </div>
 
@@ -1259,7 +1259,7 @@ const [destFolder, setDestFolder] = useState('images');
           <div className="lg:col-span-12 flex flex-wrap items-center gap-4 justify-between mt-3">
             <div className="flex items-center gap-4">
               {!isScraping ? (
-                <button onClick={startScraping} disabled={!isLoggedIn || selectedSystems.length === 0 || systems.length === 0} className="retro-btn px-14 py-4 text-xl tracking-[4px] disabled:opacity-40">START SCRAPPING</button>
+                <button onClick={startScraping} disabled={!isLoggedIn || selectedSystems.length === 0 || systems.length === 0} className="retro-btn px-14 py-4 text-xl tracking-[4px] disabled:opacity-40">START SCRAPING</button>
               ) : (
                 <button onClick={stopScraping} className="retro-btn px-14 py-4 text-xl tracking-[4px] border-red-500 text-red-500">STOP</button>
               )}
