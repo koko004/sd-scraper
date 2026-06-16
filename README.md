@@ -3,8 +3,8 @@
 Web tool for managing ROM covers of retro console with using web browser and ScreenScraper API.
 
 # Links
-- Working: https://www.sd-scrapper.gamer.gd/
-- Test: https://koko004.github.io/sd-scrapper/
+- Working: https://www.sd-scraper.gamer.gd/
+- Test: https://koko004.github.io/sd-scraper/
 
 
 
@@ -43,7 +43,7 @@ First version /backup
 ## Usage
 
 1. Open the application in Chrome or Edge
-2. Click "Seleccionar Carpeta de MicroSD" to select your ROMs folder
+2. Click "Select folder MicroSD" to select your ROMs folder
 3. Enter your ScreenScraper.fr credentials
 4. Select/deselect systems to process
 5. Configure destination folders
