@@ -11,7 +11,8 @@ Web tool for managing ROM covers of retro console with using web browser and Scr
 ## Screenshot
 /dist
 
-<img width="1366" height="2122" alt="image" src="https://github.com/user-attachments/assets/9e84571d-570a-4435-a5a2-e448e0c11114" />
+<img width="1072" height="1467" alt="screenshot" src="https://github.com/user-attachments/assets/a9aa8e17-f340-4393-819d-745a83f96044" />
+
 
 CRT-theme /crt-theme
 
