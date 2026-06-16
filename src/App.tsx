@@ -70,7 +70,7 @@ let SYSTEM_MAP: { [key: string]: number } = {
   'pico8': 999, 'pico-8': 999, 'j2me': 999, 'pymo': 999
 };
 
-export default function SDScrapperRetro() {
+export default function SDScraperRetro() {
   const [credentials, setCredentials] = useState({ ssid: '', sspass: '' });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loggedUser, setLoggedUser] = useState('');
@@ -766,7 +766,7 @@ const [destFolder, setDestFolder] = useState('images');
     setDownloadedCovers([]);
     setFailedDownloads([]);
 
-    addLog('=== STARTING SCRAPING v1.38 ===', 'info');
+    addLog('=== STARTING SCRAPING v1.39 ===', 'info');
     addLog('Usuario: ' + credentials.ssid, 'info');
 
     // Request write permission for the folder
@@ -1000,8 +1000,8 @@ const [destFolder, setDestFolder] = useState('images');
           <div className="flex items-center gap-3">
             <div className="text-4xl">📼</div>
             <div>
-              <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPPER</h1>
-              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.38</div>
+              <h1 className="text-4xl font-bold tracking-[4px] text-[#39ff14]">SD SCRAPER</h1>
+              <div className="text-xs tracking-[3px] text-[#ffaa00] -mt-1">RETRO COVER MANAGER v1.39</div>
             </div>
           </div>
 
@@ -1314,7 +1314,7 @@ const [destFolder, setDestFolder] = useState('images');
       </div>
 
       <div className="border-t-4 border-[#2a2f38] py-4 text-center text-xs text-[#00ff41]/50 tracking-[2px]">
-        SD SCRAPPER • POWERED BY SCREENSCRAPER.FR
+        SD SCRAPER • POWERED BY SCREENSCRAPER.FR
       </div>
 
       {showGallery && (
